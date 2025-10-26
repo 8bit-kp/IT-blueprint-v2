@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 
+const appSchema = new mongoose.Schema({
+  name: String,
+  containsSensitiveInfo: String, // Yes or No
+  mfa: String, // Yes or No
+  backedUp: String, // Yes or No
+  byodAccess: String, // Yes or No
+});
+
 const blueprintSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
@@ -71,6 +79,15 @@ const blueprintSchema = new mongoose.Schema({
     edr: String,
     dataClassification: String,
     socSiem: String,
+  },
+
+  // ✅ Step 6: Applications
+  applications: {
+    productivity: [appSchema],
+    finance: [appSchema],
+    hrit: [appSchema],
+    payroll: [appSchema],
+    additional: [appSchema], // user-added dynamic applications
   },
 });
 

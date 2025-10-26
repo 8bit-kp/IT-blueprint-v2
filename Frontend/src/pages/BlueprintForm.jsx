@@ -13,6 +13,7 @@ const stepTitles = {
     3: "Step 3: Network and Server Infrastructure",
     4: "Step 4: Security Administrative Controls",
     5: "Step 5: Security Technical Controls",
+    6: "Step 6: Applications",
 };
 
 const ToggleButton = ({ options, value, onChange }) => {
@@ -32,6 +33,85 @@ const ToggleButton = ({ options, value, onChange }) => {
         </div>
     );
 };
+
+const ApplicationSection = ({ title, apps = [], onChange }) => {
+    const updateApp = (index, key, value) => {
+        const newApps = [...apps];
+        newApps[index] = { ...newApps[index], [key]: value };
+        onChange(newApps);
+    };
+
+    const addApp = () => {
+        onChange([
+            ...apps,
+            {
+                name: "",
+                containsSensitiveInfo: "",
+                mfa: "",
+                backedUp: "",
+                byodAccess: "",
+            },
+        ]);
+    };
+
+    const removeApp = (index) => {
+        const newApps = apps.filter((_, i) => i !== index);
+        onChange(newApps);
+    };
+
+    return (
+        <div className="border rounded-lg p-4 mb-6 bg-gray-50">
+            <h3 className="text-lg font-semibold text-[#15587B] mb-3">{title}</h3>
+
+            {apps.map((app, i) => (
+                <div key={i} className="mb-4 border-b pb-4 last:border-none">
+                    <input
+                        placeholder="Application Name"
+                        className="border p-2 rounded w-full mb-3"
+                        value={app.name}
+                        onChange={(e) => updateApp(i, "name", e.target.value)}
+                    />
+
+                    <YesNo
+                        label="Contains PHI/PII/Sensitive information"
+                        value={app.containsSensitiveInfo}
+                        onChange={(v) => updateApp(i, "containsSensitiveInfo", v)}
+                    />
+                    <YesNo label="MFA" value={app.mfa} onChange={(v) => updateApp(i, "mfa", v)} />
+                    <YesNo
+                        label="Backed Up"
+                        value={app.backedUp}
+                        onChange={(v) => updateApp(i, "backedUp", v)}
+                    />
+                    <YesNo
+                        label="BYOD Access Allowed"
+                        value={app.byodAccess}
+                        onChange={(v) => updateApp(i, "byodAccess", v)}
+                    />
+
+                    {title === "Additional Applications" && (
+                        <button
+                            type="button"
+                            onClick={() => removeApp(i)}
+                            className="mt-2 text-red-600 text-sm underline"
+                        >
+                            Remove Application
+                        </button>
+                    )}
+                </div>
+            ))}
+
+            <button
+                type="button"
+                onClick={addApp}
+                className="mt-2 px-3 py-2 bg-[#34808A] text-white rounded hover:bg-[#2b6f6f]"
+            >
+                + Add Application
+            </button>
+        </div>
+    );
+};
+
 
 // For yes/no inputs
 const YesNo = ({ label, value, onChange }) => (
@@ -96,7 +176,7 @@ const MultiCheckbox = ({ label, options, values = [], onChange }) => {
 
 export default function BlueprintForm() {
     const navigate = useNavigate();
-    const totalSteps = 5;
+    const totalSteps = 6;
     const { formData, updateFormData, step, setStep } = useForm();
     const [loadingSave, setLoadingSave] = useState(false);
     const [lastSavedStep, setLastSavedStep] = useState(0); // step number last saved successfully
@@ -203,53 +283,68 @@ export default function BlueprintForm() {
     };
 
     const handleSaveAndNext = async () => {
-        const ok = await saveStep(step);
-        if (ok && step < totalSteps) setStep(step + 1);
-    };
+        try {
+            setLoadingSave(true);
 
+            // ✅ Save using saveStep
+            await saveStep(step);
+
+            if (step === totalSteps) {
+                navigate("/blueprint-summary", { state: { formData } });
+            } else {
+                setStep((prev) => prev + 1);
+            }
+        } catch (err) {
+            console.error("Error saving blueprint:", err);
+        } finally {
+            setLoadingSave(false);
+        }
+    };
     // Back button (always allowed)
     const handleBack = () => {
         if (step > 1) setStep(step - 1);
     };
 
-    // UI helpers to set form fields quickly
-    const setField = (key, value) => updateFormData({ [key]: value });
+   
+    const setField = (key, value) =>
+        updateFormData({    
+            ...formData,
+            [key]: value,
+        });
 
-    /* -----------------------
-       RENDER STEP CONTENT
-       ----------------------- */
+    
 
     const Step1 = () => (
         <div className="space-y-4">
             <input
                 placeholder="Name of the Company"
                 className="border p-2 w-full rounded"
-                defaultValue={formData.companyName || ""}
+                value={formData.companyName || ""}
                 onChange={(e) => setField("companyName", e.target.value)}
             />
             <input
                 placeholder="Contact Name"
                 className="border p-2 w-full rounded"
-                defaultValue={formData.contactName || ""}
+                value={formData.contactName || ""}
                 onChange={(e) => setField("contactName", e.target.value)}
             />
             <input
                 type="email"
                 placeholder="Email"
                 className="border p-2 w-full rounded"
-                defaultValue={formData.email || ""}
+                value={formData.email || ""}
                 onChange={(e) => setField("email", e.target.value)}
             />
             <input
                 placeholder="Phone Number"
                 className="border p-2 w-full rounded"
-                defaultValue={formData.phoneNumber || ""}
+                value={formData.phoneNumber || ""}
                 onChange={(e) => setField("phoneNumber", e.target.value)}
             />
 
             <select
                 className="border p-2 w-full rounded"
-                defaultValue={formData.industry || ""}
+                value={formData.industry || ""}
                 onChange={(e) => setField("industry", e.target.value)}
             >
                 <option value="">Select Industry</option>
@@ -264,13 +359,13 @@ export default function BlueprintForm() {
             <input
                 placeholder="Specify (if Others)"
                 className="border p-2 w-full rounded"
-                defaultValue={formData.otherIndustry || ""}
+                value={formData.otherIndustry || ""}
                 onChange={(e) => setField("otherIndustry", e.target.value)}
             />
 
             <select
                 className="border p-2 w-full rounded"
-                defaultValue={formData.employees || ""}
+                value={formData.employees || ""}
                 onChange={(e) => setField("employees", e.target.value)}
             >
                 <option value="">Number of employees (including contractors)</option>
@@ -286,7 +381,7 @@ export default function BlueprintForm() {
                     type="range"
                     min="1"
                     max="100"
-                    defaultValue={formData.remotePercentage || 0}
+                    value={formData.remotePercentage || 0}
                     onChange={(e) => setField("remotePercentage", Number(e.target.value))}
                     className="w-full"
                 />
@@ -298,7 +393,7 @@ export default function BlueprintForm() {
                     type="range"
                     min="1"
                     max="100"
-                    defaultValue={formData.contractorPercentage || 0}
+                    value={formData.contractorPercentage || 0}
                     onChange={(e) => setField("contractorPercentage", Number(e.target.value))}
                     className="w-full"
                 />
@@ -354,7 +449,7 @@ export default function BlueprintForm() {
             <input
                 placeholder="If multiple locations, main location (HQ)"
                 className="border p-2 w-full rounded"
-                defaultValue={formData.mainLocation || ""}
+                value={formData.mainLocation || ""}
                 onChange={(e) => setField("mainLocation", e.target.value)}
             />
 
@@ -466,6 +561,72 @@ export default function BlueprintForm() {
         </div>
     );
 
+    const Step6 = () => (
+        <div className="space-y-6">
+            <ApplicationSection
+                title="Productivity Applications"
+                apps={formData.applications?.productivity || []}
+                onChange={(apps) =>
+                    updateFormData({
+                        applications: {
+                            ...formData.applications,
+                            productivity: apps,
+                        },
+                    })
+                }
+            />
+            <ApplicationSection
+                title="Finance Applications"
+                apps={formData.applications?.finance || []}
+                onChange={(apps) =>
+                    updateFormData({
+                        applications: {
+                            ...formData.applications,
+                            finance: apps,
+                        },
+                    })
+                }
+            />
+            <ApplicationSection
+                title="HRIT Applications"
+                apps={formData.applications?.hrit || []}
+                onChange={(apps) =>
+                    updateFormData({
+                        applications: {
+                            ...formData.applications,
+                            hrit: apps,
+                        },
+                    })
+                }
+            />
+            <ApplicationSection
+                title="Payroll Applications"
+                apps={formData.applications?.payroll || []}
+                onChange={(apps) =>
+                    updateFormData({
+                        applications: {
+                            ...formData.applications,
+                            payroll: apps,
+                        },
+                    })
+                }
+            />
+            <ApplicationSection
+                title="Additional Applications"
+                apps={formData.applications?.additional || []}
+                onChange={(apps) =>
+                    updateFormData({
+                        applications: {
+                            ...formData.applications,
+                            additional: apps,
+                        },
+                    })
+                }
+            />
+        </div>
+    );
+
+
     // small helper component used above (declared here to avoid hoisting issues)
     function DropdownField({ label, value, onChange }) {
         return (
@@ -513,6 +674,7 @@ export default function BlueprintForm() {
                         {step === 3 && <Step3 />}
                         {step === 4 && <Step4 />}
                         {step === 5 && <Step5 />}
+                        {step === 6 && <Step6 />}
                     </div>
 
                     <div className="flex justify-between items-center mt-4">
@@ -534,8 +696,8 @@ export default function BlueprintForm() {
                                 onClick={handleSaveOnly}
                                 disabled={loadingSave}
                                 className={`px-4 py-2 rounded-lg border text-gray-700 ${loadingSave
-                                        ? "bg-gray-300 cursor-not-allowed"
-                                        : "bg-white hover:bg-gray-100 transition"
+                                    ? "bg-gray-300 cursor-not-allowed"
+                                    : "bg-white hover:bg-gray-100 transition"
                                     }`}
                             >
                                 {loadingSave ? "Saving..." : "Save"}
@@ -545,8 +707,8 @@ export default function BlueprintForm() {
                                 onClick={handleSaveAndNext}
                                 disabled={loadingSave}
                                 className={`px-4 py-2 text-white rounded-lg ${loadingSave
-                                        ? "bg-gray-400 cursor-not-allowed"
-                                        : "bg-[#34808A] hover:bg-[#2b6f6f] transition"
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-[#34808A] hover:bg-[#2b6f6f] transition"
                                     }`}
                             >
                                 {step === totalSteps ? "Finish" : "Save & Next →"}

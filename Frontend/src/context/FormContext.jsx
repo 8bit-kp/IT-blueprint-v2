@@ -2,7 +2,6 @@ import { createContext, useState, useContext } from "react";
 
 const FormContext = createContext();
 
-// Provider
 export const FormProvider = ({ children }) => {
   const [formData, setFormData] = useState({
     companyName: "",
@@ -19,22 +18,41 @@ export const FormProvider = ({ children }) => {
 
   const [step, setStep] = useState(1);
 
-  // Merge new data into existing formData
-  const updateFormData = (data) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+  // ✅ FIXED: Supports both functional and object-style updates
+  const updateFormData = (updater) => {
+    setFormData((prev) => {
+      if (typeof updater === "function") {
+        // when you call updateFormData(prev => ...)
+        return updater(prev);
+      }
+      // when you call updateFormData({...})
+      return { ...prev, ...updater };
+    });
   };
 
   // Optional: reset form
-  const resetForm = () => setFormData({});
+  const resetForm = () =>
+    setFormData({
+      companyName: "",
+      contactName: "",
+      email: "",
+      phoneNumber: "",
+      industry: "",
+      otherIndustry: "",
+      employees: "",
+      remotePercentage: 0,
+      contractorPercentage: 0,
+    });
 
   return (
-    <FormContext.Provider value={{ formData, updateFormData, step, setStep, resetForm }}>
+    <FormContext.Provider
+      value={{ formData, updateFormData, step, setStep, resetForm }}
+    >
       {children}
     </FormContext.Provider>
   );
 };
 
-// Hook to use the context
 export const useForm = () => {
   const context = useContext(FormContext);
   if (!context) {
