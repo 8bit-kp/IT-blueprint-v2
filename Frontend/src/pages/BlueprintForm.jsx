@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import ProgressBar from "../components/ProgressBar";
@@ -16,7 +16,7 @@ const stepTitles = {
     6: "Step 6: Applications",
 };
 
-const ToggleButton = ({ options, value, onChange }) => {
+const ToggleButton = memo(({ options, value, onChange }) => {
     return (
         <div className="flex gap-3">
             {options.map((opt) => (
@@ -32,16 +32,16 @@ const ToggleButton = ({ options, value, onChange }) => {
             ))}
         </div>
     );
-};
+});
 
-const ApplicationSection = ({ title, apps = [], onChange }) => {
-    const updateApp = (index, key, value) => {
+const ApplicationSection = memo(({ title, apps = [], onChange }) => {
+    const updateApp = useCallback((index, key, value) => {
         const newApps = [...apps];
         newApps[index] = { ...newApps[index], [key]: value };
         onChange(newApps);
-    };
+    }, [apps, onChange]);
 
-    const addApp = () => {
+    const addApp = useCallback(() => {
         onChange([
             ...apps,
             {
@@ -52,23 +52,23 @@ const ApplicationSection = ({ title, apps = [], onChange }) => {
                 byodAccess: "",
             },
         ]);
-    };
+    }, [apps, onChange]);
 
-    const removeApp = (index) => {
+    const removeApp = useCallback((index) => {
         const newApps = apps.filter((_, i) => i !== index);
         onChange(newApps);
-    };
+    }, [apps, onChange]);
 
     return (
         <div className="border rounded-lg p-4 mb-6 bg-gray-50">
             <h3 className="text-lg font-semibold text-[#15587B] mb-3">{title}</h3>
 
             {apps.map((app, i) => (
-                <div key={i} className="mb-4 border-b pb-4 last:border-none">
+                <div key={`${title}-app-${i}-${app.name}`} className="mb-4 border-b pb-4 last:border-none">
                     <input
                         placeholder="Application Name"
                         className="border p-2 rounded w-full mb-3"
-                        value={app.name}
+                        value={app.name || ""}
                         onChange={(e) => updateApp(i, "name", e.target.value)}
                     />
 
@@ -110,20 +110,18 @@ const ApplicationSection = ({ title, apps = [], onChange }) => {
             </button>
         </div>
     );
-};
-
+});
 
 // For yes/no inputs
-const YesNo = ({ label, value, onChange }) => (
+const YesNo = memo(({ label, value, onChange }) => (
     <div className="mb-4">
         <p className="font-medium mb-2">{label}</p>
         <ToggleButton options={["Yes", "No"]} value={value} onChange={onChange} />
     </div>
-);
+));
 
 // For technical controls: three choices - Yes, No, Vendor
-const YesNoVendor = ({ label, value, vendorValue, onChoice, onVendor }) => {
-    // value: "Yes" | "No" | "Vendor"
+const YesNoVendor = memo(({ label, value, vendorValue, onChoice, onVendor }) => {
     return (
         <div className="mb-4">
             <p className="font-medium mb-2">{label}</p>
@@ -146,13 +144,13 @@ const YesNoVendor = ({ label, value, vendorValue, onChoice, onVendor }) => {
             </div>
         </div>
     );
-};
+});
 
-const MultiCheckbox = ({ label, options, values = [], onChange }) => {
-    const toggle = (opt) => {
+const MultiCheckbox = memo(({ label, options, values = [], onChange }) => {
+    const toggle = useCallback((opt) => {
         if (values.includes(opt)) onChange(values.filter((v) => v !== opt));
         else onChange([...values, opt]);
-    };
+    }, [values, onChange]);
 
     return (
         <div className="mb-4">
@@ -172,17 +170,101 @@ const MultiCheckbox = ({ label, options, values = [], onChange }) => {
             </div>
         </div>
     );
-};
+});
+
+const DropdownField = memo(({ label, name, value, onChange }) => {
+    return (
+        <div className="mb-4">
+            <p className="font-medium mb-2">{label}</p>
+            <select
+                className="border p-2 rounded w-full"
+                value={value || ""}
+                onChange={(e) => onChange(e.target.value)}
+            >
+                <option value="">Select vendor</option>
+                {vendors.map((v) => (
+                    <option key={v} value={v}>
+                        {v}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+});
+
+// Create individual input components to prevent re-renders
+const TextInput = memo(({ placeholder, value, onChange, type = "text" }) => {
+    const [localValue, setLocalValue] = useState(value || "");
+
+    useEffect(() => {
+        setLocalValue(value || "");
+    }, [value]);
+
+    const handleChange = (e) => {
+        setLocalValue(e.target.value);
+    };
+
+    const handleBlur = () => {
+        if (localValue !== value) {
+            onChange(localValue);
+        }
+    };
+
+    return (
+        <input
+            type={type}
+            placeholder={placeholder}
+            className="border p-2 w-full rounded"
+            value={localValue}
+            onChange={handleChange}
+            onBlur={handleBlur}
+        />
+    );
+});
+
+const RangeInput = memo(({ label, value, onChange }) => {
+    const [localValue, setLocalValue] = useState(value || 0);
+
+    useEffect(() => {
+        setLocalValue(value || 0);
+    }, [value]);
+
+    const handleChange = (e) => {
+        const newValue = Number(e.target.value);
+        setLocalValue(newValue);
+    };
+
+    const handleBlur = () => {
+        if (localValue !== value) {
+            onChange(localValue);
+        }
+    };
+
+    return (
+        <div>
+            <label className="block mb-1">{label}: {localValue}%</label>
+            <input
+                type="range"
+                min="1"
+                max="100"
+                value={localValue}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className="w-full"
+            />
+        </div>
+    );
+});
 
 export default function BlueprintForm() {
     const navigate = useNavigate();
     const totalSteps = 6;
     const { formData, updateFormData, step, setStep } = useForm();
     const [loadingSave, setLoadingSave] = useState(false);
-    const [lastSavedStep, setLastSavedStep] = useState(0); // step number last saved successfully
+    const [lastSavedStep, setLastSavedStep] = useState(0);
     const token = localStorage.getItem("token");
 
-    // local copies for technicalControls vendor selections
+    // Use local state for technical controls to prevent form-wide re-renders
     const [technicalControls, setTechnicalControls] = useState({
         nextGenFirewall: { choice: "", vendor: "" },
         secureWebGateway: { choice: "", vendor: "" },
@@ -199,6 +281,14 @@ export default function BlueprintForm() {
         dataClassification: { choice: "", vendor: "" },
         socSiem: { choice: "", vendor: "" },
     });
+
+    // Use useCallback for stable function references
+    const setField = useCallback((key, value) => {
+        updateFormData((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
+    }, [updateFormData]);
 
     // fetch existing blueprint on mount and prefill
     useEffect(() => {
@@ -221,7 +311,6 @@ export default function BlueprintForm() {
                         const tc = {};
                         Object.keys(technicalControls).forEach((k) => {
                             const val = data.technicalControls[k];
-                            // data stored as either "Yes"/"No"/"Vendor:<vendor>"
                             if (!val) tc[k] = { choice: "", vendor: "" };
                             else if (val.startsWith("Vendor:")) {
                                 tc[k] = { choice: "Vendor", vendor: val.split("Vendor:")[1] };
@@ -243,14 +332,14 @@ export default function BlueprintForm() {
     }, []);
 
     // helper to persist technicalControls into formData (stringify each entry)
-    const persistTechnicalControlsToForm = () => {
+    const persistTechnicalControlsToForm = useCallback(() => {
         const tcPayload = {};
         Object.entries(technicalControls).forEach(([k, v]) => {
             if (v.choice === "Vendor") tcPayload[k] = `Vendor:${v.vendor || ""}`;
             else tcPayload[k] = v.choice || "";
         });
         updateFormData({ technicalControls: tcPayload });
-    };
+    }, [technicalControls, updateFormData]);
 
     const saveStep = async (currentStep = step) => {
         setLoadingSave(true);
@@ -258,7 +347,6 @@ export default function BlueprintForm() {
             // ensure technical controls local state is written to formData
             persistTechnicalControlsToForm();
 
-            // attach a helper property _lastSavedStep so backend stores it (optional)
             const payload = { ...formData, _lastSavedStep: currentStep };
 
             await axios.post(
@@ -285,8 +373,6 @@ export default function BlueprintForm() {
     const handleSaveAndNext = async () => {
         try {
             setLoadingSave(true);
-
-            // ✅ Save using saveStep
             await saveStep(step);
 
             if (step === totalSteps) {
@@ -300,108 +386,89 @@ export default function BlueprintForm() {
             setLoadingSave(false);
         }
     };
-    // Back button (always allowed)
+
     const handleBack = () => {
         if (step > 1) setStep(step - 1);
     };
 
-   
-    const setField = (key, value) =>
-        updateFormData({    
-            ...formData,
-            [key]: value,
-        });
+    // Step Components with proper memoization
+    const Step1 = memo(() => {
+        const handleInputChange = useCallback((field, value) => {
+            setField(field, value);
+        }, [setField]);
 
-    
+        return (
+            <div className="space-y-4">
+                <TextInput
+                    placeholder="Name of the Company"
+                    value={formData.companyName}
+                    onChange={(value) => handleInputChange("companyName", value)}
+                />
+                <TextInput
+                    placeholder="Contact Name"
+                    value={formData.contactName}
+                    onChange={(value) => handleInputChange("contactName", value)}
+                />
+                <TextInput
+                    type="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={(value) => handleInputChange("email", value)}
+                />
+                <TextInput
+                    placeholder="Phone Number"
+                    value={formData.phoneNumber}
+                    onChange={(value) => handleInputChange("phoneNumber", value)}
+                />
 
-    const Step1 = () => (
-        <div className="space-y-4">
-            <input
-                placeholder="Name of the Company"
-                className="border p-2 w-full rounded"
-                value={formData.companyName || ""}
-                onChange={(e) => setField("companyName", e.target.value)}
-            />
-            <input
-                placeholder="Contact Name"
-                className="border p-2 w-full rounded"
-                value={formData.contactName || ""}
-                onChange={(e) => setField("contactName", e.target.value)}
-            />
-            <input
-                type="email"
-                placeholder="Email"
-                className="border p-2 w-full rounded"
-                value={formData.email || ""}
-                onChange={(e) => setField("email", e.target.value)}
-            />
-            <input
-                placeholder="Phone Number"
-                className="border p-2 w-full rounded"
-                value={formData.phoneNumber || ""}
-                onChange={(e) => setField("phoneNumber", e.target.value)}
-            />
+                <select
+                    className="border p-2 w-full rounded"
+                    value={formData.industry || ""}
+                    onChange={(e) => handleInputChange("industry", e.target.value)}
+                >
+                    <option value="">Select Industry</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Financial">Financial</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Education">Education</option>
+                    <option value="County-Cities">County-Cities</option>
+                    <option value="Others">Others</option>
+                </select>
 
-            <select
-                className="border p-2 w-full rounded"
-                value={formData.industry || ""}
-                onChange={(e) => setField("industry", e.target.value)}
-            >
-                <option value="">Select Industry</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="Financial">Financial</option>
-                <option value="Retail">Retail</option>
-                <option value="Education">Education</option>
-                <option value="County-Cities">County-Cities</option>
-                <option value="Others">Others</option>
-            </select>
+                <TextInput
+                    placeholder="Specify (if Others)"
+                    value={formData.otherIndustry}
+                    onChange={(value) => handleInputChange("otherIndustry", value)}
+                />
 
-            <input
-                placeholder="Specify (if Others)"
-                className="border p-2 w-full rounded"
-                value={formData.otherIndustry || ""}
-                onChange={(e) => setField("otherIndustry", e.target.value)}
-            />
+                <select
+                    className="border p-2 w-full rounded"
+                    value={formData.employees || ""}
+                    onChange={(e) => handleInputChange("employees", e.target.value)}
+                >
+                    <option value="">Number of employees (including contractors)</option>
+                    <option value="1-100">1 - 100</option>
+                    <option value="101-500">101 - 500</option>
+                    <option value="501-1000">501 - 1000</option>
+                    <option value="1001+">1001 and above</option>
+                </select>
 
-            <select
-                className="border p-2 w-full rounded"
-                value={formData.employees || ""}
-                onChange={(e) => setField("employees", e.target.value)}
-            >
-                <option value="">Number of employees (including contractors)</option>
-                <option value="1-100">1 - 100</option>
-                <option value="101-500">101 - 500</option>
-                <option value="501-1000">501 - 1000</option>
-                <option value="1001+">1001 and above</option>
-            </select>
+                <RangeInput
+                    label="Percentage of remote workers"
+                    value={formData.remotePercentage}
+                    onChange={(value) => handleInputChange("remotePercentage", value)}
+                />
 
-            <div>
-                <label className="block mb-1">Percentage of remote workers: {formData.remotePercentage || 0}%</label>
-                <input
-                    type="range"
-                    min="1"
-                    max="100"
-                    value={formData.remotePercentage || 0}
-                    onChange={(e) => setField("remotePercentage", Number(e.target.value))}
-                    className="w-full"
+                <RangeInput
+                    label="Percentage of contractors"
+                    value={formData.contractorPercentage}
+                    onChange={(value) => handleInputChange("contractorPercentage", value)}
                 />
             </div>
+        );
+    });
 
-            <div>
-                <label className="block mb-1">Percentage of contractors: {formData.contractorPercentage || 0}%</label>
-                <input
-                    type="range"
-                    min="1"
-                    max="100"
-                    value={formData.contractorPercentage || 0}
-                    onChange={(e) => setField("contractorPercentage", Number(e.target.value))}
-                    className="w-full"
-                />
-            </div>
-        </div>
-    );
-
-    const Step2 = () => {
+    const Step2 = memo(() => {
         const choices = [
             { label: "How many physical office spaces you have", key: "physicalOffices", opts: ["1", "2-5", "5-25", "25+"] },
             { label: "Do you have one or more datacenters", key: "hasDataCenters" },
@@ -442,15 +509,14 @@ export default function BlueprintForm() {
                 )}
             </div>
         );
-    };
+    });
 
-    const Step3 = () => (
+    const Step3 = memo(() => (
         <div className="space-y-4">
-            <input
+            <TextInput
                 placeholder="If multiple locations, main location (HQ)"
-                className="border p-2 w-full rounded"
-                value={formData.mainLocation || ""}
-                onChange={(e) => setField("mainLocation", e.target.value)}
+                value={formData.mainLocation}
+                onChange={(value) => setField("mainLocation", value)}
             />
 
             <div className="flex gap-4">
@@ -506,11 +572,10 @@ export default function BlueprintForm() {
                 onChange={(vals) => setField("desktopOptions", vals)}
             />
         </div>
-    );
+    ));
 
-    const Step4 = () => (
+    const Step4 = memo(() => (
         <div className="space-y-4">
-            <h1>kishan</h1>
             <YesNo label="Do you have a security steering committee?" value={formData.securityCommittee} onChange={(v) => setField("securityCommittee", v)} />
             <YesNo label="Do you have a written security policy?" value={formData.securityPolicy} onChange={(v) => setField("securityPolicy", v)} />
             <YesNo label="Do you provide employee security training?" value={formData.employeeTraining} onChange={(v) => setField("employeeTraining", v)} />
@@ -522,9 +587,9 @@ export default function BlueprintForm() {
             <YesNo label="Do you conduct monthly security review meetings?" value={formData.securityReview} onChange={(v) => setField("securityReview", v)} />
             <YesNo label="Have you conducted a Penetration Testing in the last 1 year?" value={formData.penetrationTest} onChange={(v) => setField("penetrationTest", v)} />
         </div>
-    );
+    ));
 
-    const Step5 = () => (
+    const Step5 = memo(() => (
         <div className="space-y-4">
             {[
                 { key: "nextGenFirewall", label: "Next Generation Firewall" },
@@ -559,9 +624,9 @@ export default function BlueprintForm() {
                 );
             })}
         </div>
-    );
+    ));
 
-    const Step6 = () => (
+    const Step6 = memo(() => (
         <div className="space-y-6">
             <ApplicationSection
                 title="Productivity Applications"
@@ -624,33 +689,8 @@ export default function BlueprintForm() {
                 }
             />
         </div>
-    );
+    ));
 
-
-    // small helper component used above (declared here to avoid hoisting issues)
-    function DropdownField({ label, value, onChange }) {
-        return (
-            <div className="mb-4">
-                <p className="font-medium mb-2">{label}</p>
-                <select
-                    className="border p-2 rounded w-full"
-                    value={value || ""}
-                    onChange={(e) => onChange(e.target.value)}
-                >
-                    <option value="">Select vendor</option>
-                    {vendors.map((v) => (
-                        <option key={v} value={v}>
-                            {v}
-                        </option>
-                    ))}
-                </select>
-            </div>
-        );
-    }
-
-    /* -----------------------
-       Final render
-       ----------------------- */
     return (
         <div>
             <FormHeader />
@@ -678,7 +718,6 @@ export default function BlueprintForm() {
                     </div>
 
                     <div className="flex justify-between items-center mt-4">
-                        {/* Back button */}
                         <div>
                             {step > 1 && (
                                 <button
@@ -690,7 +729,6 @@ export default function BlueprintForm() {
                             )}
                         </div>
 
-                        {/* Save & Save & Next buttons */}
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={handleSaveOnly}
@@ -723,6 +761,5 @@ export default function BlueprintForm() {
                 </div>
             </div>
         </div>
-
     );
 }
