@@ -172,7 +172,7 @@ const MultiCheckbox = memo(({ label, options, values = [], onChange }) => {
     );
 });
 
-const DropdownField = memo(({ label, name, value, onChange }) => {
+const DropdownField = memo(({ label, value, onChange }) => {
     return (
         <div className="mb-4">
             <p className="font-medium mb-2">{label}</p>
@@ -395,7 +395,7 @@ export default function BlueprintForm() {
     const Step1 = memo(() => {
         const handleInputChange = useCallback((field, value) => {
             setField(field, value);
-        }, [setField]);
+        }, [ ]);
 
         return (
             <div className="space-y-4">
