@@ -22,10 +22,10 @@ export const FormProvider = ({ children }) => {
   const updateFormData = (updater) => {
     setFormData((prev) => {
       if (typeof updater === "function") {
-        // when you call updateFormData(prev => ...)
+       
         return updater(prev);
       }
-      // when you call updateFormData({...})
+      
       return { ...prev, ...updater };
     });
   };
