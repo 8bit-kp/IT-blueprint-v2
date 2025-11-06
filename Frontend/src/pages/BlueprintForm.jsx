@@ -35,16 +35,20 @@ const ToggleButton = memo(({ options, value, onChange }) => {
 });
 
 const ApplicationSection = memo(({ title, apps = [], onChange }) => {
+    // Ensure apps is always an array
+    const safeApps = apps || [];
+
     const updateApp = useCallback((index, key, value) => {
-        const newApps = [...apps];
+        const newApps = [...safeApps];
         newApps[index] = { ...newApps[index], [key]: value };
         onChange(newApps);
-    }, [apps, onChange]);
+    }, [safeApps, onChange]);
 
     const addApp = useCallback(() => {
         onChange([
-            ...apps,
+            ...safeApps,
             {
+                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, // stable id
                 name: "",
                 containsSensitiveInfo: "",
                 mfa: "",
@@ -52,54 +56,56 @@ const ApplicationSection = memo(({ title, apps = [], onChange }) => {
                 byodAccess: "",
             },
         ]);
-    }, [apps, onChange]);
+    }, [safeApps, onChange]);
 
     const removeApp = useCallback((index) => {
-        const newApps = apps.filter((_, i) => i !== index);
+        const newApps = safeApps.filter((_, i) => i !== index);
         onChange(newApps);
-    }, [apps, onChange]);
+    }, [safeApps, onChange]);
 
     return (
         <div className="border rounded-lg p-4 mb-6 bg-gray-50">
             <h3 className="text-lg font-semibold text-[#15587B] mb-3">{title}</h3>
 
-            {apps.map((app, i) => (
-                <div key={`${title}-app-${i}-${app.name}`} className="mb-4 border-b pb-4 last:border-none">
-                    <input
-                        placeholder="Application Name"
-                        className="border p-2 rounded w-full mb-3"
-                        value={app.name || ""}
-                        onChange={(e) => updateApp(i, "name", e.target.value)}
-                    />
+            {safeApps.map((app, i) => {
+                const stableKey = app.id || `app-${i}`;
+                return (
+                    <div key={`${title}-app-${stableKey}`} className="mb-4 border-b pb-4 last:border-none">
+                        <TextInput
+                            placeholder="Application Name"
+                            value={app.name || ""}
+                            onChange={(v) => updateApp(i, "name", v)}
+                        />
 
-                    <YesNo
-                        label="Contains PHI/PII/Sensitive information"
-                        value={app.containsSensitiveInfo}
-                        onChange={(v) => updateApp(i, "containsSensitiveInfo", v)}
-                    />
-                    <YesNo label="MFA" value={app.mfa} onChange={(v) => updateApp(i, "mfa", v)} />
-                    <YesNo
-                        label="Backed Up"
-                        value={app.backedUp}
-                        onChange={(v) => updateApp(i, "backedUp", v)}
-                    />
-                    <YesNo
-                        label="BYOD Access Allowed"
-                        value={app.byodAccess}
-                        onChange={(v) => updateApp(i, "byodAccess", v)}
-                    />
+                        <YesNo
+                            label="Contains PHI/PII/Sensitive information"
+                            value={app.containsSensitiveInfo}
+                            onChange={(v) => updateApp(i, "containsSensitiveInfo", v)}
+                        />
+                        <YesNo label="MFA" value={app.mfa} onChange={(v) => updateApp(i, "mfa", v)} />
+                        <YesNo
+                            label="Backed Up"
+                            value={app.backedUp}
+                            onChange={(v) => updateApp(i, "backedUp", v)}
+                        />
+                        <YesNo
+                            label="BYOD Access Allowed"
+                            value={app.byodAccess}
+                            onChange={(v) => updateApp(i, "byodAccess", v)}
+                        />
 
-                    {title === "Additional Applications" && (
-                        <button
-                            type="button"
-                            onClick={() => removeApp(i)}
-                            className="mt-2 text-red-600 text-sm underline"
-                        >
-                            Remove Application
-                        </button>
-                    )}
-                </div>
-            ))}
+                        {title === "Additional Applications" && (
+                            <button
+                                type="button"
+                                onClick={() => removeApp(i)}
+                                className="mt-2 text-red-600 text-sm underline"
+                            >
+                                Remove Application
+                            </button>
+                        )}
+                    </div>
+                );
+            })}
 
             <button
                 type="button"
@@ -111,6 +117,7 @@ const ApplicationSection = memo(({ title, apps = [], onChange }) => {
         </div>
     );
 });
+
 
 // For yes/no inputs
 const YesNo = memo(({ label, value, onChange }) => (
