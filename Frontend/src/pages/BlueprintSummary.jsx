@@ -1,5 +1,9 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { pdf } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
+import CurrentState from "./currentState";
+import BlueprintDocument from "./coverpages/BlueprintDocument";
 
 const Section = ({ title, children }) => (
   <div className="bg-white shadow-md hover:shadow-lg transition rounded-2xl p-6 mb-8 border border-gray-200">
@@ -38,6 +42,20 @@ const BlueprintSummary = () => {
       </div>
     );
   }
+  const handleDownloadPdf = async () => {
+  
+    const blob = await pdf(
+      <BlueprintDocument
+        companyName={formData.companyName || "—"}
+        preparedDate={new Date()}
+        author="Rajesh Haridas"
+        currentState={<CurrentState formData={formData} />}
+      />
+    ).toBlob();
+
+    saveAs(blob, "IT-Blueprint.pdf");
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f9fafb] via-[#f0f4f8] to-[#e2ecf0] py-10 px-6">
@@ -186,10 +204,10 @@ const BlueprintSummary = () => {
           </button>
 
           <button
-            // onClick={handleDownloadPdf}
+            onClick={handleDownloadPdf}
             className="px-6 py-3 bg-[#935010] text-white rounded-xl shadow-md hover:bg-[#7a3d0d] transition"
           >
-            Download PDF
+            Download Blueprint
           </button>
         </div>
       </div>
