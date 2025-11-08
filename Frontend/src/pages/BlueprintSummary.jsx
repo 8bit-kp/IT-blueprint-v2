@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
-import CurrentState from "./currentState";
+import CurrentState from "./CurrentState";
 import BlueprintDocument from "./coverpages/BlueprintDocument";
 
 const Section = ({ title, children }) => (
@@ -52,6 +52,7 @@ const BlueprintSummary = () => {
         currentState={<CurrentState formData={formData} />}
       />
     ).toBlob();
+    
 
     saveAs(blob, "IT-Blueprint.pdf");
   };
