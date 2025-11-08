@@ -11,7 +11,7 @@ import {
 } from "@react-pdf/renderer";
 
 // bring your existing CurrentState page (portrait, one-page fit)
-import CurrentState from "../currentState";
+import CurrentState from "../CurrentState";
 import logo from "../../../public/coverlogo.png"
 
 // Brand colors
