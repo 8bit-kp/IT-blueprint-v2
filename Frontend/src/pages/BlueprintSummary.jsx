@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import CurrentState from "./CurrentState";
@@ -25,16 +26,83 @@ const BlueprintSummary = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const formData = location.state?.formData;
+  // 1. Initialize state with passed data OR null
+  const [formData, setFormData] = useState(location.state?.formData || null);
+  // 2. Set loading to true only if we don't have data yet
+  const [loading, setLoading] = useState(!location.state?.formData);
+  const [error, setError] = useState(false);
 
-  if (!formData) {
+  // 3. Effect to fetch data if it's missing
+  useEffect(() => {
+    // If we already have data, don't fetch
+    if (formData) return;
+
+    const fetchBlueprint = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/auth");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/blueprint/get`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data && Object.keys(res.data).length > 0) {
+          setFormData(res.data);
+        } else {
+          setError(true); // Token valid, but no blueprint saved in DB
+        }
+      } catch (err) {
+        console.error("Error fetching summary:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlueprint();
+  }, [formData, navigate]);
+
+  const handleDownloadPdf = async () => {
+    // We pass the raw 'formData' object into the 'currentStateData' prop
+    const blob = await pdf(
+      <BlueprintDocument
+        companyName={formData.companyName || "—"}
+        preparedDate={new Date()}
+        currentStateData={formData} 
+      />
+    ).toBlob();
+
+    saveAs(blob, "IT-Blueprint.pdf");
+  };
+
+  // 4. Loading State
+  if (loading) {
     return (
-      <div className="p-10 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#f0f4f8]">
+        <div className="flex flex-col items-center">
+           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#15587B] mb-4"></div>
+           <p className="text-[#15587B] font-semibold">Loading your Blueprint...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. Error / No Data State
+  if (error || !formData) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f0f4f8] p-10 text-center">
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">
           No data found
         </h2>
+        <p className="text-gray-600 mb-6">
+            We couldn't find a saved blueprint for your account.
+        </p>
         <button
-          onClick={() => navigate("/blueprint")}
+          onClick={() => navigate("/blueprint-form")}
           className="px-5 py-2 bg-[#935010] text-white rounded-lg shadow hover:bg-[#7a3d0d] transition"
         >
           Go Back to Form
@@ -42,22 +110,8 @@ const BlueprintSummary = () => {
       </div>
     );
   }
-  const handleDownloadPdf = async () => {
-  
-    const blob = await pdf(
-      <BlueprintDocument
-        companyName={formData.companyName || "—"}
-        preparedDate={new Date()}
-        author="Rajesh Haridas"
-        currentState={<CurrentState formData={formData} />}
-      />
-    ).toBlob();
-    
 
-    saveAs(blob, "IT-Blueprint.pdf");
-  };
-
-
+  // 6. Success State (Render your summary)
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f9fafb] via-[#f0f4f8] to-[#e2ecf0] py-10 px-6">
       <div className="max-w-6xl mx-auto">
@@ -196,7 +250,7 @@ const BlueprintSummary = () => {
         </Section>
 
         {/* BUTTONS */}
-        <div className="flex justify-center gap-6 mt-12">
+        <div className="flex justify-center gap-6 mt-12 pb-10">
           <button
             onClick={() => navigate("/blueprint-form")}
             className="px-6 py-3 bg-[#34808A] text-white rounded-xl shadow-md hover:bg-[#2b6f6f] transition"

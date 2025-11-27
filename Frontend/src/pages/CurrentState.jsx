@@ -1,18 +1,17 @@
-// src/pdfs/currentState.jsx
-import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import React, { useMemo } from "react";
+import { Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
-// === Brand / Theme (aligns with BlueprintDocument) ===
+// === Brand / Theme ===
 const BRAND = {
   primary: "#15587B",
-  accent:  "#935010",
-  teal:    "#34808A",
+  accent: "#935010",
+  teal: "#34808A",
   gray700: "#374151",
   lightLine: "#D1D5DB",
 };
 
 const COLORS = {
-  pageBg: "#FFFFFF",                 // match other pages (white)
+  pageBg: "#FFFFFF",
   tableBorder: BRAND.lightLine,
   headBg: "#0f5c74",
   headText: "#ffffff",
@@ -23,7 +22,7 @@ const COLORS = {
   infraBand: "#2b5e85",
   rowEven: "#F9FAFB",
   rowOdd: "#FFFFFF",
-
+  
   // priority chips
   priorityCriticalBg: "#FEE2E2",
   priorityCriticalText: "#B91C1C",
@@ -40,7 +39,7 @@ const COLORS = {
   darkRedBg: "#DC2626",
 };
 
-// Theme-consistent margins (same as BlueprintDocument base.page)
+// Margins
 const PAD_T = 48;
 const PAD_B = 48;
 const PAD_H = 56;
@@ -53,11 +52,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.pageBg,
   },
   scaler: { transformOrigin: "top left" },
-
-  // Title matches other pages
   title: { fontSize: 28, color: BRAND.primary, fontWeight: 700, marginBottom: 6 },
   rule: { height: 1.5, backgroundColor: BRAND.teal, opacity: 0.85, marginBottom: 14 },
-
   tableWrap: {
     borderWidth: 1,
     borderColor: COLORS.tableBorder,
@@ -75,12 +71,10 @@ const styles = StyleSheet.create({
     borderRightColor: COLORS.tableBorder,
   },
   thText: { color: COLORS.headText, fontSize: 10.5, fontWeight: 700 },
-
   fnCol: { width: "36%" },
   providerCol: { width: "26%" },
   priorityCol: { width: "18%" },
   offeringCol: { width: "20%", borderRightWidth: 0 },
-
   sectionBandRow: { flexDirection: "row" },
   leftBandCell: {
     width: "36%",
@@ -102,7 +96,6 @@ const styles = StyleSheet.create({
     fontWeight: 700,
     textTransform: "capitalize",
   },
-
   row: {
     flexDirection: "row",
     borderTopWidth: 1,
@@ -131,7 +124,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// Priority chip colors
+// Helper for chip colors
 const chipStyles = (priority) => {
   const p = (priority || "").toLowerCase();
   if (p === "critical") return { backgroundColor: COLORS.priorityCriticalBg, color: COLORS.priorityCriticalText };
@@ -140,73 +133,118 @@ const chipStyles = (priority) => {
   return { backgroundColor: COLORS.priorityLowBg, color: COLORS.priorityLowText };
 };
 
-// Provider/Offering conditional backgrounds
+// Helper for cell backgrounds
 const getProviderBackground = (provider, priority) => {
   const prov = (provider || "").toLowerCase();
   const pri = (priority || "").toLowerCase();
-  if (prov === "no data" || prov === "generator") return COLORS.yellowBg;
-  if (prov === "no solution") {
+  if (!prov || prov === "no data" || prov === "generator") return COLORS.yellowBg;
+  if (prov === "no solution" || prov === "no") {
     if (pri === "critical") return COLORS.darkRedBg;
     if (pri === "high" || pri === "medium") return COLORS.lightRedBg;
   }
   return "transparent";
 };
+
 const getOfferingBackground = (offering) =>
   (offering || "").toLowerCase() === "no data" ? COLORS.yellowBg : "transparent";
 
-// Dummy data (unchanged)
-const DATA = [
-  {
-    section: "applications",
-    color: COLORS.applicationsBand,
-    rows: [
-      { function: "Payroll", provider: "Paycom", priority: "Critical", offering: "SaaS" },
-      { function: "Finance", provider: "QuickBooks", priority: "Critical", offering: "SaaS" },
-      { function: "HRIT", provider: "Rippling", priority: "Critical", offering: "SaaS" },
-      { function: "Productivity", provider: "O365", priority: "Critical", offering: "SaaS" },
-      { function: "Telephony", provider: "Verizon", priority: "Critical", offering: "On-Premise" },
-    ],
-  },
-  {
-    section: "security",
-    color: COLORS.securityBand,
-    rows: [
-      { function: "SOC-SIEM", provider: "RapidFire", priority: "High", offering: "SaaS" },
-      { function: "Data Classification", provider: "No Solution", priority: "High", offering: "N/A" },
-      { function: "Endpoint Detection and Response", provider: "Microsoft Defender", priority: "Medium", offering: "SaaS" },
-      { function: "MDM", provider: "IBM MAAS360", priority: "High", offering: "SaaS" },
-      { function: "MFA", provider: "Microsoft Authenticator", priority: "Critical", offering: "SaaS" },
-      { function: "NAC", provider: "No Solution", priority: "Critical", offering: "N/A" },
-      { function: "IAM", provider: "Multi-vendor", priority: "Critical", offering: "Hybrid" },
-      { function: "Vulnerability Management", provider: "Nodeware", priority: "High", offering: "SaaS" },
-      { function: "Asset Management", provider: "No Solution", priority: "High", offering: "N/A" },
-      { function: "E-mail Security", provider: "Barracuda", priority: "High", offering: "NO DATA" },
-      { function: "SSA-VPN", provider: "Cato", priority: "Critical", offering: "SaaS" },
-      { function: "Data Loss Prevention", provider: "No Solution", priority: "High", offering: "N/A" },
-      { function: "Cloud Access Security Broker", provider: "No Solution", priority: "High", offering: "N/A" },
-      { function: "Secure Web Gateway", provider: "Cato", priority: "High", offering: "SaaS" },
-      { function: "NGFW", provider: "Cato", priority: "Critical", offering: "SaaS" },
-      { function: "SDWAN", provider: "Cato", priority: "Critical", offering: "SaaS" },
-    ],
-  },
-  {
-    section: "infrastructure",
-    color: COLORS.infraBand,
-    rows: [
-      { function: "Cloud", provider: "NO DATA", priority: "Medium", offering: "NO DATA" },
-      { function: "Virtualization", provider: "VMWare", priority: "Critical", offering: "On-Premise" },
-      { function: "Baremetal", provider: "Dell", priority: "Critical", offering: "On-Premise" },
-      { function: "Wireless", provider: "Multi-vendor", priority: "Critical", offering: "On-Premise" },
-      { function: "Routing", provider: "Cisco", priority: "Critical", offering: "On-Premise" },
-      { function: "Switching", provider: "Multi-vendor", priority: "Critical", offering: "On-Premise" },
-      { function: "WAN2", provider: "No Solution", priority: "High", offering: "N/A" },
-      { function: "WAN1", provider: "ATT", priority: "Critical", offering: "On-Premise" },
-      { function: "UPS", provider: "APC", priority: "Critical", offering: "N/A" },
-      { function: "Generator", provider: "Generator", priority: "Critical", offering: "N/A" },
-    ],
-  },
-];
 
+// ==========================================
+// 1. DATA TRANSFORMATION LOGIC
+// ==========================================
+const transformFormData = (inputData) => {
+  // Fallback if data is null/undefined
+  if (!inputData) return [];
+
+  // Helper to clean up database values
+  const parseVal = (val, defaultText = "No Solution") => {
+    if (!val) return defaultText;
+    if (typeof val === 'string' && val.startsWith("Vendor:")) return val.split("Vendor:")[1];
+    if (val === "Yes") return "In Place"; 
+    if (val === "No") return defaultText;
+    return val;
+  };
+
+  // --- SECTION 1: APPLICATIONS ---
+  const appRows = [];
+  const appCategories = inputData.applications || {};
+  const targetCategories = ['productivity', 'finance', 'hrit', 'payroll', 'additional'];
+
+  targetCategories.forEach(cat => {
+    const apps = appCategories[cat] || [];
+    if(Array.isArray(apps)) {
+        apps.forEach(app => {
+            if(app.name) {
+                appRows.push({
+                    function: cat.charAt(0).toUpperCase() + cat.slice(1), 
+                    provider: app.name,
+                    priority: "Critical", 
+                    offering: app.mfa === "Yes" ? "SaaS" : "On premise"
+                });
+            }
+        });
+    }
+  });
+
+  // --- SECTION 2: SECURITY ---
+  const tc = inputData.technicalControls || {};
+  const securityMap = [
+    { key: "socSiem", label: "SOC-SIEM", pri: "High", off: "SaaS" },
+    { key: "dataClassification", label: "Data Classification", pri: "High", off: "N/A" },
+    { key: "edr", label: "Endpoint Detection & Response", pri: "Medium", off: "SaaS" },
+    { key: "mdm", label: "MDM", pri: "High", off: "SaaS" },
+    { key: "mfa", label: "MFA", pri: "Critical", off: "SaaS" },
+    { key: "nac", label: "NAC", pri: "Critical", off: "N/A" },
+    { key: "iam", label: "IAM", pri: "Critical", off: "Hybrid" },
+    { key: "vulnerabilityMgmt", label: "Vulnerability Mgmt", pri: "High", off: "SaaS" },
+    { key: "emailSecurity", label: "E-mail Security", pri: "High", off: "No Data" },
+    { key: "ssaVpn", label: "SSA-VPN", pri: "Critical", off: "SaaS" },
+    { key: "dlp", label: "Data Loss Prevention", pri: "High", off: "N/A" },
+    { key: "casb", label: "CASB", pri: "High", off: "N/A" },
+    { key: "secureWebGateway", label: "Secure Web Gateway", pri: "High", off: "SaaS" },
+    { key: "nextGenFirewall", label: "NGFW", pri: "Critical", off: "SaaS" },
+  ];
+
+  const securityRows = securityMap.map(item => ({
+    function: item.label,
+    provider: parseVal(tc[item.key]),
+    priority: item.pri,
+    offering: item.off
+  }));
+
+  // --- SECTION 3: INFRASTRUCTURE ---
+  const infraMap = [
+    { label: "Cloud", val: inputData.cloudVendor, pri: "Medium", off: "No Data" },
+    { label: "Virtualization", val: inputData.virtualizationVendor, pri: "Critical", off: "On-Premise" },
+    { label: "Baremetal", val: inputData.baremetalVendor, pri: "Critical", off: "On-Premise" },
+    { label: "Wireless", val: inputData.wirelessVendor, pri: "Critical", off: "On-Premise" },
+    { label: "Routing", val: inputData.routingVendor, pri: "Critical", off: "On-Premise" },
+    { label: "Switching", val: inputData.switchingVendor, pri: "Critical", off: "On-Premise" },
+    { label: "WAN2", val: inputData.WAN2 === "Yes" ? "-" : "No", pri: "High", off: "N/A" },
+    { label: "WAN1", val: inputData.WAN1 === "Yes" ? "---" : "No", pri: "Critical", off: "On-Premise" },
+    { label: "UPS", val: inputData.hasUPS === "Yes" ? "---" : "No", pri: "Critical", off: "N/A" },
+    { label: "Generator", val: "Generator", pri: "Critical", off: "N/A" },
+  ];
+
+  const infraRows = infraMap.map(item => ({
+    function: item.label,
+    provider: parseVal(item.val),
+    priority: item.pri,
+    offering: item.off
+  }));
+
+  // Combine
+  return [
+    { section: "applications", color: COLORS.applicationsBand, rows: appRows.length ? appRows : [{function: "None", provider: "No Apps", priority: "Low", offering: "-"}] },
+    { section: "security", color: COLORS.securityBand, rows: securityRows },
+    { section: "infrastructure", color: COLORS.infraBand, rows: infraRows },
+  ];
+};
+
+
+// ==========================================
+// 2. SUB-COMPONENTS
+// ==========================================
 const TableHeader = () => (
   <View style={styles.colHeaderRow}>
     <View style={[styles.th, styles.fnCol]}><Text style={styles.thText}>FUNCTION</Text></View>
@@ -243,16 +281,23 @@ const Row = ({ item, idx }) => {
   );
 };
 
-const CurrentState = ({ data = DATA, title = "Current State" }) => {
+// ==========================================
+// 3. MAIN COMPONENT
+// ==========================================
+// FIX: Accepting `data` prop to align with BlueprintDocument.jsx
+const CurrentState = ({ data, title = "Current State" }) => {
+  
+  const tableData = useMemo(() => transformFormData(data), [data]);
+
   // Recompute available height with new themed paddings
-  const rowsCount = data.reduce((sum, s) => sum + s.rows.length, 0);
-  const sectionBands = data.length;
+  const rowsCount = tableData.reduce((sum, s) => sum + s.rows.length, 0);
+  const sectionBands = tableData.length;
 
   // A4 portrait height = 842pt
   const pageInnerHeight = 842 - (PAD_T + PAD_B);
   const H = {
-    title: 28,       // title height approx
-    rule: 12,        // rule + spacing
+    title: 28,      
+    rule: 12,       
     headerBand: 20,
     headerRow: 24,
     sectionBand: 20,
@@ -263,31 +308,28 @@ const CurrentState = ({ data = DATA, title = "Current State" }) => {
     H.title + H.rule + H.headerBand + H.headerRow + sectionBands * H.sectionBand + rowsCount * H.row;
 
   const rawScale = Math.min(1, (pageInnerHeight - 6) / contentHeight) * 0.99;
-  const scale = Math.max(0.60, rawScale);  // guardrail
+  const scale = Math.max(0.60, rawScale); 
 
   return (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={[styles.scaler, { transform: `scale(${scale})` }]} wrap={false}>
-          {/* Theme-matching title + rule */}
-          <Text style={styles.title}>{title}</Text>
-          <View style={styles.rule} />
+    <Page size="A4" style={styles.page}>
+      <View style={[styles.scaler, { transform: `scale(${scale})` }]} wrap={false}>
+        <Text style={styles.title}>{title}</Text>
+        <View style={styles.rule} />
 
-          <View style={styles.tableWrap}>
-            <View style={styles.headerBand}>
-              <Text style={styles.headerText}>Applications • Security • Infrastructure</Text>
-            </View>
-            <TableHeader />
-            {data.map((section, sIdx) => (
-              <View key={sIdx}>
-                <SectionBand name={section.section} color={section.color} />
-                {section.rows.map((r, idx) => <Row key={idx} item={r} idx={idx} />)}
-              </View>
-            ))}
+        <View style={styles.tableWrap}>
+          <View style={styles.headerBand}>
+            <Text style={styles.headerText}>Applications • Security • Infrastructure</Text>
           </View>
+          <TableHeader />
+          {tableData.map((section, sIdx) => (
+            <View key={sIdx}>
+              <SectionBand name={section.section} color={section.color} />
+              {section.rows.map((r, idx) => <Row key={idx} item={r} idx={idx} />)}
+            </View>
+          ))}
         </View>
-      </Page>
-    </Document>
+      </View>
+    </Page>
   );
 };
 

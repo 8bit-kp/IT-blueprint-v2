@@ -6,7 +6,22 @@ import { useForm } from "../context/FormContext";
 import { useNavigate } from "react-router-dom";
 import FormHeader from "../components/FormHeader";
 
-const vendors = ["Cisco", "Amazon", "Flipkart", "Microsoft"];
+const vendors = [
+  "APC",
+  "ATT",
+  "Barracuda",
+  "Cato",
+  "Cisco",
+  "Dell",
+  "IBM",
+  "Microsoft",
+  "Multi-vendor",
+  "Nodeware",
+  "RapidFire",
+  "VMWare",
+  "No Data"
+];
+
 const stepTitles = {
     1: "Step 1: Company Information",
     2: "Step 2: Infrastructure - Facilities",
@@ -72,7 +87,7 @@ const ApplicationSection = memo(({ title, apps = [], onChange }) => {
                 return (
                     <div key={`${title}-app-${stableKey}`} className="mb-4 border-b pb-4 last:border-none">
                         <TextInput
-                            placeholder="Application Name"
+                            placeholder="Provider Name"
                             value={app.name || ""}
                             onChange={(v) => updateApp(i, "name", v)}
                         />

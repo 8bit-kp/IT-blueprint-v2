@@ -2,6 +2,8 @@ import { FiArrowRight } from "react-icons/fi";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
+import { FiFileText } from "react-icons/fi";
+
 // import WaveFooter from "../components/WaveFooter";
 
 const Home = () => {
@@ -37,21 +39,43 @@ const Home = () => {
           clarity.
         </p>
 
-        <button
-          onClick={() => {
-            const username = localStorage.getItem("username");
-            const token = localStorage.getItem("token");
+        {/* Buttons Container */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          {/* Fill Details Button */}
+          <button
+            onClick={() => {
+              const username = localStorage.getItem("username");
+              const token = localStorage.getItem("token");
 
-            if (username && token) {
-              navigate("/blueprint-form");
-            } else {
-              navigate("/auth");
-            }
-          }}
-          className="mt-4 px-6 py-3 bg-gradient-to-r from-[#935010] to-[#15587B] text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition duration-300 flex items-center gap-2"
-        >
-          Fill the Detailes <FiArrowRight size={18} />
-        </button>
+              if (username && token) {
+                navigate("/blueprint-form");
+              } else {
+                navigate("/auth");
+              }
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-[#935010] to-[#15587B] text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition duration-300 flex items-center justify-center gap-2"
+          >
+            Fill the Detailes <FiArrowRight size={18} />
+          </button>
+
+          {/* New Summary Button */}
+          <button
+            onClick={() => {
+              const username = localStorage.getItem("username");
+              const token = localStorage.getItem("token");
+
+              if (username && token) {
+                // Assuming your route is /blueprint-summary based on the file name
+                navigate("/blueprint-summary"); 
+              } else {
+                navigate("/auth");
+              }
+            }}
+            className="px-6 py-3 bg-white border-2 border-[#15587B] text-[#15587B] font-semibold rounded-xl shadow-md hover:bg-[#15587B] hover:text-white hover:scale-105 transition duration-300 flex items-center justify-center gap-2"
+          >
+            View Summary <FiFileText size={18} />
+          </button>
+        </div>
       </section>
 
       <style>{`
