@@ -22,7 +22,7 @@ const COLORS = {
   infraBand: "#2b5e85",
   rowEven: "#F9FAFB",
   rowOdd: "#FFFFFF",
-  
+
   // priority chips
   priorityCriticalBg: "#FEE2E2",
   priorityCriticalText: "#B91C1C",
@@ -126,28 +126,38 @@ const styles = StyleSheet.create({
 
 // Helper for chip colors
 const chipStyles = (priority) => {
-  const p = (priority || "").toLowerCase();
+  const p = (priority || "").toLowerCase().trim();
   if (p === "critical") return { backgroundColor: COLORS.priorityCriticalBg, color: COLORS.priorityCriticalText };
   if (p === "high") return { backgroundColor: COLORS.priorityHighBg, color: COLORS.priorityHighText };
   if (p === "medium") return { backgroundColor: COLORS.priorityMediumBg, color: COLORS.priorityMediumText };
+  // Default Low or others
   return { backgroundColor: COLORS.priorityLowBg, color: COLORS.priorityLowText };
 };
 
 // Helper for cell backgrounds
 const getProviderBackground = (provider, priority) => {
-  const prov = (provider || "").toLowerCase();
-  const pri = (priority || "").toLowerCase();
-  if (!prov || prov === "no data" || prov === "generator") return COLORS.yellowBg;
-  if (prov === "no solution" || prov === "no") {
-    if (pri === "critical") return COLORS.darkRedBg;
-    if (pri === "high" || pri === "medium") return COLORS.lightRedBg;
+  const prov = (provider || "").toLowerCase().trim();
+  const pri = (priority || "").toLowerCase().trim();
+  
+  // 1. ALWAYS YELLOW: "No Data", "Generator", or empty/null
+  if (!prov || prov === "no data" || prov === "generator" || prov === "") {
+    return COLORS.yellowBg;
   }
+
+  // 2. RISK COLORS: Check for explicit "No Solution" / "No" / "None"
+  if (prov === "no solution" || prov === "no" || prov === "none") {
+    if (pri === "critical") return COLORS.darkRedBg; // Critical + No Solution -> Dark Red
+    if (pri === "high") return COLORS.lightRedBg;    // High + No Solution -> Light Red
+    return COLORS.yellowBg;                          // Medium/Low + No Solution -> Yellow
+  }
+  
   return "transparent";
 };
 
-const getOfferingBackground = (offering) =>
-  (offering || "").toLowerCase() === "no data" ? COLORS.yellowBg : "transparent";
-
+const getOfferingBackground = (offering) => {
+  const off = (offering || "").toLowerCase().trim();
+  return (off === "no data" || off === "" || off === "n/a") ? COLORS.yellowBg : "transparent";
+};
 
 // ==========================================
 // 1. DATA TRANSFORMATION LOGIC
@@ -156,13 +166,38 @@ const transformFormData = (inputData) => {
   // Fallback if data is null/undefined
   if (!inputData) return [];
 
-  // Helper to clean up database values
+  // Helper to correctly parse values whether they are Strings or Objects
   const parseVal = (val, defaultText = "No Solution") => {
     if (!val) return defaultText;
-    if (typeof val === 'string' && val.startsWith("Vendor:")) return val.split("Vendor:")[1];
-    if (val === "Yes") return "In Place"; 
-    if (val === "No") return defaultText;
-    return val;
+    
+    // Handle new Object structure { choice, vendor, ... }
+    if (typeof val === 'object') {
+        const choice = val.choice;
+        if (choice === "Vendor") return val.vendor || "Unspecified Vendor";
+        if (choice === "Yes") return "In Place";
+        if (choice === "No") return "No Solution"; 
+        return choice || defaultText;
+    }
+
+    // Handle Legacy String structure
+    if (typeof val === 'string') {
+        if (val.startsWith("Vendor:")) return val.split("Vendor:")[1];
+        if (val === "Yes") return "In Place";
+        if (val === "No") return "No Solution";
+        return val;
+    }
+    return defaultText;
+  };
+
+  // Helper to extract meta fields (Priority/Offering) from Object or default to N/A
+  const getMeta = (val) => {
+      if (typeof val === 'object' && val !== null) {
+          return {
+              pri: val.businessPriority || "N/A",
+              off: val.offering || "N/A"
+          };
+      }
+      return { pri: "N/A", off: "N/A" };
   };
 
   // --- SECTION 1: APPLICATIONS ---
@@ -176,62 +211,87 @@ const transformFormData = (inputData) => {
         apps.forEach(app => {
             if(app.name) {
                 appRows.push({
-                    function: cat.charAt(0).toUpperCase() + cat.slice(1), 
+                    function: cat.charAt(0).toUpperCase() + cat.slice(1),
                     provider: app.name,
-                    priority: "Critical", 
-                    offering: app.mfa === "Yes" ? "SaaS" : "On premise"
+                    priority: app.businessPriority ? app.businessPriority : "Low",
+                    offering: app.offering ? app.offering : "No Data"
                 });
             }
         });
     }
   });
 
-  // --- SECTION 2: SECURITY ---
+  // --- SECTION 2: SECURITY (Dynamic from DB) ---
   const tc = inputData.technicalControls || {};
   const securityMap = [
-    { key: "socSiem", label: "SOC-SIEM", pri: "High", off: "SaaS" },
-    { key: "dataClassification", label: "Data Classification", pri: "High", off: "N/A" },
-    { key: "edr", label: "Endpoint Detection & Response", pri: "Medium", off: "SaaS" },
-    { key: "mdm", label: "MDM", pri: "High", off: "SaaS" },
-    { key: "mfa", label: "MFA", pri: "Critical", off: "SaaS" },
-    { key: "nac", label: "NAC", pri: "Critical", off: "N/A" },
-    { key: "iam", label: "IAM", pri: "Critical", off: "Hybrid" },
-    { key: "vulnerabilityMgmt", label: "Vulnerability Mgmt", pri: "High", off: "SaaS" },
-    { key: "emailSecurity", label: "E-mail Security", pri: "High", off: "No Data" },
-    { key: "ssaVpn", label: "SSA-VPN", pri: "Critical", off: "SaaS" },
-    { key: "dlp", label: "Data Loss Prevention", pri: "High", off: "N/A" },
-    { key: "casb", label: "CASB", pri: "High", off: "N/A" },
-    { key: "secureWebGateway", label: "Secure Web Gateway", pri: "High", off: "SaaS" },
-    { key: "nextGenFirewall", label: "NGFW", pri: "Critical", off: "SaaS" },
+    { key: "socSiem", label: "SOC-SIEM" },
+    { key: "dataClassification", label: "Data Classification" },
+    { key: "edr", label: "Endpoint Detection & Response" },
+    { key: "mdm", label: "MDM" },
+    { key: "mfa", label: "MFA" },
+    { key: "nac", label: "NAC" },
+    { key: "iam", label: "IAM" },
+    { key: "vulnerabilityMgmt", label: "Vulnerability Mgmt" },
+    { key: "emailSecurity", label: "E-mail Security" },
+    { key: "ssaVpn", label: "SSA-VPN" },
+    { key: "dlp", label: "Data Loss Prevention" },
+    { key: "casb", label: "CASB" },
+    { key: "secureWebGateway", label: "Secure Web Gateway" },
+    { key: "nextGenFirewall", label: "NGFW" },
+    { key: "assetManagement", label: "Asset Management" },
+    { key: "sdWan", label: "SD-WAN" },
   ];
 
-  const securityRows = securityMap.map(item => ({
-    function: item.label,
-    provider: parseVal(tc[item.key]),
-    priority: item.pri,
-    offering: item.off
-  }));
+  const securityRows = securityMap.map(item => {
+    const dataEntry = tc[item.key];
+    const { pri, off } = getMeta(dataEntry); 
 
-  // --- SECTION 3: INFRASTRUCTURE ---
-  const infraMap = [
-    { label: "Cloud", val: inputData.cloudVendor, pri: "Medium", off: "No Data" },
-    { label: "Virtualization", val: inputData.virtualizationVendor, pri: "Critical", off: "On-Premise" },
-    { label: "Baremetal", val: inputData.baremetalVendor, pri: "Critical", off: "On-Premise" },
-    { label: "Wireless", val: inputData.wirelessVendor, pri: "Critical", off: "On-Premise" },
-    { label: "Routing", val: inputData.routingVendor, pri: "Critical", off: "On-Premise" },
-    { label: "Switching", val: inputData.switchingVendor, pri: "Critical", off: "On-Premise" },
-    { label: "WAN2", val: inputData.WAN2 === "Yes" ? "-" : "No", pri: "High", off: "N/A" },
-    { label: "WAN1", val: inputData.WAN1 === "Yes" ? "---" : "No", pri: "Critical", off: "On-Premise" },
-    { label: "UPS", val: inputData.hasUPS === "Yes" ? "---" : "No", pri: "Critical", off: "N/A" },
-    { label: "Generator", val: "Generator", pri: "Critical", off: "N/A" },
+    return {
+        function: item.label,
+        provider: parseVal(dataEntry),
+        priority: pri,
+        offering: off
+    };
+  });
+
+  // --- SECTION 3: INFRASTRUCTURE (UPDATED DYNAMIC LOGIC) ---
+  
+  // 1. List of keys from Step 3 that use the new Object structure
+  const infraKeys = [
+    { key: "WAN1", label: "WAN 1" },
+    { key: "WAN2", label: "WAN 2" },
+    { key: "WAN3", label: "WAN 3" },
+    { key: "switchingVendor", label: "Switching" },
+    { key: "routingVendor", label: "Routing" },
+    { key: "wirelessVendor", label: "Wireless" },
+    { key: "baremetalVendor", label: "Baremetal" },
+    { key: "virtualizationVendor", label: "Virtualization" },
+    { key: "cloudVendor", label: "Cloud" },
   ];
 
-  const infraRows = infraMap.map(item => ({
-    function: item.label,
-    provider: parseVal(item.val),
-    priority: item.pri,
-    offering: item.off
-  }));
+  // 2. Map dynamic rows
+  const dynamicInfraRows = infraKeys.map(item => {
+    const dataEntry = inputData[item.key];
+    const { pri, off } = getMeta(dataEntry);
+    
+    return {
+        function: item.label,
+        provider: parseVal(dataEntry),
+        priority: pri,
+        offering: off
+    };
+  });
+
+  // 3. Manually add Facilities (UPS/Generator) which are likely still simple fields from Step 2
+  const upsVal = inputData.hasUPS === "Yes" ? "In Place" : "No Solution";
+  const genVal = inputData.hasGenerator === "Yes" ? "In Place" : "No Solution";
+
+  const staticInfraRows = [
+    { function: "UPS", provider: upsVal, priority: "Critical", offering: "On-premise" },
+    { function: "Generator", provider: genVal, priority: "Critical", offering: "On-premise" }
+  ];
+
+  const infraRows = [...dynamicInfraRows, ...staticInfraRows];
 
   // Combine
   return [
@@ -284,7 +344,6 @@ const Row = ({ item, idx }) => {
 // ==========================================
 // 3. MAIN COMPONENT
 // ==========================================
-// FIX: Accepting `data` prop to align with BlueprintDocument.jsx
 const CurrentState = ({ data, title = "Current State" }) => {
   
   const tableData = useMemo(() => transformFormData(data), [data]);
@@ -297,7 +356,7 @@ const CurrentState = ({ data, title = "Current State" }) => {
   const pageInnerHeight = 842 - (PAD_T + PAD_B);
   const H = {
     title: 28,      
-    rule: 12,       
+    rule: 12,      
     headerBand: 20,
     headerRow: 24,
     sectionBand: 20,
@@ -308,7 +367,7 @@ const CurrentState = ({ data, title = "Current State" }) => {
     H.title + H.rule + H.headerBand + H.headerRow + sectionBands * H.sectionBand + rowsCount * H.row;
 
   const rawScale = Math.min(1, (pageInnerHeight - 6) / contentHeight) * 0.99;
-  const scale = Math.max(0.60, rawScale); 
+  const scale = Math.max(0.60, rawScale);
 
   return (
     <Page size="A4" style={styles.page}>

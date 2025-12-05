@@ -7,19 +7,8 @@ import { useNavigate } from "react-router-dom";
 import FormHeader from "../components/FormHeader";
 
 const vendors = [
-  "APC",
-  "ATT",
-  "Barracuda",
-  "Cato",
-  "Cisco",
-  "Dell",
-  "IBM",
-  "Microsoft",
-  "Multi-vendor",
-  "Nodeware",
-  "RapidFire",
-  "VMWare",
-  "No Data"
+    "APC", "ATT", "Barracuda", "Cato", "Cisco", "Dell", "IBM", 
+    "Microsoft", "Multi-vendor", "Nodeware", "RapidFire", "VMWare", "No Data"
 ];
 
 const stepTitles = {
@@ -31,6 +20,11 @@ const stepTitles = {
     6: "Step 6: Applications",
 };
 
+// Default state for Technical Control Objects
+const initialTechControlState = { choice: "", vendor: "", businessPriority: "", offering: "" };
+
+// --- UI COMPONENTS ---
+
 const ToggleButton = memo(({ options, value, onChange }) => {
     return (
         <div className="flex gap-3">
@@ -38,8 +32,7 @@ const ToggleButton = memo(({ options, value, onChange }) => {
                 <button
                     key={opt}
                     onClick={() => onChange(opt)}
-                    className={`px-3 py-2 rounded-lg border ${value === opt ? "bg-[#34808A] text-white" : "bg-gray-100"
-                        }`}
+                    className={`px-3 py-2 rounded-lg border ${value === opt ? "bg-[#34808A] text-white" : "bg-gray-100"}`}
                     type="button"
                 >
                     {opt}
@@ -49,8 +42,73 @@ const ToggleButton = memo(({ options, value, onChange }) => {
     );
 });
 
+const TechnicalControlRow = memo(({ label, data, onChange }) => {
+    // Fallback to empty state if data is undefined
+    const { choice, vendor, businessPriority, offering } = data || initialTechControlState;
+
+    const handleChange = (field, value) => {
+        onChange({ ...data, [field]: value });
+    };
+
+    return (
+        <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+            <p className="font-semibold text-[#15587B] mb-3">{label}</p>
+            
+            {/* Row 1: Choice & Vendor Select */}
+            <div className="flex flex-col md:flex-row gap-4 mb-4 items-start md:items-center">
+                <ToggleButton 
+                    options={["Yes", "No", "Vendor"]} 
+                    value={choice} 
+                    onChange={(val) => handleChange("choice", val)} 
+                />
+                
+                {choice === "Vendor" && (
+                    <select
+                        value={vendor || ""}
+                        onChange={(e) => handleChange("vendor", e.target.value)}
+                        className="border p-2 rounded w-full md:w-64"
+                    >
+                        <option value="">Select vendor</option>
+                        {vendors.map((v) => (
+                            <option key={v} value={v}>{v}</option>
+                        ))}
+                    </select>
+                )}
+            </div>
+
+            {/* Row 2: Business Priority & Offering */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p className="font-medium mb-1 text-sm text-gray-600">Business Priority</p>
+                    <select
+                        className="border p-2 rounded w-full bg-white"
+                        value={businessPriority || ""}
+                        onChange={(e) => handleChange("businessPriority", e.target.value)}
+                    >
+                        <option value="">Select Priority</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+                <div>
+                    <p className="font-medium mb-1 text-sm text-gray-600">Offering</p>
+                    <select
+                        className="border p-2 rounded w-full bg-white"
+                        value={offering || ""}
+                        onChange={(e) => handleChange("offering", e.target.value)}
+                    >
+                        <option value="">Select Offering</option>
+                        <option value="SaaS">SaaS</option>
+                        <option value="On-premise">On-premise</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    );
+});
+
 const ApplicationSection = memo(({ title, apps = [], onChange }) => {
-    // Ensure apps is always an array
     const safeApps = apps || [];
 
     const updateApp = useCallback((index, key, value) => {
@@ -63,12 +121,14 @@ const ApplicationSection = memo(({ title, apps = [], onChange }) => {
         onChange([
             ...safeApps,
             {
-                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, // stable id
+                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
                 name: "",
                 containsSensitiveInfo: "",
                 mfa: "",
                 backedUp: "",
                 byodAccess: "",
+                businessPriority: "",
+                offering: "",
             },
         ]);
     }, [safeApps, onChange]);
@@ -81,92 +141,69 @@ const ApplicationSection = memo(({ title, apps = [], onChange }) => {
     return (
         <div className="border rounded-lg p-4 mb-6 bg-gray-50">
             <h3 className="text-lg font-semibold text-[#15587B] mb-3">{title}</h3>
-
             {safeApps.map((app, i) => {
                 const stableKey = app.id || `app-${i}`;
                 return (
-                    <div key={`${title}-app-${stableKey}`} className="mb-4 border-b pb-4 last:border-none">
-                        <TextInput
-                            placeholder="Provider Name"
-                            value={app.name || ""}
-                            onChange={(v) => updateApp(i, "name", v)}
-                        />
-
-                        <YesNo
-                            label="Contains PHI/PII/Sensitive information"
-                            value={app.containsSensitiveInfo}
-                            onChange={(v) => updateApp(i, "containsSensitiveInfo", v)}
-                        />
+                    <div key={`${title}-app-${stableKey}`} className="mb-6 border-b pb-6 last:border-none last:pb-0">
+                        <div className="mb-4">
+                            <TextInput
+                                placeholder="Provider Name"
+                                value={app.name || ""}
+                                onChange={(v) => updateApp(i, "name", v)}
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p className="font-medium mb-2 text-sm">Business Priority</p>
+                                <select
+                                    className="border p-2 rounded w-full bg-white"
+                                    value={app.businessPriority || ""}
+                                    onChange={(e) => updateApp(i, "businessPriority", e.target.value)}
+                                >
+                                    <option value="">Select Priority</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                            <div>
+                                <p className="font-medium mb-2 text-sm">Offering</p>
+                                <select
+                                    className="border p-2 rounded w-full bg-white"
+                                    value={app.offering || ""}
+                                    onChange={(e) => updateApp(i, "offering", e.target.value)}
+                                >
+                                    <option value="">Select Offering</option>
+                                    <option value="SaaS">SaaS</option>
+                                    <option value="On-premise">On-premise</option>
+                                </select>
+                            </div>
+                        </div>
+                        <YesNo label="Contains PHI/PII/Sensitive information" value={app.containsSensitiveInfo} onChange={(v) => updateApp(i, "containsSensitiveInfo", v)} />
                         <YesNo label="MFA" value={app.mfa} onChange={(v) => updateApp(i, "mfa", v)} />
-                        <YesNo
-                            label="Backed Up"
-                            value={app.backedUp}
-                            onChange={(v) => updateApp(i, "backedUp", v)}
-                        />
-                        <YesNo
-                            label="BYOD Access Allowed"
-                            value={app.byodAccess}
-                            onChange={(v) => updateApp(i, "byodAccess", v)}
-                        />
-
+                        <YesNo label="Backed Up" value={app.backedUp} onChange={(v) => updateApp(i, "backedUp", v)} />
+                        <YesNo label="BYOD Access Allowed" value={app.byodAccess} onChange={(v) => updateApp(i, "byodAccess", v)} />
                         {title === "Additional Applications" && (
-                            <button
-                                type="button"
-                                onClick={() => removeApp(i)}
-                                className="mt-2 text-red-600 text-sm underline"
-                            >
+                            <button type="button" onClick={() => removeApp(i)} className="mt-2 text-red-600 text-sm underline hover:text-red-800">
                                 Remove Application
                             </button>
                         )}
                     </div>
                 );
             })}
-
-            <button
-                type="button"
-                onClick={addApp}
-                className="mt-2 px-3 py-2 bg-[#34808A] text-white rounded hover:bg-[#2b6f6f]"
-            >
+            <button type="button" onClick={addApp} className="mt-2 px-3 py-2 bg-[#34808A] text-white rounded hover:bg-[#2b6f6f] transition">
                 + Add Application
             </button>
         </div>
     );
 });
 
-
-// For yes/no inputs
 const YesNo = memo(({ label, value, onChange }) => (
     <div className="mb-4">
         <p className="font-medium mb-2">{label}</p>
         <ToggleButton options={["Yes", "No"]} value={value} onChange={onChange} />
     </div>
 ));
-
-// For technical controls: three choices - Yes, No, Vendor
-const YesNoVendor = memo(({ label, value, vendorValue, onChoice, onVendor }) => {
-    return (
-        <div className="mb-4">
-            <p className="font-medium mb-2">{label}</p>
-            <div className="flex items-center gap-4">
-                <ToggleButton options={["Yes", "No", "Vendor"]} value={value} onChange={onChoice} />
-                {value === "Vendor" && (
-                    <select
-                        value={vendorValue || ""}
-                        onChange={(e) => onVendor(e.target.value)}
-                        className="border p-2 rounded"
-                    >
-                        <option value="">Select vendor</option>
-                        {vendors.map((v) => (
-                            <option key={v} value={v}>
-                                {v}
-                            </option>
-                        ))}
-                    </select>
-                )}
-            </div>
-        </div>
-    );
-});
 
 const MultiCheckbox = memo(({ label, options, values = [], onChange }) => {
     const toggle = useCallback((opt) => {
@@ -183,8 +220,7 @@ const MultiCheckbox = memo(({ label, options, values = [], onChange }) => {
                         key={opt}
                         type="button"
                         onClick={() => toggle(opt)}
-                        className={`px-3 py-2 rounded-lg border ${values.includes(opt) ? "bg-[#34808A] text-white" : "bg-gray-100"
-                            }`}
+                        className={`px-3 py-2 rounded-lg border ${values.includes(opt) ? "bg-[#34808A] text-white" : "bg-gray-100"}`}
                     >
                         {opt}
                     </button>
@@ -194,43 +230,11 @@ const MultiCheckbox = memo(({ label, options, values = [], onChange }) => {
     );
 });
 
-const DropdownField = memo(({ label, value, onChange }) => {
-    return (
-        <div className="mb-4">
-            <p className="font-medium mb-2">{label}</p>
-            <select
-                className="border p-2 rounded w-full"
-                value={value || ""}
-                onChange={(e) => onChange(e.target.value)}
-            >
-                <option value="">Select vendor</option>
-                {vendors.map((v) => (
-                    <option key={v} value={v}>
-                        {v}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
-});
-
-// Create individual input components to prevent re-renders
 const TextInput = memo(({ placeholder, value, onChange, type = "text" }) => {
     const [localValue, setLocalValue] = useState(value || "");
-
-    useEffect(() => {
-        setLocalValue(value || "");
-    }, [value]);
-
-    const handleChange = (e) => {
-        setLocalValue(e.target.value);
-    };
-
-    const handleBlur = () => {
-        if (localValue !== value) {
-            onChange(localValue);
-        }
-    };
+    useEffect(() => { setLocalValue(value || ""); }, [value]);
+    const handleChange = (e) => setLocalValue(e.target.value);
+    const handleBlur = () => { if (localValue !== value) onChange(localValue); };
 
     return (
         <input
@@ -246,37 +250,19 @@ const TextInput = memo(({ placeholder, value, onChange, type = "text" }) => {
 
 const RangeInput = memo(({ label, value, onChange }) => {
     const [localValue, setLocalValue] = useState(value || 0);
-
-    useEffect(() => {
-        setLocalValue(value || 0);
-    }, [value]);
-
-    const handleChange = (e) => {
-        const newValue = Number(e.target.value);
-        setLocalValue(newValue);
-    };
-
-    const handleBlur = () => {
-        if (localValue !== value) {
-            onChange(localValue);
-        }
-    };
+    useEffect(() => { setLocalValue(value || 0); }, [value]);
+    const handleChange = (e) => setLocalValue(Number(e.target.value));
+    const handleBlur = () => { if (localValue !== value) onChange(localValue); };
 
     return (
         <div>
             <label className="block mb-1">{label}: {localValue}%</label>
-            <input
-                type="range"
-                min="1"
-                max="100"
-                value={localValue}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className="w-full"
-            />
+            <input type="range" min="1" max="100" value={localValue} onChange={handleChange} onBlur={handleBlur} className="w-full" />
         </div>
     );
 });
+
+// --- MAIN FORM COMPONENT ---
 
 export default function BlueprintForm() {
     const navigate = useNavigate();
@@ -286,25 +272,26 @@ export default function BlueprintForm() {
     const [lastSavedStep, setLastSavedStep] = useState(0);
     const token = localStorage.getItem("token");
 
-    // Use local state for technical controls to prevent form-wide re-renders
+    // Initialize Technical Controls state (for Step 5)
     const [technicalControls, setTechnicalControls] = useState({
-        nextGenFirewall: { choice: "", vendor: "" },
-        secureWebGateway: { choice: "", vendor: "" },
-        casb: { choice: "", vendor: "" },
-        dlp: { choice: "", vendor: "" },
-        ssaVpn: { choice: "", vendor: "" },
-        emailSecurity: { choice: "", vendor: "" },
-        vulnerabilityMgmt: { choice: "", vendor: "" },
-        iam: { choice: "", vendor: "" },
-        nac: { choice: "", vendor: "" },
-        mfa: { choice: "", vendor: "" },
-        mdm: { choice: "", vendor: "" },
-        edr: { choice: "", vendor: "" },
-        dataClassification: { choice: "", vendor: "" },
-        socSiem: { choice: "", vendor: "" },
+        nextGenFirewall: { ...initialTechControlState },
+        secureWebGateway: { ...initialTechControlState },
+        casb: { ...initialTechControlState },
+        dlp: { ...initialTechControlState },
+        ssaVpn: { ...initialTechControlState },
+        emailSecurity: { ...initialTechControlState },
+        vulnerabilityMgmt: { ...initialTechControlState },
+        iam: { ...initialTechControlState },
+        nac: { ...initialTechControlState },
+        mfa: { ...initialTechControlState },
+        mdm: { ...initialTechControlState },
+        edr: { ...initialTechControlState },
+        dataClassification: { ...initialTechControlState },
+        socSiem: { ...initialTechControlState },
+        assetManagement: { ...initialTechControlState },
+        sdWan: { ...initialTechControlState },
     });
 
-    // Use useCallback for stable function references
     const setField = useCallback((key, value) => {
         updateFormData((prev) => ({
             ...prev,
@@ -312,7 +299,7 @@ export default function BlueprintForm() {
         }));
     }, [updateFormData]);
 
-    // fetch existing blueprint on mount and prefill
+    // Fetch Blueprint Data
     useEffect(() => {
         const fetchBlueprint = async () => {
             if (!token) {
@@ -325,19 +312,29 @@ export default function BlueprintForm() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = res.data || {};
+                
                 if (data && Object.keys(data).length) {
-                    // populate context formData
                     updateFormData(data);
-                    // populate technicalControls local state if present
+
+                    // Populate technicalControls local state (Step 5)
                     if (data.technicalControls) {
-                        const tc = {};
-                        Object.keys(technicalControls).forEach((k) => {
+                        const tc = { ...technicalControls };
+                        Object.keys(data.technicalControls).forEach((k) => {
                             const val = data.technicalControls[k];
-                            if (!val) tc[k] = { choice: "", vendor: "" };
-                            else if (val.startsWith("Vendor:")) {
-                                tc[k] = { choice: "Vendor", vendor: val.split("Vendor:")[1] };
-                            } else {
-                                tc[k] = { choice: val, vendor: "" };
+                            if (typeof val === 'object' && val !== null) {
+                                tc[k] = {
+                                    choice: val.choice || "",
+                                    vendor: val.vendor || "",
+                                    businessPriority: val.businessPriority || "",
+                                    offering: val.offering || ""
+                                };
+                            } else if (typeof val === 'string') {
+                                // Backward compatibility
+                                if (val.startsWith("Vendor:")) {
+                                    tc[k] = { ...initialTechControlState, choice: "Vendor", vendor: val.split("Vendor:")[1] };
+                                } else {
+                                    tc[k] = { ...initialTechControlState, choice: val };
+                                }
                             }
                         });
                         setTechnicalControls(tc);
@@ -348,28 +345,23 @@ export default function BlueprintForm() {
                 console.error("fetch blueprint err", err);
             }
         };
-
         fetchBlueprint();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // helper to persist technicalControls into formData (stringify each entry)
     const persistTechnicalControlsToForm = useCallback(() => {
-        const tcPayload = {};
-        Object.entries(technicalControls).forEach(([k, v]) => {
-            if (v.choice === "Vendor") tcPayload[k] = `Vendor:${v.vendor || ""}`;
-            else tcPayload[k] = v.choice || "";
-        });
-        updateFormData({ technicalControls: tcPayload });
+        updateFormData({ technicalControls });
     }, [technicalControls, updateFormData]);
 
     const saveStep = async (currentStep = step) => {
         setLoadingSave(true);
         try {
-            // ensure technical controls local state is written to formData
             persistTechnicalControlsToForm();
-
-            const payload = { ...formData, _lastSavedStep: currentStep };
+            const payload = { 
+                ...formData, 
+                technicalControls: technicalControls,
+                _lastSavedStep: currentStep 
+            };
 
             await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/blueprint/save`,
@@ -396,9 +388,8 @@ export default function BlueprintForm() {
         try {
             setLoadingSave(true);
             await saveStep(step);
-
             if (step === totalSteps) {
-                navigate("/blueprint-summary", { state: { formData } });
+                navigate("/blueprint-summary", { state: { formData: { ...formData, technicalControls } } });
             } else {
                 setStep((prev) => prev + 1);
             }
@@ -413,41 +404,16 @@ export default function BlueprintForm() {
         if (step > 1) setStep(step - 1);
     };
 
-    // Step Components with proper memoization
-    const Step1 = memo(() => {
-        const handleInputChange = useCallback((field, value) => {
-            setField(field, value);
-        }, [ ]);
+    // --- STEP COMPONENTS ---
 
+    const Step1 = memo(() => {
         return (
             <div className="space-y-4">
-                <TextInput
-                    placeholder="Name of the Company"
-                    value={formData.companyName}
-                    onChange={(value) => handleInputChange("companyName", value)}
-                />
-                <TextInput
-                    placeholder="Contact Name"
-                    value={formData.contactName}
-                    onChange={(value) => handleInputChange("contactName", value)}
-                />
-                <TextInput
-                    type="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={(value) => handleInputChange("email", value)}
-                />
-                <TextInput
-                    placeholder="Phone Number"
-                    value={formData.phoneNumber}
-                    onChange={(value) => handleInputChange("phoneNumber", value)}
-                />
-
-                <select
-                    className="border p-2 w-full rounded"
-                    value={formData.industry || ""}
-                    onChange={(e) => handleInputChange("industry", e.target.value)}
-                >
+                <TextInput placeholder="Name of the Company" value={formData.companyName} onChange={(v) => setField("companyName", v)} />
+                <TextInput placeholder="Contact Name" value={formData.contactName} onChange={(v) => setField("contactName", v)} />
+                <TextInput type="email" placeholder="Email" value={formData.email} onChange={(v) => setField("email", v)} />
+                <TextInput placeholder="Phone Number" value={formData.phoneNumber} onChange={(v) => setField("phoneNumber", v)} />
+                <select className="border p-2 w-full rounded" value={formData.industry || ""} onChange={(e) => setField("industry", e.target.value)}>
                     <option value="">Select Industry</option>
                     <option value="Healthcare">Healthcare</option>
                     <option value="Financial">Financial</option>
@@ -456,36 +422,16 @@ export default function BlueprintForm() {
                     <option value="County-Cities">County-Cities</option>
                     <option value="Others">Others</option>
                 </select>
-
-                <TextInput
-                    placeholder="Specify (if Others)"
-                    value={formData.otherIndustry}
-                    onChange={(value) => handleInputChange("otherIndustry", value)}
-                />
-
-                <select
-                    className="border p-2 w-full rounded"
-                    value={formData.employees || ""}
-                    onChange={(e) => handleInputChange("employees", e.target.value)}
-                >
+                <TextInput placeholder="Specify (if Others)" value={formData.otherIndustry} onChange={(v) => setField("otherIndustry", v)} />
+                <select className="border p-2 w-full rounded" value={formData.employees || ""} onChange={(e) => setField("employees", e.target.value)}>
                     <option value="">Number of employees (including contractors)</option>
                     <option value="1-100">1 - 100</option>
                     <option value="101-500">101 - 500</option>
                     <option value="501-1000">501 - 1000</option>
                     <option value="1001+">1001 and above</option>
                 </select>
-
-                <RangeInput
-                    label="Percentage of remote workers"
-                    value={formData.remotePercentage}
-                    onChange={(value) => handleInputChange("remotePercentage", value)}
-                />
-
-                <RangeInput
-                    label="Percentage of contractors"
-                    value={formData.contractorPercentage}
-                    onChange={(value) => handleInputChange("contractorPercentage", value)}
-                />
+                <RangeInput label="Percentage of remote workers" value={formData.remotePercentage} onChange={(v) => setField("remotePercentage", v)} />
+                <RangeInput label="Percentage of contractors" value={formData.contractorPercentage} onChange={(v) => setField("contractorPercentage", v)} />
             </div>
         );
     });
@@ -499,7 +445,6 @@ export default function BlueprintForm() {
             { label: "Do you have a generator onsite critical locations", key: "hasGenerator" },
             { label: "Do you have UPS at all your data centers", key: "hasUPS" },
         ];
-
         return (
             <div className="space-y-4">
                 {choices.map((c) =>
@@ -508,93 +453,79 @@ export default function BlueprintForm() {
                             <p className="font-medium mb-2">{c.label}</p>
                             <div className="flex gap-3">
                                 {c.opts.map((o) => (
-                                    <button
-                                        key={o}
-                                        type="button"
-                                        onClick={() => setField(c.key, o)}
-                                        className={`px-4 py-2 rounded border ${formData[c.key] === o ? "bg-[#34808A] text-white" : "bg-gray-100"
-                                            }`}
-                                    >
+                                    <button key={o} type="button" onClick={() => setField(c.key, o)} className={`px-4 py-2 rounded border ${formData[c.key] === o ? "bg-[#34808A] text-white" : "bg-gray-100"}`}>
                                         {o}
                                     </button>
                                 ))}
                             </div>
                         </div>
                     ) : (
-                        <YesNo
-                            key={c.key}
-                            label={c.label}
-                            value={formData[c.key]}
-                            onChange={(val) => setField(c.key, val)}
-                        />
+                        <YesNo key={c.key} label={c.label} value={formData[c.key]} onChange={(val) => setField(c.key, val)} />
                     )
                 )}
             </div>
         );
     });
 
-    const Step3 = memo(() => (
-        <div className="space-y-4">
-            <TextInput
-                placeholder="If multiple locations, main location (HQ)"
-                value={formData.mainLocation}
-                onChange={(value) => setField("mainLocation", value)}
-            />
+    // ✅ STEP 3 UPDATED TO USE TECHNICAL CONTROL ROW
+    const Step3 = memo(() => {
+        const infrastructureControls = [
+            { key: "WAN1", label: "WAN 1" },
+            { key: "WAN2", label: "WAN 2" },
+            { key: "WAN3", label: "WAN 3" },
+            { key: "switchingVendor", label: "Switching (Vendor)" },
+            { key: "routingVendor", label: "Routing (Vendor)" },
+            { key: "wirelessVendor", label: "Wireless (Vendor)" },
+            { key: "baremetalVendor", label: "Baremetal (Vendor)" },
+            { key: "virtualizationVendor", label: "Virtualization (Vendor)" },
+            { key: "cloudVendor", label: "Cloud (Vendor)" },
+        ];
 
-            <div className="flex gap-4">
-                <YesNo label="WAN 1" value={formData.WAN1} onChange={(v) => setField("WAN1", v)} />
-                <YesNo label="WAN 2" value={formData.WAN2} onChange={(v) => setField("WAN2", v)} />
-                <YesNo label="WAN 3" value={formData.WAN3} onChange={(v) => setField("WAN3", v)} />
-            </div>
+        return (
+            <div className="space-y-4">
+                <TextInput placeholder="If multiple locations, main location (HQ)" value={formData.mainLocation} onChange={(v) => setField("mainLocation", v)} />
+                
+                <div className="border-t my-6 border-gray-200"></div>
+                <h3 className="text-lg font-semibold text-[#15587B] mb-4">Infrastructure Vendors</h3>
 
-            <DropdownField label="Switching (Vendor)" name="switchingVendor" value={formData.switchingVendor} onChange={(v) => setField("switchingVendor", v)} />
-            <DropdownField label="Routing (Vendor)" name="routingVendor" value={formData.routingVendor} onChange={(v) => setField("routingVendor", v)} />
-            <DropdownField label="Wireless (Vendor)" name="wirelessVendor" value={formData.wirelessVendor} onChange={(v) => setField("wirelessVendor", v)} />
-            <DropdownField label="Baremetal (Vendor)" name="baremetalVendor" value={formData.baremetalVendor} onChange={(v) => setField("baremetalVendor", v)} />
-            <DropdownField label="Virtualization (Vendor)" name="virtualizationVendor" value={formData.virtualizationVendor} onChange={(v) => setField("virtualizationVendor", v)} />
-            <DropdownField label="Cloud (Vendor)" name="cloudVendor" value={formData.cloudVendor} onChange={(v) => setField("cloudVendor", v)} />
+                {infrastructureControls.map((ctl) => {
+                    // Safe access to object data from formData
+                    const currentData = (typeof formData[ctl.key] === 'object' && formData[ctl.key] !== null) 
+                        ? formData[ctl.key] 
+                        : initialTechControlState;
 
-            <YesNo label="Do you have HA for your routing?" value={formData.haRouting} onChange={(v) => setField("haRouting", v)} />
+                    return (
+                        <TechnicalControlRow
+                            key={ctl.key}
+                            label={ctl.label}
+                            data={currentData}
+                            onChange={(newData) => setField(ctl.key, newData)}
+                        />
+                    );
+                })}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <p className="font-medium mb-2">What authentication mechanism do you use for wireless?</p>
-                    <ToggleButton
-                        options={["PSK", "EAP-PEAP", "EAP-TLS"]}
-                        value={formData.wirelessAuth}
-                        onChange={(v) => setField("wirelessAuth", v)}
-                    />
+                <div className="border-t my-6 border-gray-200"></div>
+
+                <YesNo label="Do you have HA for your routing?" value={formData.haRouting} onChange={(v) => setField("haRouting", v)} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p className="font-medium mb-2">What authentication mechanism do you use for wireless?</p>
+                        <ToggleButton options={["PSK", "EAP-PEAP", "EAP-TLS"]} value={formData.wirelessAuth} onChange={(v) => setField("wirelessAuth", v)} />
+                    </div>
+                    <YesNo label="Do you have Guest Wireless Network?" value={formData.guestWireless} onChange={(v) => setField("guestWireless", v)} />
+                    <YesNo label="Have you segmented the guest wireless network from internal networks?" value={formData.guestSegmentation} onChange={(v) => setField("guestSegmentation", v)} />
                 </div>
-
-                <YesNo label="Do you have Guest Wireless Network?" value={formData.guestWireless} onChange={(v) => setField("guestWireless", v)} />
-                <YesNo label="Have you segmented the guest wireless network from internal networks?" value={formData.guestSegmentation} onChange={(v) => setField("guestSegmentation", v)} />
+                
+                <YesNo label="Do you have Windows Servers in your environment?" value={formData.windowsServers} onChange={(v) => setField("windowsServers", v)} />
+                <MultiCheckbox label="Windows Servers - click all that apply" options={["Protected", "Backed-up", "Monitored", "Not Monitored"]} values={formData.windowsOptions || []} onChange={(vals) => setField("windowsOptions", vals)} />
+                
+                <YesNo label="Do you have Linux Servers in your environment?" value={formData.linuxServers} onChange={(v) => setField("linuxServers", v)} />
+                <MultiCheckbox label="Linux Servers - click all that apply" options={["Fully patched", "Stored PHI/PII", "Monitored", "Protected", "Backed up", "MFA for Access"]} values={formData.linuxOptions || []} onChange={(vals) => setField("linuxOptions", vals)} />
+                
+                <MultiCheckbox label="Desktops - click all that apply" options={["Fully patched", "Stored PHI/PII", "Monitored", "Protected", "Backed up"]} values={formData.desktopOptions || []} onChange={(vals) => setField("desktopOptions", vals)} />
             </div>
-
-            {/* Server types */}
-            <YesNo label="Do you have Windows Servers in your environment?" value={formData.windowsServers} onChange={(v) => setField("windowsServers", v)} />
-            <MultiCheckbox
-                label="Windows Servers - click all that apply"
-                options={["Protected", "Backed-up", "Monitored", "Not Monitored"]}
-                values={formData.windowsOptions || []}
-                onChange={(vals) => setField("windowsOptions", vals)}
-            />
-
-            <YesNo label="Do you have Linux Servers in your environment?" value={formData.linuxServers} onChange={(v) => setField("linuxServers", v)} />
-            <MultiCheckbox
-                label="Linux Servers - click all that apply"
-                options={["Fully patched", "Stored PHI/PII", "Monitored", "Protected", "Backed up", "MFA for Access"]}
-                values={formData.linuxOptions || []}
-                onChange={(vals) => setField("linuxOptions", vals)}
-            />
-
-            <MultiCheckbox
-                label="Desktops - click all that apply"
-                options={["Fully patched", "Stored PHI/PII", "Monitored", "Protected", "Backed up"]}
-                values={formData.desktopOptions || []}
-                onChange={(vals) => setField("desktopOptions", vals)}
-            />
-        </div>
-    ));
+        );
+    });
 
     const Step4 = memo(() => (
         <div className="space-y-4">
@@ -628,19 +559,20 @@ export default function BlueprintForm() {
                 { key: "edr", label: "EndPoint Detection and Response" },
                 { key: "dataClassification", label: "Data Classification" },
                 { key: "socSiem", label: "SOC - SIEM" },
+                { key: "assetManagement", label: "Asset Management" },
+                { key: "sdWan", label: "SD-WAN" },
             ].map((ctl) => {
-                const local = technicalControls[ctl.key] || { choice: "", vendor: "" };
+                const localData = technicalControls[ctl.key] || { ...initialTechControlState };
                 return (
-                    <YesNoVendor
+                    <TechnicalControlRow
                         key={ctl.key}
                         label={ctl.label}
-                        value={local.choice}
-                        vendorValue={local.vendor}
-                        onChoice={(choice) => {
-                            setTechnicalControls((prev) => ({ ...prev, [ctl.key]: { ...prev[ctl.key], choice } }));
-                        }}
-                        onVendor={(vendor) => {
-                            setTechnicalControls((prev) => ({ ...prev, [ctl.key]: { ...prev[ctl.key], vendor } }));
+                        data={localData}
+                        onChange={(newData) => {
+                            setTechnicalControls((prev) => ({
+                                ...prev,
+                                [ctl.key]: newData
+                            }));
                         }}
                     />
                 );
@@ -650,66 +582,11 @@ export default function BlueprintForm() {
 
     const Step6 = memo(() => (
         <div className="space-y-6">
-            <ApplicationSection
-                title="Productivity Applications"
-                apps={formData.applications?.productivity || []}
-                onChange={(apps) =>
-                    updateFormData({
-                        applications: {
-                            ...formData.applications,
-                            productivity: apps,
-                        },
-                    })
-                }
-            />
-            <ApplicationSection
-                title="Finance Applications"
-                apps={formData.applications?.finance || []}
-                onChange={(apps) =>
-                    updateFormData({
-                        applications: {
-                            ...formData.applications,
-                            finance: apps,
-                        },
-                    })
-                }
-            />
-            <ApplicationSection
-                title="HRIT Applications"
-                apps={formData.applications?.hrit || []}
-                onChange={(apps) =>
-                    updateFormData({
-                        applications: {
-                            ...formData.applications,
-                            hrit: apps,
-                        },
-                    })
-                }
-            />
-            <ApplicationSection
-                title="Payroll Applications"
-                apps={formData.applications?.payroll || []}
-                onChange={(apps) =>
-                    updateFormData({
-                        applications: {
-                            ...formData.applications,
-                            payroll: apps,
-                        },
-                    })
-                }
-            />
-            <ApplicationSection
-                title="Additional Applications"
-                apps={formData.applications?.additional || []}
-                onChange={(apps) =>
-                    updateFormData({
-                        applications: {
-                            ...formData.applications,
-                            additional: apps,
-                        },
-                    })
-                }
-            />
+            <ApplicationSection title="Productivity Applications" apps={formData.applications?.productivity || []} onChange={(apps) => updateFormData({ applications: { ...formData.applications, productivity: apps } })} />
+            <ApplicationSection title="Finance Applications" apps={formData.applications?.finance || []} onChange={(apps) => updateFormData({ applications: { ...formData.applications, finance: apps } })} />
+            <ApplicationSection title="HRIT Applications" apps={formData.applications?.hrit || []} onChange={(apps) => updateFormData({ applications: { ...formData.applications, hrit: apps } })} />
+            <ApplicationSection title="Payroll Applications" apps={formData.applications?.payroll || []} onChange={(apps) => updateFormData({ applications: { ...formData.applications, payroll: apps } })} />
+            <ApplicationSection title="Additional Applications" apps={formData.applications?.additional || []} onChange={(apps) => updateFormData({ applications: { ...formData.applications, additional: apps } })} />
         </div>
     ));
 
@@ -718,16 +595,10 @@ export default function BlueprintForm() {
             <FormHeader />
             <div className="min-h-screen bg-gradient-to-br from-[#f0f4f8] to-[#e2ecf0] flex flex-col items-center p-6">
                 <div className="w-full max-w-4xl bg-white shadow-lg rounded-xl p-8">
-
                     <ProgressBar step={step} totalSteps={totalSteps} />
-
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl md:text-3xl font-semibold text-[#15587B]">
-                            {stepTitles[step]}
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                            Last saved step: {lastSavedStep}
-                        </p>
+                        <h2 className="text-2xl md:text-3xl font-semibold text-[#15587B]">{stepTitles[step]}</h2>
+                        <p className="text-sm text-gray-500">Last saved step: {lastSavedStep}</p>
                     </div>
 
                     <div className="mb-6">
@@ -742,43 +613,22 @@ export default function BlueprintForm() {
                     <div className="flex justify-between items-center mt-4">
                         <div>
                             {step > 1 && (
-                                <button
-                                    onClick={handleBack}
-                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-                                >
+                                <button onClick={handleBack} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
                                     ← Back
                                 </button>
                             )}
                         </div>
-
                         <div className="flex items-center gap-3">
-                            <button
-                                onClick={handleSaveOnly}
-                                disabled={loadingSave}
-                                className={`px-4 py-2 rounded-lg border text-gray-700 ${loadingSave
-                                    ? "bg-gray-300 cursor-not-allowed"
-                                    : "bg-white hover:bg-gray-100 transition"
-                                    }`}
-                            >
+                            <button onClick={handleSaveOnly} disabled={loadingSave} className={`px-4 py-2 rounded-lg border text-gray-700 ${loadingSave ? "bg-gray-300 cursor-not-allowed" : "bg-white hover:bg-gray-100 transition"}`}>
                                 {loadingSave ? "Saving..." : "Save"}
                             </button>
-
-                            <button
-                                onClick={handleSaveAndNext}
-                                disabled={loadingSave}
-                                className={`px-4 py-2 text-white rounded-lg ${loadingSave
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-[#34808A] hover:bg-[#2b6f6f] transition"
-                                    }`}
-                            >
+                            <button onClick={handleSaveAndNext} disabled={loadingSave} className={`px-4 py-2 text-white rounded-lg ${loadingSave ? "bg-gray-400 cursor-not-allowed" : "bg-[#34808A] hover:bg-[#2b6f6f] transition"}`}>
                                 {step === totalSteps ? "Finish" : "Save & Next →"}
                             </button>
                         </div>
                     </div>
-
                     <p className="mt-3 text-sm text-gray-500">
-                        Tip: Use <strong>Save</strong> to store the current step. Use{" "}
-                        <strong>Save & Next</strong> to store and proceed to the next step.
+                        Tip: Use <strong>Save</strong> to store the current step. Use <strong>Save & Next</strong> to store and proceed to the next step.
                     </p>
                 </div>
             </div>

@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
-import CurrentState from "./CurrentState";
 import BlueprintDocument from "./coverpages/BlueprintDocument";
 
 const Section = ({ title, children }) => (
@@ -15,8 +14,9 @@ const Section = ({ title, children }) => (
   </div>
 );
 
-const Item = ({ label, value }) => (
-  <div className="flex justify-between border-b border-dashed border-gray-300 pb-2">
+// Updated Item to allow custom styling via className or subItem prop
+const Item = ({ label, value, className = "" }) => (
+  <div className={`flex justify-between border-b border-dashed border-gray-300 pb-2 ${className}`}>
     <span className="font-medium text-gray-800">{label}</span>
     <span className="text-gray-600">{value || "—"}</span>
   </div>
@@ -26,15 +26,13 @@ const BlueprintSummary = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 1. Initialize state with passed data OR null
+  // 1. Initialize state
   const [formData, setFormData] = useState(location.state?.formData || null);
-  // 2. Set loading to true only if we don't have data yet
   const [loading, setLoading] = useState(!location.state?.formData);
   const [error, setError] = useState(false);
 
-  // 3. Effect to fetch data if it's missing
+  // 2. Fetch data if missing
   useEffect(() => {
-    // If we already have data, don't fetch
     if (formData) return;
 
     const fetchBlueprint = async () => {
@@ -53,7 +51,7 @@ const BlueprintSummary = () => {
         if (res.data && Object.keys(res.data).length > 0) {
           setFormData(res.data);
         } else {
-          setError(true); // Token valid, but no blueprint saved in DB
+          setError(true);
         }
       } catch (err) {
         console.error("Error fetching summary:", err);
@@ -67,16 +65,22 @@ const BlueprintSummary = () => {
   }, [formData, navigate]);
 
   const handleDownloadPdf = async () => {
-    // We pass the raw 'formData' object into the 'currentStateData' prop
-    const blob = await pdf(
-      <BlueprintDocument
-        companyName={formData.companyName || "—"}
-        preparedDate={new Date()}
-        currentStateData={formData} 
-      />
-    ).toBlob();
+    try {
+      // Generate the PDF blob
+      const blob = await pdf(
+        <BlueprintDocument
+          companyName={formData.companyName || "—"}
+          preparedDate={new Date()}
+          currentStateData={formData}
+        />
+      ).toBlob();
 
-    saveAs(blob, "IT-Blueprint.pdf");
+      // Trigger download
+      saveAs(blob, "IT-Blueprint.pdf");
+    } catch (err) {
+      console.error("PDF Download Error:", err);
+      alert("Failed to generate PDF. Please check console for details.");
+    }
   };
 
   // 4. Loading State
@@ -84,8 +88,8 @@ const BlueprintSummary = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f0f4f8]">
         <div className="flex flex-col items-center">
-           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#15587B] mb-4"></div>
-           <p className="text-[#15587B] font-semibold">Loading your Blueprint...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#15587B] mb-4"></div>
+          <p className="text-[#15587B] font-semibold">Loading your Blueprint...</p>
         </div>
       </div>
     );
@@ -99,7 +103,7 @@ const BlueprintSummary = () => {
           No data found
         </h2>
         <p className="text-gray-600 mb-6">
-            We couldn't find a saved blueprint for your account.
+          We couldn't find a saved blueprint for your account.
         </p>
         <button
           onClick={() => navigate("/blueprint-form")}
@@ -111,7 +115,7 @@ const BlueprintSummary = () => {
     );
   }
 
-  // 6. Success State (Render your summary)
+  // 6. Success State
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f9fafb] via-[#f0f4f8] to-[#e2ecf0] py-10 px-6">
       <div className="max-w-6xl mx-auto">
@@ -151,39 +155,88 @@ const BlueprintSummary = () => {
           <Item label="UPS" value={formData.hasUPS} />
         </Section>
 
-        {/* STEP 3 */}
+        {/* STEP 3 - UPDATED to handle complex objects */}
         <Section title="Step 3: Network and Server Infrastructure">
           <Item label="Main Location" value={formData.mainLocation} />
-          <Item label="WAN 1" value={formData.WAN1} />
-          <Item label="WAN 2" value={formData.WAN2} />
-          <Item label="WAN 3" value={formData.WAN3} />
-          <Item label="Switching Vendor" value={formData.switchingVendor} />
-          <Item label="Routing Vendor" value={formData.routingVendor} />
-          <Item label="Wireless Vendor" value={formData.wirelessVendor} />
-          <Item label="Bare Metal Vendor" value={formData.baremetalVendor} />
-          <Item
-            label="Virtualization Vendor"
-            value={formData.virtualizationVendor}
-          />
-          <Item label="Cloud Vendor" value={formData.cloudVendor} />
-          <Item label="HA Routing" value={formData.haRouting} />
-          <Item label="Wireless Auth" value={formData.wirelessAuth} />
-          <Item label="Guest Wireless" value={formData.guestWireless} />
-          <Item label="Guest Segmentation" value={formData.guestSegmentation} />
-          <Item label="Windows Servers" value={formData.windowsServers} />
-          <Item
-            label="Windows Options"
-            value={(formData.windowsOptions || []).join(", ")}
-          />
-          <Item label="Linux Servers" value={formData.linuxServers} />
-          <Item
-            label="Linux Options"
-            value={(formData.linuxOptions || []).join(", ")}
-          />
-          <Item
-            label="Desktop Options"
-            value={(formData.desktopOptions || []).join(", ")}
-          />
+          
+          <div className="mt-4 space-y-2">
+            {[
+              { key: "WAN1", label: "WAN 1" },
+              { key: "WAN2", label: "WAN 2" },
+              { key: "WAN3", label: "WAN 3" },
+              { key: "switchingVendor", label: "Switching Vendor" },
+              { key: "routingVendor", label: "Routing Vendor" },
+              { key: "wirelessVendor", label: "Wireless Vendor" },
+              { key: "baremetalVendor", label: "Bare Metal Vendor" },
+              { key: "virtualizationVendor", label: "Virtualization Vendor" },
+              { key: "cloudVendor", label: "Cloud Vendor" },
+            ].map((field) => {
+              const val = formData[field.key];
+              let choice = "";
+              let vendor = "";
+              let businessPriority = "";
+              let offering = "";
+
+              if (typeof val === "object" && val !== null) {
+                choice = val.choice;
+                vendor = val.vendor;
+                businessPriority = val.businessPriority;
+                offering = val.offering;
+              } else {
+                choice = val;
+              }
+
+              const displayValue =
+                choice === "Vendor"
+                  ? `Vendor: ${vendor || "Unspecified"}`
+                  : choice;
+
+              return (
+                <div key={field.key} className="mb-2">
+                  <Item label={field.label} value={displayValue} />
+                  {(businessPriority || offering) && (
+                    <div className="bg-gray-50 rounded-lg p-2 mb-2 ml-4 border-l-2 border-gray-300">
+                      {businessPriority && (
+                        <Item
+                          label="Business Priority"
+                          value={businessPriority}
+                          className="text-sm border-none pb-1"
+                        />
+                      )}
+                      {offering && (
+                        <Item
+                          label="Offering"
+                          value={offering}
+                          className="text-sm border-none pb-0"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="border-t border-gray-200 mt-6 pt-4">
+            <Item label="HA Routing" value={formData.haRouting} />
+            <Item label="Wireless Auth" value={formData.wirelessAuth} />
+            <Item label="Guest Wireless" value={formData.guestWireless} />
+            <Item label="Guest Segmentation" value={formData.guestSegmentation} />
+            <Item label="Windows Servers" value={formData.windowsServers} />
+            <Item
+              label="Windows Options"
+              value={(formData.windowsOptions || []).join(", ")}
+            />
+            <Item label="Linux Servers" value={formData.linuxServers} />
+            <Item
+              label="Linux Options"
+              value={(formData.linuxOptions || []).join(", ")}
+            />
+            <Item
+              label="Desktop Options"
+              value={(formData.desktopOptions || []).join(", ")}
+            />
+          </div>
         </Section>
 
         {/* STEP 4 */}
@@ -200,19 +253,48 @@ const BlueprintSummary = () => {
           <Item label="Penetration Test" value={formData.penetrationTest} />
         </Section>
 
-        {/* STEP 5 */}
+        {/* STEP 5 - Technical Controls */}
         <Section title="Step 5: Security Technical Controls">
-          {Object.entries(formData.technicalControls || {}).map(
-            ([key, value]) => (
-              <Item
-                key={key}
-                label={key
-                  .replace(/([A-Z])/g, " $1")
-                  .replace(/^./, (str) => str.toUpperCase())}
-                value={value}
-              />
-            )
-          )}
+          {Object.entries(formData.technicalControls || {}).map(([key, value]) => {
+            // Check if value is complex object or legacy string
+            let choice = "";
+            let vendor = "";
+            let businessPriority = "";
+            let offering = "";
+
+            if (typeof value === 'object' && value !== null) {
+              choice = value.choice;
+              vendor = value.vendor;
+              businessPriority = value.businessPriority;
+              offering = value.offering;
+            } else {
+              // Legacy string support
+              if (value && value.toString().startsWith("Vendor:")) {
+                choice = "Vendor";
+                vendor = value.toString().split("Vendor:")[1];
+              } else {
+                choice = value;
+              }
+            }
+
+            const label = key
+              .replace(/([A-Z])/g, " $1")
+              .replace(/^./, (str) => str.toUpperCase());
+
+            const displayValue = choice === "Vendor" ? `Vendor: ${vendor || "Unspecified"}` : choice;
+
+            return (
+              <div key={key} className="mb-4 border-b border-gray-100 pb-2">
+                <Item label={label} value={displayValue} />
+                {(businessPriority || offering) && (
+                  <div className="bg-gray-50 rounded-lg p-2 mt-1">
+                    {businessPriority && <Item label="Business Priority" value={businessPriority} className="text-sm pl-4" />}
+                    {offering && <Item label="Offering" value={offering} className="text-sm pl-4" />}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </Section>
 
         {/* STEP 6 */}
@@ -229,7 +311,12 @@ const BlueprintSummary = () => {
                       key={i}
                       className="border rounded-xl p-4 mb-3 bg-gray-50 hover:bg-gray-100 shadow-sm"
                     >
-                      <Item label="App Name" value={app.name} />
+                      <Item label="Provider" value={app.name} />
+
+                      {/* Business Priority and Offering */}
+                      <Item label="Business Priority" value={app.businessPriority} />
+                      <Item label="Offering" value={app.offering} />
+
                       <Item
                         label="Contains Sensitive Info"
                         value={app.containsSensitiveInfo}

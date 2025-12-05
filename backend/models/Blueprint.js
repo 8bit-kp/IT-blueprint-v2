@@ -6,7 +6,17 @@ const appSchema = new mongoose.Schema({
   mfa: String, // Yes or No
   backedUp: String, // Yes or No
   byodAccess: String, // Yes or No
+  businessPriority: String, // High, Medium, Critical
+  offering: String, // SaaS, On-premise
 });
+
+// Schema for Technical/Infrastructure Controls
+const technicalControlSchema = new mongoose.Schema({
+  choice: String, // Yes, No, Vendor
+  vendor: String, // Specific vendor name if "Vendor" is chosen
+  businessPriority: String, // High, Medium, Critical
+  offering: String, // SaaS, On-premise
+}, { _id: false });
 
 const blueprintSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -22,7 +32,7 @@ const blueprintSchema = new mongoose.Schema({
   remotePercentage: Number,
   contractorPercentage: Number,
 
-  // Step 2: Infrastructure
+  // Step 2: Infrastructure - Facilities
   physicalOffices: String,
   hasDataCenters: String,
   hasOnPremDC: String,
@@ -30,17 +40,19 @@ const blueprintSchema = new mongoose.Schema({
   hasGenerator: String,
   hasUPS: String,
 
-  // Step 3: Network & Server
+  // ✅ Step 3: Network & Server Infrastructure (Updated to Objects)
   mainLocation: String,
-  WAN1: String,
-  WAN2: String,
-  WAN3: String,
-  switchingVendor: String,
-  routingVendor: String,
-  wirelessVendor: String,
-  baremetalVendor: String,
-  virtualizationVendor: String,
-  cloudVendor: String,
+  WAN1: technicalControlSchema,
+  WAN2: technicalControlSchema,
+  WAN3: technicalControlSchema,
+  switchingVendor: technicalControlSchema,
+  routingVendor: technicalControlSchema,
+  wirelessVendor: technicalControlSchema,
+  baremetalVendor: technicalControlSchema,
+  virtualizationVendor: technicalControlSchema,
+  cloudVendor: technicalControlSchema,
+  
+  // Remaining Step 3 fields (simple strings/arrays)
   haRouting: String,
   wirelessAuth: String,
   guestWireless: String,
@@ -65,29 +77,31 @@ const blueprintSchema = new mongoose.Schema({
 
   // Step 5: Technical Controls
   technicalControls: {
-    nextGenFirewall: String,
-    secureWebGateway: String,
-    casb: String,
-    dlp: String,
-    ssaVpn: String,
-    emailSecurity: String,
-    vulnerabilityMgmt: String,
-    iam: String,
-    nac: String,
-    mfa: String,
-    mdm: String,
-    edr: String,
-    dataClassification: String,
-    socSiem: String,
+    nextGenFirewall: technicalControlSchema,
+    secureWebGateway: technicalControlSchema,
+    casb: technicalControlSchema,
+    dlp: technicalControlSchema,
+    ssaVpn: technicalControlSchema,
+    emailSecurity: technicalControlSchema,
+    vulnerabilityMgmt: technicalControlSchema,
+    iam: technicalControlSchema,
+    nac: technicalControlSchema,
+    mfa: technicalControlSchema,
+    mdm: technicalControlSchema,
+    edr: technicalControlSchema,
+    dataClassification: technicalControlSchema,
+    socSiem: technicalControlSchema,
+    assetManagement: technicalControlSchema,
+    sdWan: technicalControlSchema,
   },
 
-  // ✅ Step 6: Applications
+  // Step 6: Applications
   applications: {
     productivity: [appSchema],
     finance: [appSchema],
     hrit: [appSchema],
     payroll: [appSchema],
-    additional: [appSchema], // user-added dynamic applications
+    additional: [appSchema],
   },
 });
 
