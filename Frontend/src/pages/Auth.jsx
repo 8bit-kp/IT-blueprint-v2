@@ -2,6 +2,20 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
+import { FiUser, FiMail, FiLock, FiBriefcase, FiArrowLeft } from "react-icons/fi";
+
+// Reusable InputField component
+const InputField = ({ icon: Icon, ...props }) => (
+  <div className="relative">
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+      <Icon size={18} />
+    </div>
+    <input
+      {...props}
+      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-[#34808A] focus:border-[#34808A] block transition-all placeholder-gray-400 ${props.className || ""}`}
+    />
+  </div>
+);
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -14,6 +28,15 @@ const Auth = () => {
     companyName: "",
     password: "",
   });
+
+  // ✅ Single change handler (works reliably for all fields)
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +62,7 @@ const Auth = () => {
         isLogin ? "Login successful!" : "Registration successful! Please login."
       );
 
-      if (!isLogin) setIsLogin(true); // Switch to login after register
+      if (!isLogin) setIsLogin(true);
       else navigate("/");
     } catch (error) {
       const errMsg =
@@ -53,88 +76,100 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f0f4f8] to-[#e2ecf0] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F3F4F6] flex flex-col justify-center items-center p-4 relative font-sans">
       <Toaster position="top-center" />
 
-      {/* Decorative blobs */}
-      <div className="absolute -top-32 -left-32 w-[400px] h-[400px] bg-[#34808A] opacity-20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-[#935010] opacity-20 rounded-full blur-3xl animate-pulse"></div>
+      {/* Back Button */}
+      <button
+        onClick={() => navigate("/")}
+        className="absolute top-6 left-6 flex items-center gap-2 text-gray-500 hover:text-[#15587B] transition font-medium text-sm"
+      >
+        <FiArrowLeft /> Back to Home
+      </button>
 
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
-        <div className="w-full max-w-md bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow-2xl p-8">
-          <h2 className="text-2xl font-bold text-[#15587B] mb-6 text-center">
-            {isLogin ? "Login to" : "Register for"}{" "}
-            <span className="text-[#34808A]">Dashboard</span>
-          </h2>
+      <div className="w-full max-w-md">
+        {/* Logo Area */}
+        <div className="flex justify-center mb-8">
+          <img src="./conslteklogo.png" alt="Consltek" className="h-12 object-contain" />
+        </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10 relative overflow-hidden">
+          {/* Top colored accent line */}
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#15587B] to-[#34808A]" />
+
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-[#15587B]">
+              {isLogin ? "Welcome Back" : "Get Started"}
+            </h2>
+            <p className="text-sm text-gray-500 mt-2">
+              {isLogin
+                ? "Enter your credentials to access your dashboard."
+                : "Create your account to start building blueprints."}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block mb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Username
               </label>
-              <input
+              <InputField
+                icon={FiUser}
                 type="text"
-                placeholder="Enter username"
+                name="username"
+                placeholder="johndoe"
                 value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#34808A]"
+                onChange={handleChange}
               />
             </div>
 
-            {/* Email (only for Register) */}
+            {/* Extra Fields for Registration */}
             {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  placeholder="Enter email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#34808A]"
-                />
-              </div>
-            )}
-
-            {/* Company (only for Register) */}
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Company Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter company name"
-                  value={formData.companyName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, companyName: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#34808A]"
-                />
+              <div className="space-y-5 animate-fade-in">
+                <div>
+                  <label className="block mb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Email Address
+                  </label>
+                  <InputField
+                    icon={FiMail}
+                    type="email"
+                    name="email"
+                    placeholder="john@company.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Company
+                  </label>
+                  <InputField
+                    icon={FiBriefcase}
+                    type="text"
+                    name="companyName"
+                    placeholder="Acme Corp"
+                    value={formData.companyName}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
             )}
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block mb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Password
               </label>
-              <input
+              <InputField
+                icon={FiLock}
                 type="password"
-                placeholder="Enter password"
+                name="password"
+                placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#34808A]"
+                onChange={handleChange}
+                autoComplete={isLogin ? "current-password" : "new-password"}
               />
             </div>
 
@@ -142,32 +177,47 @@ const Auth = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`mt-2 w-full py-3 flex items-center justify-center font-semibold rounded-lg shadow transition-all duration-300 ${
+              className={`w-full py-3.5 rounded-lg text-white font-bold text-sm tracking-wide shadow-md transition-all duration-300 transform hover:-translate-y-0.5 ${
                 loading
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#34808A] to-[#15587B] text-white hover:scale-105 hover:from-[#15587B] hover:to-[#34808A]"
+                  : "bg-[#15587B] hover:bg-[#0f4460] hover:shadow-lg"
               }`}
             >
               {loading
                 ? "Processing..."
                 : isLogin
-                ? "Login"
-                : "Register"}
+                ? "Sign In"
+                : "Create Account"}
             </button>
           </form>
 
-          {/* Toggle between Login/Register */}
-          <p className="mt-4 text-center text-sm text-gray-600">
-            {isLogin ? "Don’t have an account?" : "Already have an account?"}{" "}
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-[#34808A] font-semibold hover:underline"
-            >
-              {isLogin ? "Register" : "Login"}
-            </button>
-          </p>
+          {/* Toggle Login/Register */}
+          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+            <p className="text-sm text-gray-600">
+              {isLogin ? "Don't have an account yet?" : "Already have an account?"}{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin((prev) => !prev);
+                  setFormData({
+                    username: "",
+                    email: "",
+                    companyName: "",
+                    password: "",
+                  });
+                }}
+                className="text-[#34808A] font-bold hover:text-[#2b6f6f] hover:underline transition ml-1"
+              >
+                {isLogin ? "Register" : "Sign In"}
+              </button>
+            </p>
+          </div>
         </div>
+
+        {/* Footer Note */}
+        <p className="text-center text-xs text-gray-400 mt-8">
+          &copy; {new Date().getFullYear()} Consltek. All rights reserved.
+        </p>
       </div>
     </div>
   );

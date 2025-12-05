@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import FormHeader from "../components/FormHeader";
 
 const vendors = [
-    "APC", "ATT", "Barracuda", "Cato", "Cisco", "Dell", "IBM", 
+    "APC", "ATT", "Barracuda", "Cato", "Cisco", "Dell", "IBM",
     "Microsoft", "Multi-vendor", "Nodeware", "RapidFire", "VMWare", "No Data"
 ];
 
@@ -45,11 +45,10 @@ const ToggleButton = memo(({ options, value, onChange }) => {
                     <button
                         key={opt}
                         onClick={() => onChange(opt)}
-                        className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${
-                            isActive 
-                            ? "bg-white text-[#15587B] shadow-sm ring-1 ring-gray-200" 
-                            : "text-gray-500 hover:text-gray-700"
-                        }`}
+                        className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${isActive
+                                ? "bg-white text-[#15587B] shadow-sm ring-1 ring-gray-200"
+                                : "text-gray-500 hover:text-gray-700"
+                            }`}
                         type="button"
                     >
                         {opt}
@@ -74,13 +73,13 @@ const TechnicalControlCard = memo(({ label, data, onChange }) => {
                 <p className="font-semibold text-gray-800 mb-3 text-sm">{label}</p>
                 <div className="flex flex-col gap-3">
                     <div className="flex justify-between items-center">
-                        <ToggleButton 
-                            options={["Yes", "No", "Vendor"]} 
-                            value={choice} 
-                            onChange={(val) => handleChange("choice", val)} 
+                        <ToggleButton
+                            options={["Yes", "No", "Vendor"]}
+                            value={choice}
+                            onChange={(val) => handleChange("choice", val)}
                         />
                     </div>
-                    
+
                     {choice === "Vendor" && (
                         <select
                             value={vendor || ""}
@@ -128,21 +127,21 @@ const TechnicalControlCard = memo(({ label, data, onChange }) => {
 const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
     return (
         <div className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm relative group hover:shadow-md transition">
-            <button 
-                type="button" 
-                onClick={() => removeApp(index)} 
+            <button
+                type="button"
+                onClick={() => removeApp(index)}
                 className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
                 title="Remove App"
             >
                 ✕
             </button>
-            
+
             <div className="mb-3">
                 <label className="block text-xs font-medium text-gray-500 mb-1">Provider Name</label>
-                <TextInput 
-                    placeholder="e.g. Salesforce" 
-                    value={app.name || ""} 
-                    onChange={(v) => updateApp(index, "name", v)} 
+                <TextInput
+                    placeholder="e.g. Salesforce"
+                    value={app.name || ""}
+                    onChange={(v) => updateApp(index, "name", v)}
                     className="font-medium text-gray-800 placeholder:font-normal"
                 />
             </div>
@@ -217,11 +216,10 @@ const MultiCheckbox = memo(({ label, options, values = [], onChange }) => {
                         key={opt}
                         type="button"
                         onClick={() => toggle(opt)}
-                        className={`px-3 py-1.5 text-xs rounded-full border transition-all ${
-                            values.includes(opt) 
-                            ? "bg-[#34808A] text-white border-[#34808A]" 
-                            : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
-                        }`}
+                        className={`px-3 py-1.5 text-xs rounded-full border transition-all ${values.includes(opt)
+                                ? "bg-[#34808A] text-white border-[#34808A]"
+                                : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
+                            }`}
                     >
                         {opt}
                     </button>
@@ -231,7 +229,7 @@ const MultiCheckbox = memo(({ label, options, values = [], onChange }) => {
     );
 });
 
-const TextInput = memo(({ placeholder, value, onChange, type = "text", className="" }) => {
+const TextInput = memo(({ placeholder, value, onChange, type = "text", className = "" }) => {
     const [localValue, setLocalValue] = useState(value || "");
     useEffect(() => { setLocalValue(value || ""); }, [value]);
     const handleChange = (e) => setLocalValue(e.target.value);
@@ -261,14 +259,14 @@ const RangeInput = memo(({ label, value, onChange }) => {
                 <label className="text-sm font-medium text-gray-700">{label}</label>
                 <span className="text-sm font-bold text-[#34808A]">{localValue}%</span>
             </div>
-            <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={localValue} 
-                onChange={handleChange} 
-                onBlur={handleBlur} 
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#34808A]" 
+            <input
+                type="range"
+                min="0"
+                max="100"
+                value={localValue}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#34808A]"
             />
         </div>
     );
@@ -343,7 +341,7 @@ const Step2 = memo(({ formData, setField }) => (
                     ))}
                 </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <YesNo label="Have Datacenters?" value={formData.hasDataCenters} onChange={(v) => setField("hasDataCenters", v)} />
@@ -382,8 +380,8 @@ const Step3 = memo(({ formData, setField }) => {
                 <h3 className="text-lg font-semibold text-[#15587B] mb-4 pl-1">Infrastructure Vendors</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {infraControls.map((ctl) => {
-                         const currentData = (typeof formData[ctl.key] === 'object' && formData[ctl.key] !== null) 
-                            ? formData[ctl.key] 
+                        const currentData = (typeof formData[ctl.key] === 'object' && formData[ctl.key] !== null)
+                            ? formData[ctl.key]
                             : initialTechControlState;
                         return (
                             <TechnicalControlCard
@@ -399,23 +397,23 @@ const Step3 = memo(({ formData, setField }) => {
 
             <Card title="Network Config & Servers">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                     <YesNo label="HA Routing?" value={formData.haRouting} onChange={(v) => setField("haRouting", v)} />
-                     <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 border-b border-gray-100 gap-2">
+                    <YesNo label="HA Routing?" value={formData.haRouting} onChange={(v) => setField("haRouting", v)} />
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 border-b border-gray-100 gap-2">
                         <span className="text-sm font-medium text-gray-700">Wireless Auth</span>
                         <ToggleButton options={["PSK", "EAP-PEAP", "EAP-TLS"]} value={formData.wirelessAuth} onChange={(v) => setField("wirelessAuth", v)} />
-                     </div>
-                     <YesNo label="Guest Wireless?" value={formData.guestWireless} onChange={(v) => setField("guestWireless", v)} />
-                     <YesNo label="Guest Segmentation?" value={formData.guestSegmentation} onChange={(v) => setField("guestSegmentation", v)} />
+                    </div>
+                    <YesNo label="Guest Wireless?" value={formData.guestWireless} onChange={(v) => setField("guestWireless", v)} />
+                    <YesNo label="Guest Segmentation?" value={formData.guestSegmentation} onChange={(v) => setField("guestSegmentation", v)} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-gray-100 pt-6">
                     <div>
-                         <YesNo label="Windows Servers?" value={formData.windowsServers} onChange={(v) => setField("windowsServers", v)} />
-                         {formData.windowsServers === "Yes" && (
+                        <YesNo label="Windows Servers?" value={formData.windowsServers} onChange={(v) => setField("windowsServers", v)} />
+                        {formData.windowsServers === "Yes" && (
                             <div className="mt-2 ml-4 pl-4 border-l-2 border-gray-200">
                                 <MultiCheckbox label="Select features:" options={["Protected", "Backed-up", "Monitored", "Not Monitored"]} values={formData.windowsOptions || []} onChange={(vals) => setField("windowsOptions", vals)} />
                             </div>
-                         )}
+                        )}
                     </div>
                     <div>
                         <YesNo label="Linux Servers?" value={formData.linuxServers} onChange={(v) => setField("linuxServers", v)} />
@@ -473,7 +471,7 @@ const Step5 = memo(({ technicalControls, setTechnicalControls }) => {
 
     return (
         <div className="max-w-6xl mx-auto">
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {controls.map((ctl) => {
                     const localData = technicalControls[ctl.key] || { ...initialTechControlState };
                     return (
@@ -498,7 +496,7 @@ const Step5 = memo(({ technicalControls, setTechnicalControls }) => {
 const Step6 = memo(({ formData, updateFormData }) => {
     const AppGroup = ({ title, category }) => {
         const apps = formData.applications?.[category] || [];
-        
+
         const updateAppsList = (newApps) => {
             updateFormData({ applications: { ...formData.applications, [category]: newApps } });
         };
@@ -510,11 +508,11 @@ const Step6 = memo(({ formData, updateFormData }) => {
         }
 
         const addApp = () => {
-             updateAppsList([...apps, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: "", containsSensitiveInfo: "", mfa: "", backedUp: "", byodAccess: "", businessPriority: "", offering: "" }]);
+            updateAppsList([...apps, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: "", containsSensitiveInfo: "", mfa: "", backedUp: "", byodAccess: "", businessPriority: "", offering: "" }]);
         }
 
         const removeApp = (index) => {
-             updateAppsList(apps.filter((_, i) => i !== index));
+            updateAppsList(apps.filter((_, i) => i !== index));
         }
 
         return (
@@ -526,7 +524,7 @@ const Step6 = memo(({ formData, updateFormData }) => {
                     </button>
                 </div>
                 {apps.length === 0 && <div className="text-gray-400 text-sm italic border border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">No applications added in this category yet.</div>}
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {apps.map((app, i) => (
                         <ApplicationCard key={app.id || i} app={app} index={i} updateApp={updateApp} removeApp={removeApp} />
@@ -593,7 +591,7 @@ export default function BlueprintForm() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = res.data || {};
-                
+
                 if (data && Object.keys(data).length) {
                     updateFormData(data);
                     if (data.technicalControls) {
@@ -630,10 +628,10 @@ export default function BlueprintForm() {
         setLoadingSave(true);
         try {
             persistTechnicalControlsToForm(); // Sync local to global before save
-            const payload = { 
-                ...formData, 
+            const payload = {
+                ...formData,
                 technicalControls: technicalControls,
-                _lastSavedStep: currentStep 
+                _lastSavedStep: currentStep
             };
             await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/blueprint/save`,
@@ -663,25 +661,25 @@ export default function BlueprintForm() {
                 navigate("/blueprint-summary", { state: { formData: { ...formData, technicalControls } } });
             } else {
                 setStep((prev) => prev + 1);
-                window.scrollTo(0,0);
+                window.scrollTo(0, 0);
             }
         }
     };
 
     const handleBack = () => {
-       if (step > 1) {
-           setStep(step - 1);
-           window.scrollTo(0,0);
-       }
+        if (step > 1) {
+            setStep(step - 1);
+            window.scrollTo(0, 0);
+        }
     };
 
     return (
         <div className="min-h-screen bg-[#F3F4F6] pb-24">
             <FormHeader />
-            
+
             <div className="max-w-7xl mx-auto px-4 py-6">
                 <ProgressBar step={step} totalSteps={totalSteps} />
-                
+
                 <div className="flex justify-between items-end mb-6">
                     <div>
                         <h2 className="text-2xl font-bold text-[#15587B]">{stepTitles[step]}</h2>
@@ -705,8 +703,12 @@ export default function BlueprintForm() {
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-4">
                         {step > 1 && (
-                            <button onClick={handleBack} className="text-gray-500 hover:text-gray-800 text-sm font-medium underline flex items-center gap-1">
-                                ← Back
+                            <button
+                                onClick={handleBack}
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 hover:text-[#15587B] hover:border-gray-300 transition-all duration-200 group"
+                            >
+                                <span className="group-hover:-translate-x-0.5 transition-transform duration-200">←</span>
+                                <span>Back</span>
                             </button>
                         )}
                         <span className="text-xs text-gray-400 hidden sm:inline-block border-l border-gray-300 pl-4">
@@ -714,15 +716,15 @@ export default function BlueprintForm() {
                         </span>
                     </div>
                     <div className="flex gap-3">
-                        <button 
-                            onClick={handleSaveOnly} 
+                        <button
+                            onClick={handleSaveOnly}
                             disabled={loadingSave}
                             className="px-4 sm:px-6 py-2.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition"
                         >
                             {loadingSave ? "Saving..." : "Save Draft"}
                         </button>
-                        <button 
-                            onClick={handleSaveAndNext} 
+                        <button
+                            onClick={handleSaveAndNext}
                             disabled={loadingSave}
                             className="px-6 sm:px-8 py-2.5 text-sm text-white bg-[#15587B] hover:bg-[#0f4460] rounded-lg font-bold shadow-md transition flex items-center gap-2"
                         >
