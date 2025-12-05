@@ -5,33 +5,87 @@ import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import BlueprintDocument from "./coverpages/BlueprintDocument";
 
-const Section = ({ title, children }) => (
-  <div className="bg-white shadow-md hover:shadow-lg transition rounded-2xl p-6 mb-8 border border-gray-200">
-    <h2 className="text-xl font-semibold text-[#15587B] mb-5 border-l-4 border-[#34808A] pl-3">
-      {title}
-    </h2>
-    <div className="space-y-3">{children}</div>
+// --- UI HELPERS ---
+
+const Card = ({ title, children, className = "" }) => (
+  <div className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col ${className}`}>
+    <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+      <div className="h-4 w-1 bg-[#34808A] rounded-full"></div>
+      <h2 className="font-bold text-[#15587B] text-sm uppercase tracking-wider">{title}</h2>
+    </div>
+    <div className="p-5 flex-1">{children}</div>
   </div>
 );
 
-// Updated Item to allow custom styling via className or subItem prop
-const Item = ({ label, value, className = "" }) => (
-  <div className={`flex justify-between border-b border-dashed border-gray-300 pb-2 ${className}`}>
-    <span className="font-medium text-gray-800">{label}</span>
-    <span className="text-gray-600">{value || "—"}</span>
+const DetailRow = ({ label, value, className = "" }) => (
+  <div className={`flex justify-between items-start py-2 border-b border-gray-50 last:border-0 text-sm ${className}`}>
+    <span className="text-gray-500 font-medium">{label}</span>
+    <span className="text-gray-800 font-semibold text-right max-w-[60%] truncate" title={value?.toString()}>
+      {value || "—"}
+    </span>
   </div>
 );
+
+const Badge = ({ text, type = "neutral" }) => {
+  if (!text) return <span className="text-gray-300">-</span>;
+  
+  let classes = "bg-gray-100 text-gray-600";
+  const t = text.toString().toLowerCase();
+
+  if (type === "priority") {
+    if (t === "critical") classes = "bg-red-50 text-red-700 border border-red-100";
+    else if (t === "high") classes = "bg-orange-50 text-orange-700 border border-orange-100";
+    else if (t === "medium") classes = "bg-blue-50 text-blue-700 border border-blue-100";
+    else classes = "bg-green-50 text-green-700 border border-green-100";
+  } else if (type === "status") {
+    if (t === "yes" || t === "true" || t === "protected" || t === "fully patched") classes = "bg-teal-50 text-teal-700 border border-teal-100";
+    else if (t === "no" || t === "false" || t === "no data") classes = "bg-gray-50 text-gray-400 border border-gray-100";
+    else if (t === "vendor") classes = "bg-indigo-50 text-indigo-700 border border-indigo-100";
+  }
+
+  return (
+    <span className={`px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap ${classes}`}>
+      {text}
+    </span>
+  );
+};
+
+// Logic helper to parse the mixed data types (String vs Object)
+const parseControlData = (val) => {
+  let choice = "";
+  let vendor = "";
+  let businessPriority = "";
+  let offering = "";
+
+  if (typeof val === "object" && val !== null) {
+    choice = val.choice;
+    vendor = val.vendor;
+    businessPriority = val.businessPriority;
+    offering = val.offering;
+  } else {
+    // Legacy support
+    if (val && val.toString().startsWith("Vendor:")) {
+      choice = "Vendor";
+      vendor = val.toString().split("Vendor:")[1];
+    } else {
+      choice = val;
+    }
+  }
+
+  // Determine what to show in the main column
+  const displayValue = choice === "Vendor" ? vendor || "Unspecified Vendor" : choice;
+  
+  return { displayValue, businessPriority, offering, rawChoice: choice };
+};
 
 const BlueprintSummary = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 1. Initialize state
   const [formData, setFormData] = useState(location.state?.formData || null);
   const [loading, setLoading] = useState(!location.state?.formData);
   const [error, setError] = useState(false);
 
-  // 2. Fetch data if missing
   useEffect(() => {
     if (formData) return;
 
@@ -66,7 +120,6 @@ const BlueprintSummary = () => {
 
   const handleDownloadPdf = async () => {
     try {
-      // Generate the PDF blob
       const blob = await pdf(
         <BlueprintDocument
           companyName={formData.companyName || "—"}
@@ -74,284 +127,276 @@ const BlueprintSummary = () => {
           currentStateData={formData}
         />
       ).toBlob();
-
-      // Trigger download
       saveAs(blob, "IT-Blueprint.pdf");
     } catch (err) {
-      console.error("PDF Download Error:", err);
-      alert("Failed to generate PDF. Please check console for details.");
+      console.error("PDF Error", err);
+      alert("Failed to generate PDF.");
     }
   };
 
-  // 4. Loading State
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f0f4f8]">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#15587B] mb-4"></div>
-          <p className="text-[#15587B] font-semibold">Loading your Blueprint...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-[#15587B] font-medium">Loading Blueprint...</div>;
+  if (error || !formData) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <h2 className="text-xl font-bold text-gray-700 mb-2">No Data Found</h2>
+        <button onClick={() => navigate("/blueprint-form")} className="text-[#34808A] underline">Return to Form</button>
+    </div>
+  );
 
-  // 5. Error / No Data State
-  if (error || !formData) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f0f4f8] p-10 text-center">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-          No data found
-        </h2>
-        <p className="text-gray-600 mb-6">
-          We couldn't find a saved blueprint for your account.
-        </p>
-        <button
-          onClick={() => navigate("/blueprint-form")}
-          className="px-5 py-2 bg-[#935010] text-white rounded-lg shadow hover:bg-[#7a3d0d] transition"
-        >
-          Go Back to Form
-        </button>
-      </div>
-    );
-  }
-
-  // 6. Success State
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f9fafb] via-[#f0f4f8] to-[#e2ecf0] py-10 px-6">
-      <div className="max-w-6xl mx-auto">
-        {/* HEADER */}
-        <div className="bg-gradient-to-r from-[#34808A] to-[#15587B] text-white rounded-2xl shadow-lg p-8 mb-10 text-center">
-          <h1 className="text-4xl font-bold tracking-wide mb-2">
-            IT Blueprint Summary
-          </h1>
-          <p className="text-white/90 text-lg">
-            Review all your submitted information below
-          </p>
+    <div className="min-h-screen bg-[#F3F4F6] pb-20">
+      
+      {/* STICKY HEADER */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+             <div className="bg-[#15587B] p-2 rounded-lg text-white">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+             </div>
+             <div>
+                <h1 className="text-lg font-bold text-gray-800 leading-none">Blueprint Summary</h1>
+                <p className="text-xs text-gray-500 mt-0.5">Configuration for <span className="font-semibold text-[#34808A]">{formData.companyName}</span></p>
+             </div>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => navigate("/blueprint-form")} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Edit Data</button>
+            <button onClick={handleDownloadPdf} className="px-4 py-2 text-sm font-bold text-white bg-[#935010] hover:bg-[#7a3d0d] rounded-lg shadow-sm transition flex items-center gap-2">
+                <span>Download PDF</span>
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* STEP 1 */}
-        <Section title="Step 1: Company Information">
-          <Item label="Company Name" value={formData.companyName} />
-          <Item label="Contact Name" value={formData.contactName} />
-          <Item label="Email" value={formData.email} />
-          <Item label="Phone Number" value={formData.phoneNumber} />
-          <Item label="Industry" value={formData.industry} />
-          <Item label="Other Industry" value={formData.otherIndustry} />
-          <Item label="Employees" value={formData.employees} />
-          <Item label="Remote %" value={`${formData.remotePercentage || 0}%`} />
-          <Item
-            label="Contractor %"
-            value={`${formData.contractorPercentage || 0}%`}
-          />
-        </Section>
-
-        {/* STEP 2 */}
-        <Section title="Step 2: Infrastructure - Facilities">
-          <Item label="Physical Offices" value={formData.physicalOffices} />
-          <Item label="Data Centers" value={formData.hasDataCenters} />
-          <Item label="On-prem DC" value={formData.hasOnPremDC} />
-          <Item label="Cloud Infra" value={formData.hasCloudInfra} />
-          <Item label="Generator" value={formData.hasGenerator} />
-          <Item label="UPS" value={formData.hasUPS} />
-        </Section>
-
-        {/* STEP 3 - UPDATED to handle complex objects */}
-        <Section title="Step 3: Network and Server Infrastructure">
-          <Item label="Main Location" value={formData.mainLocation} />
-          
-          <div className="mt-4 space-y-2">
-            {[
-              { key: "WAN1", label: "WAN 1" },
-              { key: "WAN2", label: "WAN 2" },
-              { key: "WAN3", label: "WAN 3" },
-              { key: "switchingVendor", label: "Switching Vendor" },
-              { key: "routingVendor", label: "Routing Vendor" },
-              { key: "wirelessVendor", label: "Wireless Vendor" },
-              { key: "baremetalVendor", label: "Bare Metal Vendor" },
-              { key: "virtualizationVendor", label: "Virtualization Vendor" },
-              { key: "cloudVendor", label: "Cloud Vendor" },
-            ].map((field) => {
-              const val = formData[field.key];
-              let choice = "";
-              let vendor = "";
-              let businessPriority = "";
-              let offering = "";
-
-              if (typeof val === "object" && val !== null) {
-                choice = val.choice;
-                vendor = val.vendor;
-                businessPriority = val.businessPriority;
-                offering = val.offering;
-              } else {
-                choice = val;
-              }
-
-              const displayValue =
-                choice === "Vendor"
-                  ? `Vendor: ${vendor || "Unspecified"}`
-                  : choice;
-
-              return (
-                <div key={field.key} className="mb-2">
-                  <Item label={field.label} value={displayValue} />
-                  {(businessPriority || offering) && (
-                    <div className="bg-gray-50 rounded-lg p-2 mb-2 ml-4 border-l-2 border-gray-300">
-                      {businessPriority && (
-                        <Item
-                          label="Business Priority"
-                          value={businessPriority}
-                          className="text-sm border-none pb-1"
-                        />
-                      )}
-                      {offering && (
-                        <Item
-                          label="Offering"
-                          value={offering}
-                          className="text-sm border-none pb-0"
-                        />
-                      )}
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        
+        {/* ROW 1: OVERVIEW GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Step 1: Company */}
+            <Card title="Company Profile">
+                <div className="space-y-1">
+                    <DetailRow label="Company" value={formData.companyName} />
+                    <DetailRow label="Contact" value={formData.contactName} />
+                    <DetailRow label="Email" value={formData.email} />
+                    <DetailRow label="Phone" value={formData.phoneNumber} />
+                    <DetailRow label="Industry" value={formData.industry === "Others" ? formData.otherIndustry : formData.industry} />
+                    <div className="grid grid-cols-2 gap-4 mt-4 pt-3 border-t border-gray-100">
+                        <div className="text-center">
+                            <span className="block text-xs text-gray-400 uppercase">Employees</span>
+                            <span className="text-lg font-bold text-[#15587B]">{formData.employees}</span>
+                        </div>
+                        <div className="text-center">
+                            <span className="block text-xs text-gray-400 uppercase">Remote</span>
+                            <span className="text-lg font-bold text-[#15587B]">{formData.remotePercentage}%</span>
+                        </div>
                     </div>
-                  )}
                 </div>
-              );
-            })}
-          </div>
+            </Card>
 
-          <div className="border-t border-gray-200 mt-6 pt-4">
-            <Item label="HA Routing" value={formData.haRouting} />
-            <Item label="Wireless Auth" value={formData.wirelessAuth} />
-            <Item label="Guest Wireless" value={formData.guestWireless} />
-            <Item label="Guest Segmentation" value={formData.guestSegmentation} />
-            <Item label="Windows Servers" value={formData.windowsServers} />
-            <Item
-              label="Windows Options"
-              value={(formData.windowsOptions || []).join(", ")}
-            />
-            <Item label="Linux Servers" value={formData.linuxServers} />
-            <Item
-              label="Linux Options"
-              value={(formData.linuxOptions || []).join(", ")}
-            />
-            <Item
-              label="Desktop Options"
-              value={(formData.desktopOptions || []).join(", ")}
-            />
-          </div>
-        </Section>
-
-        {/* STEP 4 */}
-        <Section title="Step 4: Security Administrative Controls">
-          <Item label="Security Committee" value={formData.securityCommittee} />
-          <Item label="Security Policy" value={formData.securityPolicy} />
-          <Item label="Employee Training" value={formData.employeeTraining} />
-          <Item label="BCDR Plan" value={formData.bcdrPlan} />
-          <Item label="Cyber Insurance" value={formData.cyberInsurance} />
-          <Item label="Backup Testing" value={formData.testBackup} />
-          <Item label="Change Control" value={formData.changeControl} />
-          <Item label="Incident Response" value={formData.incidentResponse} />
-          <Item label="Security Review" value={formData.securityReview} />
-          <Item label="Penetration Test" value={formData.penetrationTest} />
-        </Section>
-
-        {/* STEP 5 - Technical Controls */}
-        <Section title="Step 5: Security Technical Controls">
-          {Object.entries(formData.technicalControls || {}).map(([key, value]) => {
-            // Check if value is complex object or legacy string
-            let choice = "";
-            let vendor = "";
-            let businessPriority = "";
-            let offering = "";
-
-            if (typeof value === 'object' && value !== null) {
-              choice = value.choice;
-              vendor = value.vendor;
-              businessPriority = value.businessPriority;
-              offering = value.offering;
-            } else {
-              // Legacy string support
-              if (value && value.toString().startsWith("Vendor:")) {
-                choice = "Vendor";
-                vendor = value.toString().split("Vendor:")[1];
-              } else {
-                choice = value;
-              }
-            }
-
-            const label = key
-              .replace(/([A-Z])/g, " $1")
-              .replace(/^./, (str) => str.toUpperCase());
-
-            const displayValue = choice === "Vendor" ? `Vendor: ${vendor || "Unspecified"}` : choice;
-
-            return (
-              <div key={key} className="mb-4 border-b border-gray-100 pb-2">
-                <Item label={label} value={displayValue} />
-                {(businessPriority || offering) && (
-                  <div className="bg-gray-50 rounded-lg p-2 mt-1">
-                    {businessPriority && <Item label="Business Priority" value={businessPriority} className="text-sm pl-4" />}
-                    {offering && <Item label="Offering" value={offering} className="text-sm pl-4" />}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </Section>
-
-        {/* STEP 6 */}
-        <Section title="Step 6: Applications">
-          {Object.entries(formData.applications || {}).map(
-            ([category, apps]) => (
-              <div key={category} className="mb-4">
-                <h3 className="text-lg font-semibold text-[#34808A] mb-3 capitalize border-l-2 border-[#935010] pl-2">
-                  {category}
-                </h3>
-                {(apps || []).length > 0 ? (
-                  apps.map((app, i) => (
-                    <div
-                      key={i}
-                      className="border rounded-xl p-4 mb-3 bg-gray-50 hover:bg-gray-100 shadow-sm"
-                    >
-                      <Item label="Provider" value={app.name} />
-
-                      {/* Business Priority and Offering */}
-                      <Item label="Business Priority" value={app.businessPriority} />
-                      <Item label="Offering" value={app.offering} />
-
-                      <Item
-                        label="Contains Sensitive Info"
-                        value={app.containsSensitiveInfo}
-                      />
-                      <Item label="MFA" value={app.mfa} />
-                      <Item label="Backed Up" value={app.backedUp} />
-                      <Item label="BYOD Access" value={app.byodAccess} />
+            {/* Step 2: Facilities */}
+            <Card title="Facilities & Power">
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-blue-50 rounded p-3 text-center">
+                        <div className="text-xs text-blue-600 font-bold uppercase">Offices</div>
+                        <div className="text-xl font-bold text-blue-900">{formData.physicalOffices}</div>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-gray-600 text-sm">
-                    No applications added.
-                  </p>
-                )}
-              </div>
-            )
-          )}
-        </Section>
+                    <div className="bg-teal-50 rounded p-3 text-center">
+                        <div className="text-xs text-teal-600 font-bold uppercase">Datacenters</div>
+                        <div className="text-xl font-bold text-teal-900">{formData.hasDataCenters}</div>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm"><span className="text-gray-600">On-Prem DC</span> <Badge text={formData.hasOnPremDC} type="status" /></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-gray-600">Cloud Infra</span> <Badge text={formData.hasCloudInfra} type="status" /></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-gray-600">Generators</span> <Badge text={formData.hasGenerator} type="status" /></div>
+                    <div className="flex justify-between items-center text-sm"><span className="text-gray-600">UPS Systems</span> <Badge text={formData.hasUPS} type="status" /></div>
+                </div>
+            </Card>
 
-        {/* BUTTONS */}
-        <div className="flex justify-center gap-6 mt-12 pb-10">
-          <button
-            onClick={() => navigate("/blueprint-form")}
-            className="px-6 py-3 bg-[#34808A] text-white rounded-xl shadow-md hover:bg-[#2b6f6f] transition"
-          >
-            ← Back to Edit
-          </button>
-
-          <button
-            onClick={handleDownloadPdf}
-            className="px-6 py-3 bg-[#935010] text-white rounded-xl shadow-md hover:bg-[#7a3d0d] transition"
-          >
-            Download Blueprint
-          </button>
+            {/* Step 4: Governance */}
+            <Card title="Governance & Compliance">
+                <div className="grid grid-cols-1 gap-y-2">
+                    {[
+                        ["Steering Committee", formData.securityCommittee],
+                        ["Written Policy", formData.securityPolicy],
+                        ["Employee Training", formData.employeeTraining],
+                        ["BCDR Plan", formData.bcdrPlan],
+                        ["Cyber Insurance", formData.cyberInsurance],
+                        ["Incident Response", formData.incidentResponse],
+                        ["Pen Test (1yr)", formData.penetrationTest]
+                    ].map(([l, v], i) => (
+                        <div key={i} className="flex justify-between items-center text-sm py-1 border-b border-gray-50 last:border-0">
+                            <span className="text-gray-600">{l}</span>
+                            <Badge text={v} type="status" />
+                        </div>
+                    ))}
+                </div>
+            </Card>
         </div>
+
+        {/* ROW 2: INFRASTRUCTURE (UPDATED) */}
+        <Card title="Network & Infrastructure">
+            <div className="flex flex-col gap-8">
+                
+                {/* Top Section: Servers & Config */}
+                <div>
+                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">Configuration & Servers</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                            <span className="text-xs text-gray-500 block mb-1">Windows Servers</span>
+                            <div className="flex items-center gap-2">
+                                <Badge text={formData.windowsServers} type="status" />
+                                {formData.windowsServers === "Yes" && (
+                                    <span className="text-[10px] text-gray-400 truncate">
+                                        ({formData.windowsOptions?.length || 0} opts)
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                            <span className="text-xs text-gray-500 block mb-1">Linux Servers</span>
+                            <div className="flex items-center gap-2">
+                                <Badge text={formData.linuxServers} type="status" />
+                                {formData.linuxServers === "Yes" && (
+                                    <span className="text-[10px] text-gray-400 truncate">
+                                        ({formData.linuxOptions?.length || 0} opts)
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex flex-col justify-center">
+                            <div className="flex justify-between items-center">
+                                <span className="text-xs text-gray-500">Wireless Auth</span>
+                                <span className="text-sm font-bold text-[#15587B]">{formData.wirelessAuth || "-"}</span>
+                            </div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex flex-col justify-center">
+                            <div className="flex justify-between items-center">
+                                <span className="text-xs text-gray-500">Guest Wifi</span>
+                                <div className="flex gap-1">
+                                    <Badge text={formData.guestWireless} type="status" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom Section: Core Vendors Table */}
+                <div>
+                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">Core Vendors</h3>
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-6 py-3 font-semibold w-1/4">Type</th>
+                                    <th className="px-6 py-3 font-semibold w-1/4">Vendor</th>
+                                    <th className="px-6 py-3 font-semibold w-1/4">Offering</th>
+                                    <th className="px-6 py-3 font-semibold w-1/4">Priority</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {[
+                                    { k: "WAN 1", v: formData.WAN1 },
+                                    { k: "WAN 2", v: formData.WAN2 },
+                                    { k: "Firewall/Routing", v: formData.routingVendor },
+                                    { k: "Switching", v: formData.switchingVendor },
+                                    { k: "Wireless", v: formData.wirelessVendor },
+                                    { k: "Virtualization", v: formData.virtualizationVendor },
+                                    { k: "Cloud", v: formData.cloudVendor }
+                                ].map((item, i) => {
+                                    const { displayValue, businessPriority, offering, rawChoice } = parseControlData(item.v);
+                                    return (
+                                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-6 py-3 font-medium text-gray-700">{item.k}</td>
+                                            <td className="px-6 py-3">
+                                                <span className={`font-medium ${rawChoice === 'No' ? 'text-red-400 opacity-80' : 'text-gray-800'}`}>
+                                                    {displayValue}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3 text-gray-500">{offering || "—"}</td>
+                                            <td className="px-6 py-3"><Badge text={businessPriority} type="priority" /></td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </Card>
+
+        {/* ROW 3: TECHNICAL CONTROLS (TABLE) */}
+        <Card title="Security Technical Controls">
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th className="px-6 py-3 font-semibold">Control Area</th>
+                            <th className="px-6 py-3 font-semibold">Solution / Vendor</th>
+                            <th className="px-6 py-3 font-semibold">Offering</th>
+                            <th className="px-6 py-3 font-semibold">Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {Object.entries(formData.technicalControls || {}).map(([key, rawValue]) => {
+                             const { displayValue, businessPriority, offering, rawChoice } = parseControlData(rawValue);
+                             const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+                             
+                             return (
+                                 <tr key={key} className="hover:bg-gray-50/50 transition-colors">
+                                     <td className="px-6 py-3 font-medium text-gray-700">{label}</td>
+                                     <td className="px-6 py-3">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-gray-800 ${rawChoice === 'No' ? 'text-red-500 opacity-70' : ''}`}>
+                                                {displayValue}
+                                            </span>
+                                        </div>
+                                     </td>
+                                     <td className="px-6 py-3 text-gray-500">{offering || "—"}</td>
+                                     <td className="px-6 py-3"><Badge text={businessPriority} type="priority" /></td>
+                                 </tr>
+                             )
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </Card>
+
+        {/* ROW 4: APPLICATIONS (GRID OF TABLES) */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {Object.entries(formData.applications || {}).map(([category, apps]) => {
+                if (!apps || apps.length === 0) return null;
+                const catTitle = category.charAt(0).toUpperCase() + category.slice(1);
+                
+                return (
+                    <Card key={category} title={`${catTitle} Applications`}>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead className="text-xs text-gray-400 uppercase border-b border-gray-100 text-left">
+                                    <tr>
+                                        <th className="px-2 py-2 font-medium">Provider</th>
+                                        <th className="px-2 py-2 font-medium">Data</th>
+                                        <th className="px-2 py-2 font-medium">MFA</th>
+                                        <th className="px-2 py-2 font-medium">Backup</th>
+                                        <th className="px-2 py-2 font-medium">Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {apps.map((app, i) => (
+                                        <tr key={i}>
+                                            <td className="px-2 py-2.5 font-semibold text-[#15587B]">{app.name}</td>
+                                            <td className="px-2 py-2.5"><Badge text={app.containsSensitiveInfo === "Yes" ? "Yes" : null} type="status" /></td>
+                                            <td className="px-2 py-2.5"><Badge text={app.mfa === "Yes" ? "Yes" : null} type="status" /></td>
+                                            <td className="px-2 py-2.5"><Badge text={app.backedUp === "Yes" ? "Yes" : null} type="status" /></td>
+                                            <td className="px-2 py-2.5"><Badge text={app.businessPriority} type="priority" /></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                )
+            })}
+        </div>
+
       </div>
     </div>
   );
