@@ -29,7 +29,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] relative overflow-hidden flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] relative overflow-hidden flex flex-col pt-7 font-sans">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-gray-100/50 -z-10" />
