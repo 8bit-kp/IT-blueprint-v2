@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback, memo, useRef } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import ProgressBar from "../components/ProgressBar";
@@ -231,9 +231,27 @@ const MultiCheckbox = memo(({ label, options, values = [], onChange }) => {
 
 const TextInput = memo(({ placeholder, value, onChange, type = "text", className = "" }) => {
     const [localValue, setLocalValue] = useState(value || "");
-    useEffect(() => { setLocalValue(value || ""); }, [value]);
-    const handleChange = (e) => setLocalValue(e.target.value);
-    const handleBlur = () => { if (localValue !== value) onChange(localValue); };
+    const timerRef = useRef(null);
+    
+    useEffect(() => { 
+        setLocalValue(value || ""); 
+    }, [value]);
+    
+    const handleChange = (e) => {
+        const newValue = e.target.value;
+        setLocalValue(newValue);
+        
+        // Debounce onChange
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+            onChange(newValue);
+        }, 300); // 300ms debounce
+    };
+    
+    const handleBlur = () => { 
+        if (timerRef.current) clearTimeout(timerRef.current);
+        if (localValue !== value) onChange(localValue); 
+    };
 
     return (
         <input
@@ -249,9 +267,22 @@ const TextInput = memo(({ placeholder, value, onChange, type = "text", className
 
 const RangeInput = memo(({ label, value, onChange }) => {
     const [localValue, setLocalValue] = useState(value || 0);
-    useEffect(() => { setLocalValue(value || 0); }, [value]);
-    const handleChange = (e) => setLocalValue(Number(e.target.value));
-    const handleBlur = () => { if (localValue !== value) onChange(localValue); };
+    const timerRef = useRef(null);
+    
+    useEffect(() => { 
+        setLocalValue(value || 0); 
+    }, [value]);
+    
+    const handleChange = (e) => {
+        const newValue = Number(e.target.value);
+        setLocalValue(newValue);
+        
+        // Debounce onChange for better performance
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+            onChange(newValue);
+        }, 200); // 200ms debounce for range slider
+    };
 
     return (
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -265,7 +296,6 @@ const RangeInput = memo(({ label, value, onChange }) => {
                 max="100"
                 value={localValue}
                 onChange={handleChange}
-                onBlur={handleBlur}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#34808A]"
             />
         </div>
@@ -552,6 +582,7 @@ export default function BlueprintForm() {
     const totalSteps = 6;
     const { formData, updateFormData, step, setStep } = useForm();
     const [loadingSave, setLoadingSave] = useState(false);
+    const [loadingData, setLoadingData] = useState(true);
     const [lastSavedStep, setLastSavedStep] = useState(0);
     const token = localStorage.getItem("token");
 
@@ -578,7 +609,7 @@ export default function BlueprintForm() {
         updateFormData((prev) => ({ ...prev, [key]: value }));
     }, [updateFormData]);
 
-    // Initial Fetch
+    // Initial Fetch - Optimized
     useEffect(() => {
         const fetchBlueprint = async () => {
             if (!token) {
@@ -586,16 +617,20 @@ export default function BlueprintForm() {
                 navigate("/auth");
                 return;
             }
+            
+            setLoadingData(true);
+            
             try {
                 const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/blueprint/get`, {
                     headers: { Authorization: `Bearer ${token}` },
+                    timeout: 10000, // 10 second timeout
                 });
                 const data = res.data || {};
 
                 if (data && Object.keys(data).length) {
-                    updateFormData(data);
+                    // Handle technical controls efficiently
                     if (data.technicalControls) {
-                        const tc = { ...technicalControls };
+                        const tc = {};
                         Object.keys(data.technicalControls).forEach((k) => {
                             const val = data.technicalControls[k];
                             if (typeof val === 'object' && val !== null) {
@@ -610,10 +645,33 @@ export default function BlueprintForm() {
                         });
                         setTechnicalControls(tc);
                     }
+                    
+                    // Initialize applications structure if missing
+                    if (!data.applications) {
+                        data.applications = {
+                            productivity: [],
+                            finance: [],
+                            hrit: [],
+                            payroll: [],
+                            additional: []
+                        };
+                    }
+                    
+                    updateFormData(data);
                     setLastSavedStep(data._lastSavedStep || 0);
                 }
             } catch (err) {
                 console.error("fetch blueprint err", err);
+                if (err.response?.status === 401) {
+                    toast.error("Session expired. Please login again.");
+                    navigate("/auth");
+                } else if (err.code === 'ECONNABORTED') {
+                    toast.error("Request timeout. Please try again.");
+                } else {
+                    toast.error("Failed to load data. Please refresh the page.");
+                }
+            } finally {
+                setLoadingData(false);
             }
         };
         fetchBlueprint();
@@ -628,22 +686,48 @@ export default function BlueprintForm() {
         setLoadingSave(true);
         try {
             persistTechnicalControlsToForm(); // Sync local to global before save
+            
+            // Ensure applications structure is properly formatted
+            const applications = formData.applications || {
+                productivity: [],
+                finance: [],
+                hrit: [],
+                payroll: [],
+                additional: []
+            };
+            
             const payload = {
                 ...formData,
+                applications,
                 technicalControls: technicalControls,
                 _lastSavedStep: currentStep
             };
-            await axios.post(
+            
+            const response = await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/blueprint/save`,
                 payload,
-                { headers: { Authorization: `Bearer ${token}` } }
+                { 
+                    headers: { Authorization: `Bearer ${token}` },
+                    timeout: 15000 // 15 second timeout for save
+                }
             );
+            
             setLastSavedStep(currentStep);
-            toast.success("Saved successfully");
+            toast.success(response.data?.message || "Saved successfully");
             return true;
         } catch (err) {
-            console.error(err);
-            toast.error(err.response?.data?.message || "Failed to save step");
+            console.error("Save error:", err);
+            
+            if (err.response?.status === 401) {
+                toast.error("Session expired. Please login again.");
+                setTimeout(() => navigate("/auth"), 2000);
+            } else if (err.code === 'ECONNABORTED') {
+                toast.error("Save timeout. Please try again.");
+            } else if (err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error("Failed to save. Please check your connection and try again.");
+            }
             return false;
         } finally {
             setLoadingSave(false);
@@ -672,6 +756,18 @@ export default function BlueprintForm() {
             window.scrollTo(0, 0);
         }
     };
+
+    // Show loading screen while fetching data
+    if (loadingData) {
+        return (
+            <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#15587B] mb-4"></div>
+                    <p className="text-gray-600 font-medium">Loading your blueprint...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#F3F4F6] pb-24">
