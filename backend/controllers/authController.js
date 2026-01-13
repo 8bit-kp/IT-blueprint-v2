@@ -12,7 +12,9 @@ export const registerUser = async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+  // Use a stronger salt rounds value
+  const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10) || 12;
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await User.create({
       username,
       email,
@@ -35,6 +37,10 @@ export const loginUser = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: "Server misconfigured: JWT secret missing" });
+    }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
