@@ -16,13 +16,24 @@ async function initRedis() {
 
   try {
     const Redis = (await import("ioredis")).default;
-    client = new Redis(process.env.REDIS_URL);
+    client = new Redis(process.env.REDIS_URL, {
+      retryStrategy: (times) => {
+        if (times > 3) {
+          console.warn("Redis connection failed after 3 retries, falling back to memory cache");
+          useRedis = false;
+          return null;
+        }
+        return Math.min(times * 100, 3000);
+      }
+    });
     useRedis = true;
     client.on("error", (err) => {
-      console.warn("Redis error:", err);
+      console.warn("Redis error:", err.message);
       useRedis = false;
     });
-    console.log("✅ Using Redis cache at", process.env.REDIS_URL);
+    client.on("ready", () => {
+      console.log("✅ Using Redis cache");
+    });
   } catch (err) {
     console.warn("⚠️  Redis not available, using in-memory cache:", err.message);
     useRedis = false;

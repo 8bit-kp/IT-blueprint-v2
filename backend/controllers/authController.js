@@ -33,6 +33,9 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
+    
+    console.log(`Login attempt for user: ${username}`);
+    
     const user = await User.findOne({ username });
 
     if (!user) return res.status(400).json({ message: "User not found" });
@@ -41,6 +44,7 @@ export const loginUser = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not set in environment");
       return res.status(500).json({ message: "Server misconfigured: JWT secret missing" });
     }
 
@@ -58,12 +62,17 @@ export const loginUser = async (req, res) => {
       } else {
         const bp = await Blueprint.findOne({ userId: user._id }).lean().select("-__v");
         blueprintData = bp || {};
-        // cache for subsequent requests
-        cache.set(cacheKey, blueprintData, parseInt(process.env.BLUEPRINT_CACHE_TTL || "60", 10)).catch(() => {});
+        // cache for subsequent requests (non-blocking)
+        cache.set(cacheKey, blueprintData, parseInt(process.env.BLUEPRINT_CACHE_TTL || "60", 10)).catch((err) => {
+          console.warn("Cache set error:", err.message);
+        });
       }
     } catch (e) {
       console.warn("Failed to include blueprint in login response:", e.message || e);
+      // Continue without blueprint data
     }
+
+    console.log(`Login successful for user: ${username}`);
 
     res.status(200).json({
       message: "Login successful",
@@ -72,6 +81,9 @@ export const loginUser = async (req, res) => {
       blueprint: blueprintData,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Login error:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
+    res.status(500).json({ message: "Login failed: " + error.message });
   }
 };
