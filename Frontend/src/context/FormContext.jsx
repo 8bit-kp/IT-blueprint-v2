@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useMemo, useCallback } from "react";
 
 const FormContext = createContext();
 
@@ -13,25 +13,29 @@ export const FormProvider = ({ children }) => {
     employees: "",
     remotePercentage: 0,
     contractorPercentage: 0,
-    // add more default fields if necessary
+    applications: {
+      productivity: [],
+      finance: [],
+      hrit: [],
+      payroll: [],
+      additional: []
+    }
   });
 
   const [step, setStep] = useState(1);
 
-  // ✅ FIXED: Supports both functional and object-style updates
-  const updateFormData = (updater) => {
+  // ✅ OPTIMIZED: Memoized update function
+  const updateFormData = useCallback((updater) => {
     setFormData((prev) => {
       if (typeof updater === "function") {
-       
         return updater(prev);
       }
-      
       return { ...prev, ...updater };
     });
-  };
+  }, []);
 
   // Optional: reset form
-  const resetForm = () =>
+  const resetForm = useCallback(() =>
     setFormData({
       companyName: "",
       contactName: "",
@@ -42,12 +46,23 @@ export const FormProvider = ({ children }) => {
       employees: "",
       remotePercentage: 0,
       contractorPercentage: 0,
-    });
+      applications: {
+        productivity: [],
+        finance: [],
+        hrit: [],
+        payroll: [],
+        additional: []
+      }
+    }), []);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({ formData, updateFormData, step, setStep, resetForm }),
+    [formData, updateFormData, step, resetForm]
+  );
 
   return (
-    <FormContext.Provider
-      value={{ formData, updateFormData, step, setStep, resetForm }}
-    >
+    <FormContext.Provider value={contextValue}>
       {children}
     </FormContext.Provider>
   );
