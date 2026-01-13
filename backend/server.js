@@ -26,34 +26,55 @@ requiredEnvs.forEach((name) => {
 // Trust proxy when behind a load balancer (Heroku, Vercel, etc.)
 if (process.env.TRUST_PROXY === "1") app.set("trust proxy", 1);
 
-// Security middlewares
-app.use(helmet());
+// CORS - must be set BEFORE other middlewares
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+console.log("🌐 CORS enabled for origin:", CLIENT_ORIGIN);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (origin === CLIENT_ORIGIN) {
+      callback(null, true);
+    } else {
+      console.warn("⚠️  CORS blocked origin:", origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["Content-Length", "X-Request-Id"],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+app.use(cors(corsOptions));
+
+// Parse JSON with a size limit to mitigate large payload attacks
+app.use(express.json({ limit: "10kb" }));
+
+// Security middlewares - helmet configured to not block CORS
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
 app.use(compression());
 
-// Rate limiter (basic)
+// Rate limiter (basic) - but skip for OPTIONS
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === "OPTIONS",
 });
 app.use(limiter);
 
 // Data sanitization against NoSQL injection and XSS
 app.use(mongoSanitize());
 app.use(xss());
-
-// CORS - allow client origin from env or fallback to localhost during dev
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-const corsOptions = {
-  origin: CLIENT_ORIGIN,
-  methods: "GET,POST,PUT,DELETE,PATCH,HEAD",
-  credentials: true,
-};
-app.use(cors(corsOptions));
-
-// Parse JSON with a size limit to mitigate large payload attacks
-app.use(express.json({ limit: "10kb" }));
 
 connectDB();
 

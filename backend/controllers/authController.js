@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Blueprint from "../models/Blueprint.js";
+import cache from "../utils/cache.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -46,10 +48,28 @@ export const loginUser = async (req, res) => {
       expiresIn: "1d",
     });
 
+    // Attempt to fetch the user's blueprint and include it in the login response
+    let blueprintData = {};
+    try {
+      const cacheKey = `blueprint:${user._id}`;
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        blueprintData = cached;
+      } else {
+        const bp = await Blueprint.findOne({ userId: user._id }).lean().select("-__v");
+        blueprintData = bp || {};
+        // cache for subsequent requests
+        cache.set(cacheKey, blueprintData, parseInt(process.env.BLUEPRINT_CACHE_TTL || "60", 10)).catch(() => {});
+      }
+    } catch (e) {
+      console.warn("Failed to include blueprint in login response:", e.message || e);
+    }
+
     res.status(200).json({
       message: "Login successful",
       token,
       username: user.username,
+      blueprint: blueprintData,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
