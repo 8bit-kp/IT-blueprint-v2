@@ -90,7 +90,34 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/blueprint", blueprintRoutes);
 
-// Health
+// Health check endpoint
+app.get("/health", async (req, res) => {
+  const healthCheck = {
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development",
+  };
+
+  try {
+    // Check MongoDB connection
+    const mongoose = (await import("mongoose")).default;
+    if (mongoose.connection.readyState === 1) {
+      healthCheck.database = "Connected";
+    } else {
+      healthCheck.database = "Disconnected";
+      healthCheck.status = "ERROR";
+    }
+  } catch (err) {
+    healthCheck.database = "Error: " + err.message;
+    healthCheck.status = "ERROR";
+  }
+
+  const statusCode = healthCheck.status === "OK" ? 200 : 503;
+  res.status(statusCode).json(healthCheck);
+});
+
+// Root endpoint
 app.get("/", (req, res) => res.send("API running..."));
 
 // Serve frontend in production if build exists
