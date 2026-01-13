@@ -80,12 +80,23 @@ export const saveBlueprint = async (req, res) => {
 export const getBlueprint = async (req, res) => {
   try {
     const userId = req.user;
+    
+    console.log(`Fetching blueprint for user: ${userId}`);
+
+    // Ensure the request is authenticated
+    if (!userId) {
+      console.error("getBlueprint: No userId found in request");
+      return res.status(401).json({ message: "User not authenticated" });
+    }
 
     const cacheKey = `blueprint:${userId}`;
     // Try cache first
     try {
       const cached = await cache.get(cacheKey);
-      if (cached) return res.status(200).json(cached);
+      if (cached) {
+        console.log(`Returning cached blueprint for user ${userId}`);
+        return res.status(200).json(cached);
+      }
     } catch (e) {
       // cache read failed; continue to DB
       console.warn("Cache get failed:", e.message || e);
@@ -95,6 +106,8 @@ export const getBlueprint = async (req, res) => {
     const blueprint = await Blueprint.findOne({ userId }).lean().select("-__v");
 
     const result = blueprint || {};
+    
+    console.log(`Blueprint fetched from DB for user ${userId}. Has data: ${!!blueprint}`);
 
     // Set cache asynchronously
     cache.set(cacheKey, result, BLUEPRINT_TTL).catch((err) => {
@@ -104,6 +117,10 @@ export const getBlueprint = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.error("getBlueprint error:", error);
-    res.status(500).json({ message: error.message });
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
+    res.status(500).json({ 
+      message: "Failed to retrieve blueprint: " + error.message 
+    });
   }
 };
