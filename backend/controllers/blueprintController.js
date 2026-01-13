@@ -38,10 +38,13 @@ export const saveBlueprint = async (req, res) => {
 
     console.log(`Saving blueprint for user ${userId}. Payload keys: ${Object.keys(data).slice(0,20).join(', ')}. Size: ${JSON.stringify(data).length} bytes`);
 
+    // Remove userId from data to avoid conflict (we're already using it in the query)
+    const { userId: _, ...updateData } = data;
+
     // Use updateOne for fast writes with validation
     await Blueprint.updateOne(
       { userId }, 
-      { $set: data, $setOnInsert: { userId } }, 
+      { $set: updateData, $setOnInsert: { userId } }, 
       { upsert: true, runValidators: true }
     );
 
