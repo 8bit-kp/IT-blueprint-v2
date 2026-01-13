@@ -1,4 +1,8 @@
 import Blueprint from "../models/Blueprint.js";
+import cache from "../utils/cache.js";
+
+// Cache TTL in seconds for blueprint reads
+const BLUEPRINT_TTL = parseInt(process.env.BLUEPRINT_CACHE_TTL || "60", 10);
 
 export const saveBlueprint = async (req, res) => {
   try {
@@ -34,20 +38,27 @@ export const saveBlueprint = async (req, res) => {
 
     console.log(`Saving blueprint for user ${userId}. Payload keys: ${Object.keys(data).slice(0,20).join(', ')}. Size: ${JSON.stringify(data).length} bytes`);
 
-    // Use an atomic upsert to create or update the blueprint safely and run validators
-    const updated = await Blueprint.findOneAndUpdate(
-      { userId },
-      { userId, ...data },
-      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
+    // Use updateOne for fast writes with validation
+    await Blueprint.updateOne(
+      { userId }, 
+      { $set: data, $setOnInsert: { userId } }, 
+      { upsert: true, runValidators: true }
     );
 
-    return res.status(200).json({ 
+    // Invalidate cache for this user so subsequent reads fetch fresh data
+    try {
+      await cache.del(`blueprint:${userId}`);
+    } catch (e) {
+      // Non-fatal: caching errors shouldn't block API success
+      console.warn("Cache delete failed:", e.message || e);
+    }
+
+    res.status(200).json({ 
       message: "Blueprint saved successfully",
-      success: true,
-      id: updated?._id
+      success: true
     });
   } catch (error) {
-    console.error("Save blueprint error:", error);
+    console.error("saveBlueprint error:", error);
     console.error("Error details:", error.message);
     console.error("Error stack:", error.stack);
     
@@ -69,32 +80,30 @@ export const saveBlueprint = async (req, res) => {
 export const getBlueprint = async (req, res) => {
   try {
     const userId = req.user;
-    
-    if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
+
+    const cacheKey = `blueprint:${userId}`;
+    // Try cache first
+    try {
+      const cached = await cache.get(cacheKey);
+      if (cached) return res.status(200).json(cached);
+    } catch (e) {
+      // cache read failed; continue to DB
+      console.warn("Cache get failed:", e.message || e);
     }
-    
-    const blueprint = await Blueprint.findOne({ userId }).lean(); // Use lean() for better performance
-    
-    // Return empty structure if no blueprint found
-    if (!blueprint) {
-      return res.status(200).json({
-        applications: {
-          productivity: [],
-          finance: [],
-          hrit: [],
-          payroll: [],
-          additional: []
-        }
-      });
-    }
-    
-    res.status(200).json(blueprint);
-  } catch (error) {
-    console.error("Get blueprint error:", error);
-    res.status(500).json({ 
-      message: "Failed to retrieve blueprint. Please try again.",
-      error: error.message 
+
+    // Use lean() to return plain JS object (faster and smaller)
+    const blueprint = await Blueprint.findOne({ userId }).lean().select("-__v");
+
+    const result = blueprint || {};
+
+    // Set cache asynchronously
+    cache.set(cacheKey, result, BLUEPRINT_TTL).catch((err) => {
+      console.warn("Cache set failed:", err.message || err);
     });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("getBlueprint error:", error);
+    res.status(500).json({ message: error.message });
   }
 };

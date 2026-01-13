@@ -105,4 +105,10 @@ const blueprintSchema = new mongoose.Schema({
   },
 });
 
+// index for efficient user lookups
+blueprintSchema.index({ userId: 1 });
+
+// add timestamps for auditing and to enable TTL or sorting if needed
+blueprintSchema.set("timestamps", true);
+
 export default mongoose.model("Blueprint", blueprintSchema);
