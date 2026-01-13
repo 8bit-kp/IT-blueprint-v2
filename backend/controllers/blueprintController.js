@@ -35,6 +35,8 @@ export const saveBlueprint = async (req, res) => {
     });
   } catch (error) {
     console.error("Save blueprint error:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
     
     // Handle specific mongoose errors
     if (error.name === 'ValidationError') {
@@ -45,7 +47,7 @@ export const saveBlueprint = async (req, res) => {
     }
     
     res.status(500).json({ 
-      message: "Failed to save blueprint. Please try again.",
+      message: "Failed to save blueprint: " + error.message,
       success: false 
     });
   }

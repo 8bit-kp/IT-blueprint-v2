@@ -696,16 +696,45 @@ export default function BlueprintForm() {
                 additional: []
             };
             
-            const payload = {
+            // Normalize infrastructure vendor fields to proper object structure
+            const normalizeVendorField = (value) => {
+                if (!value) return initialTechControlState;
+                if (typeof value === 'object' && value !== null) return value;
+                // If it's a string, convert to proper structure
+                if (typeof value === 'string') {
+                    if (value === 'Yes' || value === 'No') {
+                        return { ...initialTechControlState, choice: value };
+                    } else {
+                        // Assume it's a vendor name
+                        return { ...initialTechControlState, choice: 'Vendor', vendor: value };
+                    }
+                }
+                return initialTechControlState;
+            };
+            
+            // Normalize all vendor fields in Step 3
+            const normalizedData = {
                 ...formData,
                 applications,
+                WAN1: normalizeVendorField(formData.WAN1),
+                WAN2: normalizeVendorField(formData.WAN2),
+                WAN3: normalizeVendorField(formData.WAN3),
+                switchingVendor: normalizeVendorField(formData.switchingVendor),
+                routingVendor: normalizeVendorField(formData.routingVendor),
+                wirelessVendor: normalizeVendorField(formData.wirelessVendor),
+                baremetalVendor: normalizeVendorField(formData.baremetalVendor),
+                virtualizationVendor: normalizeVendorField(formData.virtualizationVendor),
+                cloudVendor: normalizeVendorField(formData.cloudVendor),
                 technicalControls: technicalControls,
                 _lastSavedStep: currentStep
             };
             
+            console.log("Saving to:", `${import.meta.env.VITE_BACKEND_URL}/api/blueprint/save`);
+            console.log("Payload size:", JSON.stringify(normalizedData).length, "bytes");
+            
             const response = await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/blueprint/save`,
-                payload,
+                normalizedData,
                 { 
                     headers: { Authorization: `Bearer ${token}` },
                     timeout: 15000 // 15 second timeout for save
@@ -717,6 +746,8 @@ export default function BlueprintForm() {
             return true;
         } catch (err) {
             console.error("Save error:", err);
+            console.error("Error response:", err.response?.data);
+            console.error("Error status:", err.response?.status);
             
             if (err.response?.status === 401) {
                 toast.error("Session expired. Please login again.");
@@ -725,6 +756,8 @@ export default function BlueprintForm() {
                 toast.error("Save timeout. Please try again.");
             } else if (err.response?.data?.message) {
                 toast.error(err.response.data.message);
+            } else if (err.message) {
+                toast.error("Error: " + err.message);
             } else {
                 toast.error("Failed to save. Please check your connection and try again.");
             }
