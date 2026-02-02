@@ -13,7 +13,7 @@ const SecurityTechStep = ({ data = {}, onChange, onPrev })  => {
             name="encryptionLevel"
             value={data.encryptionLevel || ""}
             onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           >
             <option value="">Select</option>
             <option value="aes256">AES-256</option>
@@ -28,7 +28,7 @@ const SecurityTechStep = ({ data = {}, onChange, onPrev })  => {
             name="intrusionDetection"
             value={data.intrusionDetection || ""}
             onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           >
             <option value="">Select</option>
             <option value="enabled">Enabled</option>

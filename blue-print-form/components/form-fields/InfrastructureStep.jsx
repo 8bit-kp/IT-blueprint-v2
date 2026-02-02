@@ -17,7 +17,7 @@ const InfrastructureStep = ({ data = {}, onChange, onNext, onPrev }) => {
             name="hostingType"
             value={data.hostingType || ""}
             onChange={handleChange("hostingType")}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           >
             <option value="">Select</option>
             <option value="cloud">Cloud</option>
@@ -32,7 +32,7 @@ const InfrastructureStep = ({ data = {}, onChange, onNext, onPrev }) => {
             name="os"
             value={data.os || ""}
             onChange={handleChange("os")}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           >
             <option value="">Select OS</option>
             <option value="windows">Windows</option>

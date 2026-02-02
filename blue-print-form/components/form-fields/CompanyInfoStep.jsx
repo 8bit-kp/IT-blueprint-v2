@@ -7,32 +7,32 @@ const CompanyInfoStep = ({ data = {}, onChange, onNext }) => {
     <div className="space-y-4">
       <input
         placeholder="Name of the Company"
-        className="border p-2 w-full rounded"
+        className="border p-2 w-full rounded placeholder-visible"
         value={data.companyName || ""}
         onChange={handleChange("companyName")}
       />
       <input
         placeholder="Contact Name"
-        className="border p-2 w-full rounded"
+        className="border p-2 w-full rounded placeholder-visible"
         value={data.contactName || ""}
         onChange={handleChange("contactName")}
       />
       <input
         type="email"
         placeholder="Email"
-        className="border p-2 w-full rounded"
+        className="border p-2 w-full rounded placeholder-visible"
         value={data.email || ""}
         onChange={handleChange("email")}
       />
       <input
         placeholder="Phone Number"
-        className="border p-2 w-full rounded"
+        className="border p-2 w-full rounded placeholder-visible"
         value={data.phoneNumber || ""}
         onChange={handleChange("phoneNumber")}
       />
 
       <select
-        className="border p-2 w-full rounded"
+        className="border p-2 w-full rounded placeholder-visible"
         value={data.industry || ""}
         onChange={handleChange("industry")}
       >
@@ -47,7 +47,7 @@ const CompanyInfoStep = ({ data = {}, onChange, onNext }) => {
 
       <input
         placeholder="Specify (if Others)"
-        className="border p-2 w-full rounded"
+        className="border p-2 w-full rounded placeholder-visible"
         value={data.otherIndustry || ""}
         onChange={handleChange("otherIndustry")}
       />

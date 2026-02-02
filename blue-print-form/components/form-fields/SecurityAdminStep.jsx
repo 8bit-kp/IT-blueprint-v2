@@ -15,7 +15,7 @@ const SecurityAdminStep = ({ data = {}, onChange, onNext, onPrev })  => {
             value={data.accessControl || ""}
             onChange={onChange}
             placeholder="e.g. Role-based, MFA"
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           />
         </div>
 
@@ -25,7 +25,7 @@ const SecurityAdminStep = ({ data = {}, onChange, onNext, onPrev })  => {
             name="auditLogging"
             value={data.auditLogging || ""}
             onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           >
             <option value="">Select</option>
             <option value="yes">Yes</option>
@@ -41,7 +41,7 @@ const SecurityAdminStep = ({ data = {}, onChange, onNext, onPrev })  => {
             value={data.securityTeamSize || ""}
             onChange={onChange}
             placeholder="Number of admins"
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           />
         </div>
       </div>

@@ -24,3 +24,16 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Global Placeholder Visibility Fix */
+input::placeholder, 
+textarea::placeholder,
+select:invalid {
+  color: #6b7280 !important; /* Tailwind gray-500 equivalent, darker than default */
+  opacity: 1; /* Ensure opacity is full */
+}
+
+/* Specific styling for the form inputs */
+input.placeholder-visible::placeholder {
+  color: #4b5563 !important; /* Even darker gray-600 for better contrast */
+}

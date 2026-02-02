@@ -259,7 +259,7 @@ const TextInput = memo(({ placeholder, value, onChange, type = "text", className
         <input
             type={type}
             placeholder={placeholder}
-            className={`block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-1 focus:ring-[#34808A] sm:text-sm p-2.5 ${className}`}
+            className={`block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-1 focus:ring-[#34808A] sm:text-sm p-2.5 placeholder-visible ${className}`}
             value={localValue}
             onChange={handleChange}
             onBlur={handleBlur}

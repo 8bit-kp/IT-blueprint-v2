@@ -15,7 +15,7 @@ const NetworkServerStep = ({ data = {}, onChange, onNext, onPrev })  => {
             value={data.serverProvider || ""}
             onChange={onChange}
             placeholder="e.g. AWS, Azure, GCP"
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           />
         </div>
 
@@ -25,7 +25,7 @@ const NetworkServerStep = ({ data = {}, onChange, onNext, onPrev })  => {
             name="databaseType"
             value={data.databaseType || ""}
             onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           >
             <option value="">Select DB</option>
             <option value="mysql">MySQL</option>
@@ -40,7 +40,7 @@ const NetworkServerStep = ({ data = {}, onChange, onNext, onPrev })  => {
             name="backupFrequency"
             value={data.backupFrequency || ""}
             onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A]"
+            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
           >
             <option value="">Select</option>
             <option value="daily">Daily</option>
