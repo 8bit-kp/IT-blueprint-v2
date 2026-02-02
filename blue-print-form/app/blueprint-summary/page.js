@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { pdf, PDFDownloadLink } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
-import BlueprintDocument from "@/pages/coverpages/BlueprintDocument";
+import BlueprintDocument from "@/components/coverpages/BlueprintDocument";
 
 // --- UI HELPERS ---
 
