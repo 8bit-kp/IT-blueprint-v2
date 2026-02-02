@@ -2,8 +2,10 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 // Create axios instance with default config
+const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL,
   timeout: 15000, // 15 seconds default timeout
   headers: {
     'Content-Type': 'application/json',
@@ -33,7 +35,7 @@ api.interceptors.response.use(
     // Handle common errors
     if (error.response) {
       const status = error.response.status;
-      
+
       switch (status) {
         case 401:
           toast.error('Session expired. Please login again.');
@@ -63,7 +65,7 @@ api.interceptors.response.use(
     } else if (error.message === 'Network Error') {
       toast.error('Network error. Please check your connection.');
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -72,7 +74,7 @@ api.interceptors.response.use(
 export const blueprintAPI = {
   // Get blueprint data
   getBlueprint: () => api.get('/api/blueprint/get'),
-  
+
   // Save blueprint data
   saveBlueprint: (data) => api.post('/api/blueprint/save', data),
 };
@@ -80,7 +82,7 @@ export const blueprintAPI = {
 export const authAPI = {
   // Login
   login: (credentials) => api.post('/api/auth/login', credentials),
-  
+
   // Register
   register: (userData) => api.post('/api/auth/register', userData),
 };

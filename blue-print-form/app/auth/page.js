@@ -50,8 +50,9 @@ const Auth = () => {
                 ? { username: formData.username, password: formData.password }
                 : formData;
 
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
             const res = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/${endpoint}`,
+                `${backendUrl}/api/auth/${endpoint}`,
                 payload
             );
 
@@ -179,8 +180,8 @@ const Auth = () => {
                             type="submit"
                             disabled={loading}
                             className={`w-full py-3.5 rounded-lg text-white font-bold text-sm tracking-wide shadow-md transition-all duration-300 transform hover:-translate-y-0.5 ${loading
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-[#15587B] hover:bg-[#0f4460] hover:shadow-lg"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-[#15587B] hover:bg-[#0f4460] hover:shadow-lg"
                                 }`}
                         >
                             {loading
