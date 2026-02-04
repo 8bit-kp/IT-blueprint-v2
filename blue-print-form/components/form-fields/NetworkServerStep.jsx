@@ -1,71 +1,83 @@
-// src/pages/form-fields/NetworkServerStep.jsx
-import React from "react";
+"use client";
 
-const NetworkServerStep = ({ data = {}, onChange, onNext, onPrev })  => {
+import { memo } from "react";
+import { Card, TextInput, TechnicalControlCard, YesNo, ToggleButton, MultiCheckbox } from "./FormComponents";
+
+const NetworkServerStep = memo(({ formData, setField, vendors, initialTechControlState }) => {
+  const infraControls = [
+    { key: "WAN1", label: "WAN 1" },
+    { key: "WAN2", label: "WAN 2" },
+    { key: "WAN3", label: "WAN 3" },
+    { key: "switchingVendor", label: "Switching" },
+    { key: "routingVendor", label: "Routing" },
+    { key: "wirelessVendor", label: "Wireless" },
+    { key: "baremetalVendor", label: "Baremetal" },
+    { key: "virtualizationVendor", label: "Virtualization" },
+    { key: "cloudVendor", label: "Cloud" },
+  ];
+
   return (
-    <div className="p-6 bg-white rounded-xl shadow-md w-full max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-[#15587B] mb-6">Network & Server Configuration</h2>
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <Card title="Main Location">
+        <TextInput placeholder="HQ Location Name" value={formData.mainLocation} onChange={(v) => setField("mainLocation", v)} />
+      </Card>
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Server Provider</label>
-          <input
-            type="text"
-            name="serverProvider"
-            value={data.serverProvider || ""}
-            onChange={onChange}
-            placeholder="e.g. AWS, Azure, GCP"
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Database Type</label>
-          <select
-            name="databaseType"
-            value={data.databaseType || ""}
-            onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          >
-            <option value="">Select DB</option>
-            <option value="mysql">MySQL</option>
-            <option value="mongodb">MongoDB</option>
-            <option value="postgresql">PostgreSQL</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Backup Frequency</label>
-          <select
-            name="backupFrequency"
-            value={data.backupFrequency || ""}
-            onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          >
-            <option value="">Select</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
+      <div>
+        <h3 className="text-lg font-semibold text-[#15587B] mb-4 pl-1">Infrastructure Vendors</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {infraControls.map((ctl) => {
+            const currentData = (typeof formData[ctl.key] === 'object' && formData[ctl.key] !== null)
+              ? formData[ctl.key]
+              : initialTechControlState;
+            return (
+              <TechnicalControlCard
+                key={ctl.key}
+                label={ctl.label}
+                data={currentData}
+                onChange={(newData) => setField(ctl.key, newData)}
+                vendors={vendors}
+                initialTechControlState={initialTechControlState}
+              />
+            );
+          })}
         </div>
       </div>
 
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={onPrev}
-          className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition"
-        >
-          ← Back
-        </button>
-        <button
-          onClick={onNext}
-          className="bg-[#34808A] text-white px-6 py-2 rounded-lg hover:bg-[#15587B] transition"
-        >
-          Next →
-        </button>
-      </div>
+      <Card title="Network Config & Servers">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <YesNo label="HA Routing?" value={formData.haRouting} onChange={(v) => setField("haRouting", v)} />
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 border-b border-gray-100 gap-2">
+            <span className="text-sm font-medium text-gray-700">Wireless Auth</span>
+            <ToggleButton options={["PSK", "EAP-PEAP", "EAP-TLS"]} value={formData.wirelessAuth} onChange={(v) => setField("wirelessAuth", v)} />
+          </div>
+          <YesNo label="Guest Wireless?" value={formData.guestWireless} onChange={(v) => setField("guestWireless", v)} />
+          <YesNo label="Guest Segmentation?" value={formData.guestSegmentation} onChange={(v) => setField("guestSegmentation", v)} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-gray-100 pt-6">
+          <div>
+            <YesNo label="Windows Servers?" value={formData.windowsServers} onChange={(v) => setField("windowsServers", v)} />
+            {formData.windowsServers === "Yes" && (
+              <div className="mt-2 ml-4 pl-4 border-l-2 border-gray-200">
+                <MultiCheckbox label="Select features:" options={["Protected", "Backed-up", "Monitored", "Not Monitored"]} values={formData.windowsOptions || []} onChange={(vals) => setField("windowsOptions", vals)} />
+              </div>
+            )}
+          </div>
+          <div>
+            <YesNo label="Linux Servers?" value={formData.linuxServers} onChange={(v) => setField("linuxServers", v)} />
+            {formData.linuxServers === "Yes" && (
+              <div className="mt-2 ml-4 pl-4 border-l-2 border-gray-200">
+                <MultiCheckbox label="Select features:" options={["Fully patched", "Stored PHI/PII", "Monitored", "Protected", "Backed up", "MFA for Access"]} values={formData.linuxOptions || []} onChange={(vals) => setField("linuxOptions", vals)} />
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <MultiCheckbox label="Desktops - Select all that apply:" options={["Fully patched", "Stored PHI/PII", "Monitored", "Protected", "Backed up"]} values={formData.desktopOptions || []} onChange={(vals) => setField("desktopOptions", vals)} />
+        </div>
+      </Card>
     </div>
   );
-};
+});
 
 export default NetworkServerStep;

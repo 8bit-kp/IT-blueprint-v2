@@ -1,63 +1,35 @@
-import React from "react";
+"use client";
 
-const InfrastructureStep = ({ data = {}, onChange, onNext, onPrev }) => {
-  // Wrap onChange so it updates the correct field
-  const handleChange = (field) => (e) => {
-    onChange({ ...data, [field]: e.target.value });
-  };
+import { memo } from "react";
+import { Card, YesNo } from "./FormComponents";
 
-  return (
-    <div className="p-6 bg-white rounded-xl shadow-md w-full max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-[#15587B] mb-6">Infrastructure Details</h2>
-
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Hosting Type</label>
-          <select
-            name="hostingType"
-            value={data.hostingType || ""}
-            onChange={handleChange("hostingType")}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          >
-            <option value="">Select</option>
-            <option value="cloud">Cloud</option>
-            <option value="onPremise">On-premise</option>
-            <option value="hybrid">Hybrid</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Operating System</label>
-          <select
-            name="os"
-            value={data.os || ""}
-            onChange={handleChange("os")}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          >
-            <option value="">Select OS</option>
-            <option value="windows">Windows</option>
-            <option value="linux">Linux</option>
-            <option value="macos">macOS</option>
-          </select>
+const InfrastructureStep = memo(({ formData, setField }) => (
+  <Card title="Facilities" className="max-w-4xl mx-auto">
+    <div className="space-y-6">
+      <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+        <p className="font-medium text-gray-800 mb-3 text-sm">How many physical office spaces do you have?</p>
+        <div className="flex flex-wrap gap-2">
+          {["1", "2-5", "5-25", "25+"].map(opt => (
+            <button key={opt} onClick={() => setField("physicalOffices", opt)} className={`flex-1 py-2 text-sm rounded border transition ${formData.physicalOffices === opt ? "bg-[#34808A] text-white border-[#34808A]" : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
+              {opt}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={onPrev}
-          className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition"
-        >
-          ← Back
-        </button>
-        <button
-          onClick={onNext}
-          className="bg-[#34808A] text-white px-6 py-2 rounded-lg hover:bg-[#15587B] transition"
-        >
-          Next →
-        </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <YesNo label="Have Datacenters?" value={formData.hasDataCenters} onChange={(v) => setField("hasDataCenters", v)} />
+          <YesNo label="On-Prem DC?" value={formData.hasOnPremDC} onChange={(v) => setField("hasOnPremDC", v)} />
+          <YesNo label="Cloud Infra?" value={formData.hasCloudInfra} onChange={(v) => setField("hasCloudInfra", v)} />
+        </div>
+        <div className="space-y-2">
+          <YesNo label="Onsite Generator?" value={formData.hasGenerator} onChange={(v) => setField("hasGenerator", v)} />
+          <YesNo label="UPS Systems?" value={formData.hasUPS} onChange={(v) => setField("hasUPS", v)} />
+        </div>
       </div>
     </div>
-  );
-};
+  </Card>
+));
 
 export default InfrastructureStep;

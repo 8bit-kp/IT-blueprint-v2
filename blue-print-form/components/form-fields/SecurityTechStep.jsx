@@ -1,58 +1,52 @@
-// src/pages/form-fields/SecurityTechStep.jsx
-import React from "react";
+"use client";
 
-const SecurityTechStep = ({ data = {}, onChange, onPrev })  => {
+import { memo } from "react";
+import { TechnicalControlCard } from "./FormComponents";
+
+const SecurityTechStep = memo(({ technicalControls, setTechnicalControls, vendors, initialTechControlState }) => {
+  const controls = [
+    { key: "nextGenFirewall", label: "Next Gen Firewall" },
+    { key: "secureWebGateway", label: "Secure Web Gateway" },
+    { key: "casb", label: "CASB" },
+    { key: "dlp", label: "Data Loss Prevention" },
+    { key: "ssaVpn", label: "SSA-VPN" },
+    { key: "emailSecurity", label: "E-mail Security" },
+    { key: "vulnerabilityMgmt", label: "Vuln. Management" },
+    { key: "iam", label: "IAM" },
+    { key: "nac", label: "NAC" },
+    { key: "mfa", label: "MFA" },
+    { key: "mdm", label: "MDM" },
+    { key: "edr", label: "EDR" },
+    { key: "dataClassification", label: "Data Classification" },
+    { key: "socSiem", label: "SOC - SIEM" },
+    { key: "assetManagement", label: "Asset Management" },
+    { key: "sdWan", label: "SD-WAN" },
+  ];
+
   return (
-    <div className="p-6 bg-white rounded-xl shadow-md w-full max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-[#15587B] mb-6">Security Technology</h2>
-
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Encryption Level</label>
-          <select
-            name="encryptionLevel"
-            value={data.encryptionLevel || ""}
-            onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          >
-            <option value="">Select</option>
-            <option value="aes256">AES-256</option>
-            <option value="rsa">RSA</option>
-            <option value="sha512">SHA-512</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Intrusion Detection</label>
-          <select
-            name="intrusionDetection"
-            value={data.intrusionDetection || ""}
-            onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          >
-            <option value="">Select</option>
-            <option value="enabled">Enabled</option>
-            <option value="disabled">Disabled</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={onPrev}
-          className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition"
-        >
-          ← Back
-        </button>
-        <button
-          onClick={ () => alert("Form submitted!") }
-          className="bg-[#935010] text-white px-6 py-2 rounded-lg hover:bg-[#15587B] transition"
-        >
-          Submit ✅
-        </button>
+    <div className="max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {controls.map((ctl) => {
+          const localData = technicalControls[ctl.key] || { ...initialTechControlState };
+          return (
+            <TechnicalControlCard
+              key={ctl.key}
+              label={ctl.label}
+              data={localData}
+              onChange={(newData) => {
+                setTechnicalControls((prev) => ({
+                  ...prev,
+                  [ctl.key]: newData
+                }));
+              }}
+              vendors={vendors}
+              initialTechControlState={initialTechControlState}
+            />
+          );
+        })}
       </div>
     </div>
   );
-};
+});
 
 export default SecurityTechStep;

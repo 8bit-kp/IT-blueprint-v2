@@ -1,67 +1,23 @@
-// src/pages/form-fields/SecurityAdminStep.jsx
-import React from "react";
+"use client";
 
-const SecurityAdminStep = ({ data = {}, onChange, onNext, onPrev })  => {
-  return (
-    <div className="p-6 bg-white rounded-xl shadow-md w-full max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-[#15587B] mb-6">Security Administration</h2>
+import { memo } from "react";
+import { Card, YesNo } from "./FormComponents";
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Access Control System</label>
-          <input
-            type="text"
-            name="accessControl"
-            value={data.accessControl || ""}
-            onChange={onChange}
-            placeholder="e.g. Role-based, MFA"
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Audit Logging Enabled?</label>
-          <select
-            name="auditLogging"
-            value={data.auditLogging || ""}
-            onChange={onChange}
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          >
-            <option value="">Select</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Security Team Size</label>
-          <input
-            type="number"
-            name="securityTeamSize"
-            value={data.securityTeamSize || ""}
-            onChange={onChange}
-            placeholder="Number of admins"
-            className="w-full mt-1 border rounded-lg p-2 focus:ring-2 focus:ring-[#34808A] placeholder-visible"
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={onPrev}
-          className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition"
-        >
-          ← Back
-        </button>
-        <button
-          onClick={onNext}
-          className="bg-[#34808A] text-white px-6 py-2 rounded-lg hover:bg-[#15587B] transition"
-        >
-          Next →
-        </button>
-      </div>
+const SecurityAdminStep = memo(({ formData, setField }) => (
+  <Card title="Governance Checklist" className="max-w-4xl mx-auto">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+      <YesNo label="Security Steering Committee?" value={formData.securityCommittee} onChange={(v) => setField("securityCommittee", v)} />
+      <YesNo label="Written Security Policy?" value={formData.securityPolicy} onChange={(v) => setField("securityPolicy", v)} />
+      <YesNo label="Employee Training?" value={formData.employeeTraining} onChange={(v) => setField("employeeTraining", v)} />
+      <YesNo label="Written BCDR Plan?" value={formData.bcdrPlan} onChange={(v) => setField("bcdrPlan", v)} />
+      <YesNo label="Cybersecurity Insurance?" value={formData.cyberInsurance} onChange={(v) => setField("cyberInsurance", v)} />
+      <YesNo label="Test Backup Recovery?" value={formData.testBackup} onChange={(v) => setField("testBackup", v)} />
+      <YesNo label="Change Control Process?" value={formData.changeControl} onChange={(v) => setField("changeControl", v)} />
+      <YesNo label="Incident Response Plan?" value={formData.incidentResponse} onChange={(v) => setField("incidentResponse", v)} />
+      <YesNo label="Monthly Security Review?" value={formData.securityReview} onChange={(v) => setField("securityReview", v)} />
+      <YesNo label="Penetration Test (1 yr)?" value={formData.penetrationTest} onChange={(v) => setField("penetrationTest", v)} />
     </div>
-  );
-};
+  </Card>
+));
 
 export default SecurityAdminStep;
