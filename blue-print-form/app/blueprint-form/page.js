@@ -40,16 +40,25 @@ const Card = ({ title, children, className = "" }) => (
 
 const ToggleButton = memo(({ options, value, onChange }) => {
     return (
-        <div className="flex bg-gray-100 p-1 rounded-lg w-max">
+        <div className="flex bg-gray-100 p-1 rounded-lg w-max shadow-inner">
             {options.map((opt) => {
                 const isActive = value === opt;
+
+                // Meaningful colors
+                let activeClass = "bg-white text-[#15587B] shadow-sm ring-1 ring-gray-200";
+                if (isActive) {
+                    if (opt === "Yes") activeClass = "bg-green-600 text-white shadow-md ring-1 ring-green-700";
+                    else if (opt === "No") activeClass = "bg-red-600 text-white shadow-md ring-1 ring-red-700";
+                    else activeClass = "bg-[#34808A] text-white shadow-md ring-1 ring-[#2b6d75]";
+                }
+
                 return (
                     <button
                         key={opt}
                         onClick={() => onChange(opt)}
-                        className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${isActive
-                            ? "bg-white text-[#15587B] shadow-sm ring-1 ring-gray-200"
-                            : "text-gray-500 hover:text-gray-700"
+                        className={`px-4 py-1.5 text-xs sm:text-sm font-bold rounded-md transition-all duration-200 ${isActive
+                            ? activeClass
+                            : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
                             }`}
                         type="button"
                     >
@@ -195,10 +204,22 @@ const YesNo = memo(({ label, value, onChange }) => (
 
 const YesNoCompact = ({ label, value, onChange }) => (
     <div className="flex justify-between items-center text-xs text-gray-600">
-        <span>{label}</span>
-        <div className="flex bg-gray-100 rounded p-0.5">
-            <button type="button" onClick={() => onChange("Yes")} className={`px-2 py-0.5 rounded transition ${value === "Yes" ? "bg-white shadow text-teal-700 font-bold" : "text-gray-400 hover:text-gray-600"}`}>Y</button>
-            <button type="button" onClick={() => onChange("No")} className={`px-2 py-0.5 rounded transition ${value === "No" ? "bg-white shadow text-gray-700 font-bold" : "text-gray-400 hover:text-gray-600"}`}>N</button>
+        <span className="font-medium">{label}</span>
+        <div className="flex bg-gray-100 rounded p-0.5 shadow-inner">
+            <button
+                type="button"
+                onClick={() => onChange("Yes")}
+                className={`px-2.5 py-0.5 rounded transition-all duration-200 ${value === "Yes" ? "bg-green-600 shadow text-white font-bold scale-105" : "text-gray-400 hover:text-gray-600"}`}
+            >
+                Y
+            </button>
+            <button
+                type="button"
+                onClick={() => onChange("No")}
+                className={`px-2.5 py-0.5 rounded transition-all duration-200 ${value === "No" ? "bg-red-600 shadow text-white font-bold scale-105" : "text-gray-400 hover:text-gray-600"}`}
+            >
+                N
+            </button>
         </div>
     </div>
 );
@@ -627,7 +648,8 @@ export default function BlueprintForm() {
             setLoadingData(true);
 
             try {
-                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/blueprint/get`, {
+                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+                const res = await axios.get(`${backendUrl}/api/blueprint/get`, {
                     headers: { Authorization: `Bearer ${storedToken}` },
                     timeout: 10000,
                 });
@@ -727,8 +749,9 @@ export default function BlueprintForm() {
                 _lastSavedStep: currentStep
             };
 
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/blueprint/save`,
+                `${backendUrl}/api/blueprint/save`,
                 normalizedData,
                 {
                     headers: { Authorization: `Bearer ${token}` },
