@@ -24,16 +24,16 @@ const CompanyInfoStep = memo(({ formData, setField }) => (
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
-        <select className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-[#34808A] sm:text-sm p-2.5" value={formData.industry || ""} onChange={(e) => setField("industry", e.target.value)}>
+        <select className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-[#34808A] sm:text-sm p-2.5 text-gray-900" value={formData.industry || ""} onChange={(e) => setField("industry", e.target.value)}>
           <option value="">Select...</option>
           <option value="Healthcare">Healthcare</option>
           <option value="Financial">Financial</option>
           <option value="Retail">Retail</option>
           <option value="Education">Education</option>
           <option value="County-Cities">County-Cities</option>
-          <option value="Others">Others</option>
+          <option value="Other">Other</option>
         </select>
-        {formData.industry === "Others" && (
+        {formData.industry === "Other" && (
           <div className="mt-2">
             <TextInput placeholder="Specify Industry" value={formData.otherIndustry} onChange={(v) => setField("otherIndustry", v)} />
           </div>
@@ -41,7 +41,7 @@ const CompanyInfoStep = memo(({ formData, setField }) => (
       </div>
       <div className="col-span-1 md:col-span-2">
         <label className="block text-sm font-medium text-gray-700 mb-1">Company Size</label>
-        <select className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-[#34808A] sm:text-sm p-2.5" value={formData.employees || ""} onChange={(e) => setField("employees", e.target.value)}>
+        <select className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-[#34808A] sm:text-sm p-2.5 text-gray-900" value={formData.employees || ""} onChange={(e) => setField("employees", e.target.value)}>
           <option value="">Number of employees...</option>
           <option value="1-100">1 - 100</option>
           <option value="101-500">101 - 500</option>

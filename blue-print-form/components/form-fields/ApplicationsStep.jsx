@@ -25,28 +25,40 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
                 />
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="space-y-3 mb-4">
                 <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Priority</label>
-                    <select
-                        className="w-full text-xs border-gray-200 rounded bg-gray-50 p-1.5 border"
-                        value={app.businessPriority || ""}
-                        onChange={(e) => updateApp(index, "businessPriority", e.target.value)}
-                    >
-                        <option value="">Select...</option>
-                        <option value="High">High</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Critical">Critical</option>
-                    </select>
+                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-2">Business Priority</label>
+                    <div className="flex gap-1.5">
+                        {["High", "Medium", "Critical"].map((priority) => {
+                            const currentPriority = app.businessPriority || "Medium";
+                            return (
+                                <button
+                                    key={priority}
+                                    type="button"
+                                    onClick={() => updateApp(index, "businessPriority", priority)}
+                                    className={`flex-1 px-2 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${currentPriority === priority
+                                            ? priority === "Critical"
+                                                ? "bg-red-600 text-white shadow-md ring-1 ring-red-700"
+                                                : priority === "High"
+                                                    ? "bg-orange-500 text-white shadow-md ring-1 ring-orange-600"
+                                                    : "bg-blue-500 text-white shadow-md ring-1 ring-blue-600"
+                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                        }`}
+                                >
+                                    {priority}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
                 <div>
                     <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Offering</label>
                     <select
-                        className="w-full text-xs border-gray-200 rounded bg-gray-50 p-1.5 border"
+                        className="w-full text-xs border-gray-200 rounded bg-gray-50 p-1.5 border text-gray-900"
                         value={app.offering || ""}
                         onChange={(e) => updateApp(index, "offering", e.target.value)}
                     >
-                        <option value="">Select...</option>
+                        <option value="">Select Offering...</option>
                         <option value="SaaS">SaaS</option>
                         <option value="On-premise">On-prem</option>
                     </select>

@@ -344,7 +344,7 @@ const LastPage = () => (
 );
 
 // ============ 4) WRAPPER DOCUMENT ============
-// Props let you feed form data (company name, date, etc.)
+
 const BlueprintDocument = ({
   companyName = "—",
   preparedDate = new Date(),

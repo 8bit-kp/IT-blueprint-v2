@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Blueprint from "@/models/Blueprint";
 import { verifyToken } from "@/lib/auth";
+import { blueprintCache } from "@/lib/blueprintCache";
 
 export async function POST(request) {
     try {
@@ -54,6 +55,10 @@ export async function POST(request) {
             { $set: updateData, $setOnInsert: { userId } },
             { upsert: true, runValidators: true }
         );
+
+        // Invalidate cache after save so fresh data is fetched next time
+        blueprintCache.invalidate(userId);
+        console.log(`Cache invalidated for user ${userId}`);
 
         return NextResponse.json({
             message: "Blueprint saved successfully",

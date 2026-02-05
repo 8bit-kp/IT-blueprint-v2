@@ -73,7 +73,7 @@ export const TextInput = memo(({ placeholder, value, onChange, type = "text", cl
         <input
             type={type}
             placeholder={placeholder}
-            className={`block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-1 focus:ring-[#34808A] sm:text-sm p-2.5 placeholder-visible ${className}`}
+            className={`block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-1 focus:ring-[#34808A] sm:text-sm p-2.5 text-gray-900 placeholder:text-gray-500 ${className}`}
             value={localValue}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -118,8 +118,8 @@ export const RangeInput = memo(({ label, value, onChange }) => {
 });
 
 export const YesNo = memo(({ label, value, onChange }) => (
-    <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 border-b border-gray-100 last:border-0 gap-2">
-        <span className="text-sm font-medium text-gray-700">{label}</span>
+    <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 border-b border-gray-100 last:border-0 gap-2 sm:gap-8">
+        <span className="text-sm font-medium text-gray-700 sm:min-w-[250px]">{label}</span>
         <ToggleButton options={["Yes", "No"]} value={value} onChange={onChange} />
     </div>
 ));
@@ -181,6 +181,9 @@ export const TechnicalControlCard = memo(({ label, data, onChange, vendors, init
         onChange({ ...data, [field]: value });
     };
 
+    // Set default priority to "Medium" if not set
+    const currentPriority = businessPriority || "Medium";
+
     return (
         <div className="border border-gray-200 rounded-lg p-4 hover:border-[#34808A] transition bg-white shadow-sm flex flex-col justify-between h-full">
             <div>
@@ -198,7 +201,7 @@ export const TechnicalControlCard = memo(({ label, data, onChange, vendors, init
                         <select
                             value={vendor || ""}
                             onChange={(e) => handleChange("vendor", e.target.value)}
-                            className="text-sm border-gray-300 rounded-md shadow-sm focus:border-[#34808A] focus:ring-[#34808A] w-full p-2 border"
+                            className="text-sm border-gray-300 rounded-md shadow-sm focus:border-[#34808A] focus:ring-[#34808A] w-full p-2 border text-gray-900"
                         >
                             <option value="">Select Vendor...</option>
                             {vendors.map((v) => <option key={v} value={v}>{v}</option>)}
@@ -207,28 +210,37 @@ export const TechnicalControlCard = memo(({ label, data, onChange, vendors, init
                 </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
+            <div className="mt-4 pt-3 border-t border-gray-100 space-y-3">
                 <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Priority</label>
-                    <select
-                        className="w-full text-xs border-gray-200 rounded bg-gray-50 focus:bg-white transition p-1 border"
-                        value={businessPriority || ""}
-                        onChange={(e) => handleChange("businessPriority", e.target.value)}
-                    >
-                        <option value="">-</option>
-                        <option value="High">High</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Critical">Critical</option>
-                    </select>
+                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-2">Business Priority</label>
+                    <div className="flex gap-1.5">
+                        {["High", "Medium", "Critical"].map((priority) => (
+                            <button
+                                key={priority}
+                                type="button"
+                                onClick={() => handleChange("businessPriority", priority)}
+                                className={`flex-1 px-2 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${currentPriority === priority
+                                    ? priority === "Critical"
+                                        ? "bg-red-600 text-white shadow-md ring-1 ring-red-700"
+                                        : priority === "High"
+                                            ? "bg-orange-500 text-white shadow-md ring-1 ring-orange-600"
+                                            : "bg-blue-500 text-white shadow-md ring-1 ring-blue-600"
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                    }`}
+                            >
+                                {priority}
+                            </button>
+                        ))}
+                    </div>
                 </div>
                 <div>
                     <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Offering</label>
                     <select
-                        className="w-full text-xs border-gray-200 rounded bg-gray-50 focus:bg-white transition p-1 border"
+                        className="w-full text-xs border-gray-200 rounded bg-gray-50 focus:bg-white transition p-1 border text-gray-900"
                         value={offering || ""}
                         onChange={(e) => handleChange("offering", e.target.value)}
                     >
-                        <option value="">-</option>
+                        <option value="">Select Offering...</option>
                         <option value="SaaS">SaaS</option>
                         <option value="On-premise">On-prem</option>
                     </select>
