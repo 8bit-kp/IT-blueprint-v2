@@ -67,7 +67,7 @@ const parseControlData = (val) => {
     } else {
         // Legacy support
         if (val && val.toString().startsWith("Vendor:")) {
-            choice = "Vendor";
+            choice = "Yes";
             vendor = val.toString().split("Vendor:")[1];
         } else {
             choice = val;
@@ -75,7 +75,8 @@ const parseControlData = (val) => {
     }
 
     // Determine what to show in the main column
-    const displayValue = choice === "Vendor" ? vendor || "Unspecified Vendor" : choice;
+    // If choice is "Yes" and vendor is specified, show the vendor name
+    const displayValue = (choice === "Yes" && vendor) ? vendor : choice;
 
     return { displayValue, businessPriority, offering, rawChoice: choice };
 };
@@ -361,7 +362,27 @@ const BlueprintSummary = () => {
                             <tbody className="divide-y divide-gray-100">
                                 {Object.entries(formData.technicalControls || {}).map(([key, rawValue]) => {
                                     const { displayValue, businessPriority, offering, rawChoice } = parseControlData(rawValue);
-                                    const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+                                    
+                                    // Format label with proper capitalization for acronyms
+                                    let label = key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+                                    
+                                    // Convert specific acronyms to all caps
+                                    const acronyms = {
+                                        'Sd Wan': 'SD WAN',
+                                        'Soc Siem': 'SOC SIEM',
+                                        'Edr': 'EDR',
+                                        'Mdm': 'MDM',
+                                        'Mfa': 'MFA',
+                                        'Nac': 'NAC',
+                                        'Iam': 'IAM',
+                                        'Ssa Vpn': 'SSA VPN',
+                                        'Dlp': 'DLP',
+                                        'Casb': 'CASB'
+                                    };
+                                    
+                                    Object.entries(acronyms).forEach(([pattern, replacement]) => {
+                                        label = label.replace(pattern, replacement);
+                                    });
 
                                     return (
                                         <tr key={key} className="hover:bg-gray-50/50 transition-colors">

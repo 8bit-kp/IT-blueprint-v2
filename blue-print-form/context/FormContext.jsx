@@ -15,6 +15,16 @@ export const FormProvider = ({ children }) => {
     employees: "",
     remotePercentage: 0,
     contractorPercentage: 0,
+    // Network & Server Infra defaults
+    WAN1: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+    WAN2: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+    WAN3: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+    switchingVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+    routingVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+    wirelessVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+    baremetalVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+    virtualizationVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+    cloudVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
     applications: {
       productivity: [],
       finance: [],
@@ -48,6 +58,16 @@ export const FormProvider = ({ children }) => {
       employees: "",
       remotePercentage: 0,
       contractorPercentage: 0,
+      // Network & Server Infra defaults
+      WAN1: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+      WAN2: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+      WAN3: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+      switchingVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+      routingVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+      wirelessVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+      baremetalVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+      virtualizationVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
+      cloudVendor: { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" },
       applications: {
         productivity: [],
         finance: [],

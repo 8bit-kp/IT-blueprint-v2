@@ -30,7 +30,7 @@ const stepTitles = {
     6: "Applications Portfolio",
 };
 
-const initialTechControlState = { choice: "", vendor: "", businessPriority: "", offering: "" };
+const initialTechControlState = { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" };
 
 // --- MAIN PAGE ---
 

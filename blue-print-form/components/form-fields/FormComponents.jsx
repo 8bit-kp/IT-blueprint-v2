@@ -181,8 +181,10 @@ export const TechnicalControlCard = memo(({ label, data, onChange, vendors, init
         onChange({ ...data, [field]: value });
     };
 
-    // Set default priority to "Medium" if not set
-    const currentPriority = businessPriority || "Medium";
+    // Set default priority to "Critical" if not set
+    const currentPriority = businessPriority || "Critical";
+    // Set default offering to "SaaS" if not set
+    const currentOffering = offering || "SaaS";
 
     return (
         <div className="border border-gray-200 rounded-lg p-4 hover:border-[#34808A] transition bg-white shadow-sm flex flex-col justify-between h-full">
@@ -191,13 +193,13 @@ export const TechnicalControlCard = memo(({ label, data, onChange, vendors, init
                 <div className="flex flex-col gap-3">
                     <div className="flex justify-between items-center">
                         <ToggleButton
-                            options={["Yes", "No", "Vendor"]}
+                            options={["Yes", "No"]}
                             value={choice}
                             onChange={(val) => handleChange("choice", val)}
                         />
                     </div>
 
-                    {choice === "Vendor" && (
+                    {choice === "Yes" && (
                         <select
                             value={vendor || ""}
                             onChange={(e) => handleChange("vendor", e.target.value)}
@@ -237,10 +239,9 @@ export const TechnicalControlCard = memo(({ label, data, onChange, vendors, init
                     <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Offering</label>
                     <select
                         className="w-full text-xs border-gray-200 rounded bg-gray-50 focus:bg-white transition p-1 border text-gray-900"
-                        value={offering || ""}
+                        value={currentOffering}
                         onChange={(e) => handleChange("offering", e.target.value)}
                     >
-                        <option value="">Select Offering...</option>
                         <option value="SaaS">SaaS</option>
                         <option value="On-premise">On-prem</option>
                     </select>

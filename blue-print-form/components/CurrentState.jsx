@@ -173,7 +173,9 @@ const transformFormData = (inputData) => {
     // Handle new Object structure { choice, vendor, ... }
     if (typeof val === 'object') {
       const choice = val.choice;
-      if (choice === "Vendor") return val.vendor || "Unspecified Vendor";
+      const vendor = val.vendor;
+      // If choice is "Yes" and vendor is specified, show the vendor name
+      if (choice === "Yes" && vendor) return vendor;
       if (choice === "Yes") return "In Place";
       if (choice === "No") return "No Solution";
       return choice || defaultText;
