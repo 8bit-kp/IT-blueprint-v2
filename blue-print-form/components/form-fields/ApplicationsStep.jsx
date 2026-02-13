@@ -1,7 +1,32 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { TextInput, YesNoCompact } from "./FormComponents";
+
+// Default applications for each category
+const defaultApplications = {
+    productivity: [
+        { id: "prod-1", name: "Microsoft 365", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Critical", offering: "SaaS" },
+        { id: "prod-2", name: "Google Workspace", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "High", offering: "SaaS" },
+        { id: "prod-3", name: "Slack", containsSensitiveInfo: "No", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Medium", offering: "SaaS" },
+    ],
+    finance: [
+        { id: "fin-1", name: "QuickBooks", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
+        { id: "fin-2", name: "NetSuite", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "High", offering: "SaaS" },
+    ],
+    hrit: [
+        { id: "hr-1", name: "Workday", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
+        { id: "hr-2", name: "BambooHR", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "High", offering: "SaaS" },
+    ],
+    payroll: [
+        { id: "pay-1", name: "ADP Workforce Now", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
+        { id: "pay-2", name: "Paychex", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
+    ],
+    additional: [
+        { id: "add-1", name: "Salesforce", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Critical", offering: "SaaS" },
+        { id: "add-2", name: "Zoom", containsSensitiveInfo: "No", mfa: "Yes", backedUp: "No", byodAccess: "Yes", businessPriority: "Medium", offering: "SaaS" },
+    ],
+};
 
 const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
     return (
@@ -76,6 +101,24 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
 });
 
 const ApplicationsStep = memo(({ formData, updateFormData }) => {
+    // Initialize with default applications if empty
+    useEffect(() => {
+        const currentApps = formData.applications || {};
+        const needsInitialization = Object.keys(defaultApplications).some(
+            category => !currentApps[category] || currentApps[category].length === 0
+        );
+
+        if (needsInitialization) {
+            const initializedApps = { ...currentApps };
+            Object.keys(defaultApplications).forEach(category => {
+                if (!initializedApps[category] || initializedApps[category].length === 0) {
+                    initializedApps[category] = [...defaultApplications[category]];
+                }
+            });
+            updateFormData({ applications: initializedApps });
+        }
+    }, []);
+
     const AppGroup = ({ title, category }) => {
         const apps = formData.applications?.[category] || [];
 
@@ -90,7 +133,7 @@ const ApplicationsStep = memo(({ formData, updateFormData }) => {
         }
 
         const addApp = () => {
-            updateAppsList([...apps, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: "", containsSensitiveInfo: "", mfa: "", backedUp: "", byodAccess: "", businessPriority: "", offering: "" }]);
+            updateAppsList([...apps, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: "", containsSensitiveInfo: "", mfa: "", backedUp: "", byodAccess: "", businessPriority: "Medium", offering: "SaaS" }]);
         }
 
         const removeApp = (index) => {

@@ -123,6 +123,8 @@ export default function BlueprintForm() {
             } catch (err) {
                 console.error("fetch blueprint err", err);
                 if (err.response?.status === 401) {
+                    // Clear invalid token
+                    localStorage.removeItem("token");
                     toast.error("Session expired. Please login again.");
                     router.push("/auth");
                 } else if (err.code === 'ECONNABORTED') {
@@ -199,6 +201,8 @@ export default function BlueprintForm() {
         } catch (err) {
             console.error("Save error:", err);
             if (err.response?.status === 401) {
+                // Clear invalid token
+                localStorage.removeItem("token");
                 toast.error("Session expired. Please login again.");
                 setTimeout(() => router.push("/auth"), 2000);
             } else if (err.code === 'ECONNABORTED') {

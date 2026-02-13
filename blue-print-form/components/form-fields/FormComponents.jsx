@@ -118,7 +118,7 @@ export const RangeInput = memo(({ label, value, onChange }) => {
 });
 
 export const YesNo = memo(({ label, value, onChange }) => (
-    <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 border-b border-gray-100 last:border-0 gap-2 sm:gap-8">
+    <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 border-b border-gray-200 last:border-b gap-2 sm:gap-8">
         <span className="text-sm font-medium text-gray-700 sm:min-w-[250px]">{label}</span>
         <ToggleButton options={["Yes", "No"]} value={value} onChange={onChange} />
     </div>
