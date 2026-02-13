@@ -16,7 +16,7 @@ export const Card = ({ title, children, className = "" }) => (
 
 export const ToggleButton = memo(({ options, value, onChange }) => {
     return (
-        <div className="flex bg-gray-100 p-1 rounded-lg w-max shadow-inner">
+        <div className="flex bg-gray-100 p-1 rounded-lg w-max shadow-inner ring-2 ring-[#34808A]/50 shadow-[#34808A]/30">
             {options.map((opt) => {
                 const isActive = value === opt;
 
@@ -127,20 +127,20 @@ export const YesNo = memo(({ label, value, onChange }) => (
 export const YesNoCompact = ({ label, value, onChange }) => (
     <div className="flex justify-between items-center text-xs text-gray-600">
         <span className="font-medium">{label}</span>
-        <div className="flex bg-gray-100 rounded p-0.5 shadow-inner">
+        <div className="flex bg-gray-100 rounded-lg p-1 shadow-inner ring-2 ring-[#34808A]/50 shadow-[#34808A]/30">
             <button
                 type="button"
                 onClick={() => onChange("Yes")}
-                className={`px-2.5 py-0.5 rounded transition-all duration-200 ${value === "Yes" ? "bg-green-600 shadow text-white font-bold scale-105" : "text-gray-400 hover:text-gray-600"}`}
+                className={`px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 ${value === "Yes" ? "bg-green-600 text-white shadow-md ring-1 ring-green-700" : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"}`}
             >
-                Y
+                Yes
             </button>
             <button
                 type="button"
                 onClick={() => onChange("No")}
-                className={`px-2.5 py-0.5 rounded transition-all duration-200 ${value === "No" ? "bg-red-600 shadow text-white font-bold scale-105" : "text-gray-400 hover:text-gray-600"}`}
+                className={`px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 ${value === "No" ? "bg-red-600 text-white shadow-md ring-1 ring-red-700" : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"}`}
             >
-                N
+                No
             </button>
         </div>
     </div>
