@@ -169,23 +169,15 @@ const BlueprintSummary = () => {
                     <div className="flex gap-3">
                         <button onClick={() => router.push("/blueprint-form")} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Edit Data</button>
 
-                        {isClient && (
-                            <PDFDownloadLink
-                                document={
-                                    <BlueprintDocument
-                                        companyName={formData.companyName || "—"}
-                                        preparedDate={new Date()}
-                                        currentStateData={formData}
-                                    />
-                                }
-                                fileName={`IT-Blueprint-${(formData.companyName || "Company").replace(/\s+/g, '_')}.pdf`}
-                                className="px-4 py-2 text-sm font-bold text-white bg-[#935010] hover:bg-[#7a3d0d] rounded-lg shadow-sm transition flex items-center gap-2"
-                            >
-                                {({ blob, url, loading, error }) => (
-                                    <span>{loading ? "Preparing..." : "Download PDF"}</span>
-                                )}
-                            </PDFDownloadLink>
-                        )}
+                        <button 
+                            onClick={() => router.push("/all-blueprints")}
+                            className="px-4 py-2 text-sm font-bold text-white bg-[#935010] hover:bg-[#7a3d0d] rounded-lg shadow-sm transition flex items-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            <span>Go to All Blueprints</span>
+                        </button>
                     </div>
                 </div>
             </div>
