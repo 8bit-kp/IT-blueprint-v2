@@ -63,17 +63,29 @@ const BlueprintDashboard = () => {
 
         try {
             setSaving(true);
-            await axios.post(
+            
+            // Clean the formData before sending - remove _id and __v fields
+            const { _id, __v, ...cleanData } = formData;
+            
+            console.log("Saving blueprint data:", cleanData);
+            
+            const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/blueprint/save`,
-                formData,
+                cleanData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            
+            console.log("Save response:", response.data);
+            
             setMessage("✓ Changes saved successfully!");
             setTimeout(() => setMessage(""), 3000);
         } catch (err) {
             console.error("Error saving blueprint:", err);
-            setMessage("✗ Error saving changes. Please try again.");
-            setTimeout(() => setMessage(""), 3000);
+            console.error("Error response:", err.response?.data);
+            
+            const errorMsg = err.response?.data?.message || "Error saving changes. Please try again.";
+            setMessage(`✗ ${errorMsg}`);
+            setTimeout(() => setMessage(""), 5000);
         } finally {
             setSaving(false);
         }

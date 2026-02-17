@@ -79,6 +79,13 @@ export default function Home() {
             >
               <FiFileText className="text-gray-400 group-hover:text-[#15587B] transition-colors" /> View Summary
             </button>
+
+            <button
+              onClick={() => handleNavigation("/all-blueprints")}
+              className="group min-w-[200px] px-8 py-4 bg-gradient-to-r from-[#34808A] to-[#15587B] text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <FiLayers className="group-hover:rotate-12 transition-transform" /> All Blueprints
+            </button>
           </div>
         </div>
 
