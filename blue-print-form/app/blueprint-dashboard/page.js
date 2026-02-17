@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 
@@ -14,7 +14,7 @@ import OperationalDashboard from "@/components/dashboard/OperationalDashboard";
 import FinancialDashboard from "@/components/dashboard/FinancialDashboard";
 import AdministrationDashboard from "@/components/dashboard/AdministrationDashboard";
 
-const BlueprintDashboard = () => {
+const BlueprintDashboardContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const blueprintType = searchParams.get("type");
@@ -149,6 +149,15 @@ const BlueprintDashboard = () => {
                 {renderDashboard()}
             </div>
         </div>
+    );
+};
+
+// Wrap with Suspense to fix Next.js build error
+const BlueprintDashboard = () => {
+    return (
+        <Suspense fallback={<LoadingSpinner message="Loading Dashboard..." />}>
+            <BlueprintDashboardContent />
+        </Suspense>
     );
 };
 
