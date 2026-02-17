@@ -136,7 +136,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                         value={app.name || ""}
                         onChange={(e) => updateAppField(category, index, "name", e.target.value)}
                         placeholder="Application name..."
-                        className="col-span-4 px-4 py-3 text-sm text-gray-800 font-medium placeholder-gray-400 border-r border-gray-200 focus:outline-none focus:bg-blue-50 focus:placeholder-gray-500"
+                        className="col-span-3 px-4 py-3 text-sm text-gray-800 font-medium placeholder-gray-400 border-r border-gray-200 focus:outline-none focus:bg-blue-50 focus:placeholder-gray-500"
                     />
                     <select
                         value={app.businessPriority || "Medium"}
@@ -156,12 +156,66 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                         <option value="SaaS">SaaS</option>
                         <option value="On-premise">On-premise</option>
                     </select>
-                    <div className="col-span-2 px-3 py-3 flex items-center justify-center text-xs space-x-1 border-r border-gray-200">
-                        <span className={`px-2 py-0.5 rounded ${app.mfa === "Yes" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>MFA</span>
+                    
+                    {/* Sensitive Info Toggle */}
+                    <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
+                        <button
+                            onClick={() => updateAppField(category, index, "containsSensitiveInfo", app.containsSensitiveInfo === "Yes" ? "No" : "Yes")}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${
+                                app.containsSensitiveInfo === "Yes" 
+                                    ? "bg-red-100 text-red-700 hover:bg-red-200" 
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                        >
+                            {app.containsSensitiveInfo === "Yes" ? "YES" : "NO"}
+                        </button>
                     </div>
+                    
+                    {/* MFA Toggle */}
+                    <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
+                        <button
+                            onClick={() => updateAppField(category, index, "mfa", app.mfa === "Yes" ? "No" : "Yes")}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${
+                                app.mfa === "Yes" 
+                                    ? "bg-green-100 text-green-700 hover:bg-green-200" 
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                        >
+                            {app.mfa === "Yes" ? "YES" : "NO"}
+                        </button>
+                    </div>
+                    
+                    {/* Backed Up Toggle */}
+                    <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
+                        <button
+                            onClick={() => updateAppField(category, index, "backedUp", app.backedUp === "Yes" ? "No" : "Yes")}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${
+                                app.backedUp === "Yes" 
+                                    ? "bg-blue-100 text-blue-700 hover:bg-blue-200" 
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                        >
+                            {app.backedUp === "Yes" ? "YES" : "NO"}
+                        </button>
+                    </div>
+                    
+                    {/* BYOD Access Toggle */}
+                    <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
+                        <button
+                            onClick={() => updateAppField(category, index, "byodAccess", app.byodAccess === "Yes" ? "No" : "Yes")}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${
+                                app.byodAccess === "Yes" 
+                                    ? "bg-purple-100 text-purple-700 hover:bg-purple-200" 
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                        >
+                            {app.byodAccess === "Yes" ? "YES" : "NO"}
+                        </button>
+                    </div>
+                    
                     <button
                         onClick={() => removeApplication(category, index)}
-                        className="col-span-2 px-2 py-3 text-red-600 hover:bg-red-50 text-xs font-medium transition-colors flex items-center justify-center gap-1"
+                        className="col-span-1 px-2 py-3 text-red-600 hover:bg-red-50 text-xs font-medium transition-colors flex items-center justify-center gap-1"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -262,11 +316,14 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
 
                 {/* Table Header */}
                 <div className="grid grid-cols-12 gap-0 bg-[#0F4C5C] text-white text-sm font-bold sticky top-0 z-10">
-                    <div className="col-span-4 px-4 py-4 border-r border-white/20">APPLICATION / FUNCTION</div>
+                    <div className="col-span-3 px-4 py-4 border-r border-white/20">APPLICATION / FUNCTION</div>
                     <div className="col-span-2 px-3 py-4 border-r border-white/20">PRIORITY</div>
                     <div className="col-span-2 px-3 py-4 border-r border-white/20">OFFERING</div>
-                    <div className="col-span-2 px-3 py-4 border-r border-white/20">STATUS</div>
-                    <div className="col-span-2 px-2 py-4">ACTION</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">SENSITIVE</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">MFA</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BACKUP</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BYOD</div>
+                    <div className="col-span-1 px-2 py-4">ACTION</div>
                 </div>
 
                 <div className="p-6 space-y-6">
