@@ -7,6 +7,7 @@ import ProgressBar from "@/components/ProgressBar";
 import { useForm } from "@/context/FormContext";
 import { useRouter } from "next/navigation";
 import FormHeader from "@/components/FormHeader";
+import WarningModal from "@/components/WarningModal";
 
 // Import step components
 import Step1 from "@/components/form-fields/CompanyInfoStep";
@@ -37,11 +38,13 @@ const initialTechControlState = { choice: "Yes", vendor: "", businessPriority: "
 export default function BlueprintForm() {
     const router = useRouter();
     const totalSteps = 6;
-    const { formData, updateFormData, step, setStep } = useForm();
+    const { formData, updateFormData, step, setStep, resetForm } = useForm();
     const [loadingSave, setLoadingSave] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
     const [lastSavedStep, setLastSavedStep] = useState(0);
     const [token, setToken] = useState(null);
+    const [loadingReset, setLoadingReset] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
 
     const [technicalControls, setTechnicalControls] = useState({
         nextGenFirewall: { ...initialTechControlState },
@@ -65,6 +68,24 @@ export default function BlueprintForm() {
     const setField = useCallback((key, value) => {
         updateFormData((prev) => ({ ...prev, [key]: value }));
     }, [updateFormData]);
+
+    // Restore step from localStorage on mount
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const savedStep = localStorage.getItem("blueprintFormStep");
+        if (savedStep) {
+            const stepNum = parseInt(savedStep, 10);
+            if (stepNum >= 1 && stepNum <= totalSteps) {
+                setStep(stepNum);
+            }
+        }
+    }, [setStep, totalSteps]);
+
+    // Save step to localStorage whenever it changes
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        localStorage.setItem("blueprintFormStep", step.toString());
+    }, [step]);
 
     // Initial Fetch - Optimized
     useEffect(() => {
@@ -243,6 +264,62 @@ export default function BlueprintForm() {
         }
     };
 
+    const handleResetData = async () => {
+        setLoadingReset(true);
+        try {
+            // Reset local form data
+            resetForm();
+            
+            // Reset technical controls
+            const freshTechControls = {};
+            Object.keys(technicalControls).forEach(key => {
+                freshTechControls[key] = { ...initialTechControlState };
+            });
+            setTechnicalControls(freshTechControls);
+
+            // Reset to step 1
+            setStep(1);
+            setLastSavedStep(0);
+            
+            // Clear saved step from localStorage
+            localStorage.setItem("blueprintFormStep", "1");
+
+            // Delete data from backend
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+            await axios.post(
+                `${backendUrl}/api/blueprint/save`,
+                {
+                    applications: {
+                        productivity: [],
+                        finance: [],
+                        hrit: [],
+                        payroll: [],
+                        additional: []
+                    },
+                    _lastSavedStep: 0
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    timeout: 15000
+                }
+            );
+
+            toast.success("All data has been reset to default values");
+            window.scrollTo(0, 0);
+        } catch (err) {
+            console.error("Reset error:", err);
+            if (err.response?.status === 401) {
+                localStorage.removeItem("token");
+                toast.error("Session expired. Please login again.");
+                setTimeout(() => router.push("/auth"), 2000);
+            } else {
+                toast.error("Failed to reset data. Please try again.");
+            }
+        } finally {
+            setLoadingReset(false);
+        }
+    };
+
     if (loadingData) {
         return (
             <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
@@ -257,6 +334,18 @@ export default function BlueprintForm() {
     return (
         <div className="min-h-screen bg-[#F3F4F6] pb-24">
             <FormHeader />
+
+            <WarningModal
+                isOpen={showResetModal}
+                onClose={() => setShowResetModal(false)}
+                onConfirm={handleResetData}
+                title="⚠️ WARNING"
+                message="This will permanently delete all your filled data and reset the form to default values. This action cannot be undone.
+
+Are you sure you want to continue?"
+                confirmText="Yes, Reset All Data"
+                cancelText="Cancel"
+            />
 
             <div className="max-w-7xl mx-auto px-4 py-6">
                 <ProgressBar step={step} totalSteps={totalSteps} />
@@ -296,16 +385,40 @@ export default function BlueprintForm() {
                     </div>
                     <div className="flex gap-3">
                         <button
+                            onClick={() => setShowResetModal(true)}
+                            disabled={loadingReset || loadingSave}
+                            className="px-4 sm:px-6 py-2.5 text-sm text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg font-medium transition flex items-center gap-2"
+                            title="Reset all data to default values"
+                        >
+                            {loadingReset ? (
+                                <>
+                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>Resetting...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Reset Data</span>
+                                    <span className="sm:hidden">Reset</span>
+                                </>
+                            )}
+                        </button>
+                        <button
                             onClick={handleSaveOnly}
-                            disabled={loadingSave}
-                            className="px-4 sm:px-6 py-2.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition"
+                            disabled={loadingSave || loadingReset}
+                            className="px-4 sm:px-6 py-2.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-200 disabled:cursor-not-allowed rounded-lg font-medium transition"
                         >
                             {loadingSave ? "Saving..." : "Save Draft"}
                         </button>
                         <button
                             onClick={handleSaveAndNext}
-                            disabled={loadingSave}
-                            className="px-6 sm:px-8 py-2.5 text-sm text-white bg-[#15587B] hover:bg-[#0f4460] rounded-lg font-bold shadow-md transition flex items-center gap-2"
+                            disabled={loadingSave || loadingReset}
+                            className="px-6 sm:px-8 py-2.5 text-sm text-white bg-[#15587B] hover:bg-[#0f4460] disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg font-bold shadow-md transition flex items-center gap-2"
                         >
                             {step === totalSteps ? "Finish & Review" : "Next Step →"}
                         </button>

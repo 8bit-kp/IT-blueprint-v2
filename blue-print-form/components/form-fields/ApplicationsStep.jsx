@@ -8,7 +8,6 @@ const defaultApplications = {
     productivity: [
         { id: "prod-1", name: "Microsoft 365", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Critical", offering: "SaaS" },
         { id: "prod-2", name: "Google Workspace", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "High", offering: "SaaS" },
-        { id: "prod-3", name: "Slack", containsSensitiveInfo: "No", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Medium", offering: "SaaS" },
     ],
     finance: [
         { id: "fin-1", name: "QuickBooks", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
@@ -25,6 +24,7 @@ const defaultApplications = {
     additional: [
         { id: "add-1", name: "Salesforce", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Critical", offering: "SaaS" },
         { id: "add-2", name: "Zoom", containsSensitiveInfo: "No", mfa: "Yes", backedUp: "No", byodAccess: "Yes", businessPriority: "Medium", offering: "SaaS" },
+        { id: "add-3", name: "Slack", containsSensitiveInfo: "No", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Medium", offering: "SaaS" },
     ],
 };
 
