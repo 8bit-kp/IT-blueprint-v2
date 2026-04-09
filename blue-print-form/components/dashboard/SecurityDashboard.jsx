@@ -1,20 +1,73 @@
 import React from "react";
 
-const SecurityDashboard = ({ formData, updateField }) => {
+// ── Color-coded badge helpers ──────────────────────────────────────────────
+
+const StatusBadge = ({ value }) => {
+    const map = {
+        Yes: "bg-green-100 text-green-800 border border-green-300",
+        No: "bg-red-100 text-red-800 border border-red-300",
+        Partial: "bg-teal-100 text-teal-800 border border-teal-300",
+    };
+    const cls = map[value] || "bg-gray-100 text-gray-500 border border-gray-300";
+    return (
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${cls}`}>
+            {value || "—"}
+        </span>
+    );
+};
+
+const PriorityBadge = ({ value }) => {
+    const map = {
+        Critical: "bg-red-600 text-white",
+        High: "bg-orange-500 text-white",
+        Medium: "bg-blue-500 text-white",
+        Low: "bg-gray-400 text-white",
+    };
+    const cls = map[value] || "bg-gray-200 text-gray-500";
+    return (
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${cls}`}>
+            {value || "—"}
+        </span>
+    );
+};
+
+const OfferingBadge = ({ value }) => {
+    const map = {
+        SaaS: "bg-indigo-100 text-indigo-800 border border-indigo-300",
+        "On-premise": "bg-gray-100 text-gray-700 border border-gray-300",
+        "On-Premise": "bg-gray-100 text-gray-700 border border-gray-300",
+        Hybrid: "bg-purple-100 text-purple-800 border border-purple-300",
+        Cloud: "bg-sky-100 text-sky-800 border border-sky-300",
+    };
+    const cls = map[value] || "bg-gray-100 text-gray-500 border border-gray-300";
+    return (
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${cls}`}>
+            {value || "—"}
+        </span>
+    );
+};
+
+// ── Main Component ─────────────────────────────────────────────────────────
+
+const SecurityDashboard = ({ formData }) => {
+    // Keys match exactly what the Blueprint model stores under technicalControls
     const technicalControls = [
-        { label: "Firewall", key: "firewall" },
-        { label: "Endpoint Security", key: "endpointSecurity" },
-        { label: "Email Security", key: "emailSecurity" },
-        { label: "SIEM", key: "siem" },
-        { label: "EDR", key: "edr" },
-        { label: "MDM", key: "mdm" },
-        { label: "MFA", key: "mfa" },
-        { label: "NAC", key: "nac" },
-        { label: "IAM", key: "iam" },
-        { label: "SSO", key: "sso" },
-        { label: "VPN", key: "vpn" },
-        { label: "DLP", key: "dlp" },
+        { label: "Next Gen Firewall", key: "nextGenFirewall" },
+        { label: "Secure Web Gateway", key: "secureWebGateway" },
         { label: "CASB", key: "casb" },
+        { label: "Data Loss Prevention", key: "dlp" },
+        { label: "SSA-VPN", key: "ssaVpn" },
+        { label: "Email Security", key: "emailSecurity" },
+        { label: "Vulnerability Management", key: "vulnerabilityMgmt" },
+        { label: "IAM", key: "iam" },
+        { label: "NAC", key: "nac" },
+        { label: "MFA", key: "mfa" },
+        { label: "MDM", key: "mdm" },
+        { label: "EDR", key: "edr" },
+        { label: "Data Classification", key: "dataClassification" },
+        { label: "SOC - SIEM", key: "socSiem" },
+        { label: "Asset Management", key: "assetManagement" },
+        { label: "SD-WAN", key: "sdWan" },
     ];
 
     const adminControls = [
@@ -31,18 +84,18 @@ const SecurityDashboard = ({ formData, updateField }) => {
         { label: "Penetration Testing", key: "penetrationTest" },
     ];
 
-    const updateControlField = (key, field, value) => {
-        const currentValue = formData[key] || {};
-        updateField(key, { ...currentValue, [field]: value });
-    };
+    // Pull nested technicalControls object from DB data
+    const dbTechControls = formData?.technicalControls || {};
 
     return (
         <div className="space-y-8">
-            {/* Technical Controls Section */}
+            {/* ── Technical Controls Table ───────────────────────────────── */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
                     <h2 className="text-2xl font-bold">Security Technical Controls</h2>
-                    <p className="text-sm text-white/90 mt-1">Manage your security infrastructure and tools</p>
+                    <p className="text-sm text-white/90 mt-1">
+                        Data fetched from your Security Technical Controls submission
+                    </p>
                 </div>
                 <div className="p-6">
                     <div className="overflow-x-auto">
@@ -51,60 +104,38 @@ const SecurityDashboard = ({ formData, updateField }) => {
                                 <tr className="bg-[#0F4C5C] text-white text-sm">
                                     <th className="px-4 py-4 text-left font-bold">Control</th>
                                     <th className="px-4 py-4 text-left font-bold">Status</th>
-                                    <th className="px-4 py-4 text-left font-bold">Vendor</th>
+                                    <th className="px-4 py-4 text-left font-bold">Vendor / Provider</th>
                                     <th className="px-4 py-4 text-left font-bold">Priority</th>
                                     <th className="px-4 py-4 text-left font-bold">Offering</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {technicalControls.map((control, index) => {
-                                    const value = formData[control.key] || {};
+                                    const value = dbTechControls[control.key] || {};
                                     return (
-                                        <tr key={control.key} className={`border-b border-gray-200 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? "bg-[#B8E6E6]/30" : "bg-white"}`}>
-                                            <td className="px-4 py-4 font-semibold text-gray-800">{control.label}</td>
-                                            <td className="px-4 py-4">
-                                                <select
-                                                    value={value.choice || "No"}
-                                                    onChange={(e) => updateControlField(control.key, "choice", e.target.value)}
-                                                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-800 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] bg-white"
-                                                >
-                                                    <option value="Yes">Yes</option>
-                                                    <option value="No">No</option>
-                                                    <option value="Partial">Partial</option>
-                                                </select>
+                                        <tr
+                                            key={control.key}
+                                            className={`border-b border-gray-200 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? "bg-[#B8E6E6]/30" : "bg-white"
+                                                }`}
+                                        >
+                                            <td className="px-4 py-4 font-semibold text-gray-800">
+                                                {control.label}
                                             </td>
                                             <td className="px-4 py-4">
-                                                <input
-                                                    type="text"
-                                                    value={value.vendor || ""}
-                                                    onChange={(e) => updateControlField(control.key, "vendor", e.target.value)}
-                                                    placeholder="Enter vendor name..."
-                                                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] focus:placeholder-gray-500"
-                                                />
+                                                <StatusBadge value={value.choice} />
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-gray-700">
+                                                {value.vendor ? (
+                                                    <span className="font-medium">{value.vendor}</span>
+                                                ) : (
+                                                    <span className="text-gray-400 italic text-xs">—</span>
+                                                )}
                                             </td>
                                             <td className="px-4 py-4">
-                                                <select
-                                                    value={value.businessPriority || "Medium"}
-                                                    onChange={(e) => updateControlField(control.key, "businessPriority", e.target.value)}
-                                                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-800 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] bg-white"
-                                                >
-                                                    <option value="Critical">Critical</option>
-                                                    <option value="High">High</option>
-                                                    <option value="Medium">Medium</option>
-                                                    <option value="Low">Low</option>
-                                                </select>
+                                                <PriorityBadge value={value.businessPriority} />
                                             </td>
                                             <td className="px-4 py-4">
-                                                <select
-                                                    value={value.offering || "SaaS"}
-                                                    onChange={(e) => updateControlField(control.key, "offering", e.target.value)}
-                                                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-800 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] bg-white"
-                                                >
-                                                    <option value="SaaS">SaaS</option>
-                                                    <option value="On-Premise">On-Premise</option>
-                                                    <option value="Hybrid">Hybrid</option>
-                                                    <option value="Cloud">Cloud</option>
-                                                </select>
+                                                <OfferingBadge value={value.offering} />
                                             </td>
                                         </tr>
                                     );
@@ -115,26 +146,21 @@ const SecurityDashboard = ({ formData, updateField }) => {
                 </div>
             </div>
 
-            {/* Administrative Controls Section */}
+            {/* ── Administrative Controls Grid ───────────────────────────── */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
-                    <h2 className="text-2xl font-bold">Governance & Administrative Controls</h2>
+                    <h2 className="text-2xl font-bold">Governance &amp; Administrative Controls</h2>
                     <p className="text-sm text-white/90 mt-1">Policy framework and compliance status</p>
                 </div>
                 <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {adminControls.map((control) => (
-                            <div key={control.key} className="flex items-center gap-4 p-5 bg-gradient-to-r from-[#7BC5C5]/30 to-[#B8E6E6]/30 rounded-xl border-2 border-[#7BC5C5]/50 hover:border-[#34808A] transition-all">
-                                <label className="flex-1 font-semibold text-gray-800">{control.label}</label>
-                                <select
-                                    value={formData[control.key] || "No"}
-                                    onChange={(e) => updateField(control.key, e.target.value)}
-                                    className="px-5 py-2.5 border-2 border-gray-300 rounded-lg font-bold text-gray-800 bg-white focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A]"
-                                >
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
-                                    <option value="Partial">Partial</option>
-                                </select>
+                            <div
+                                key={control.key}
+                                className="flex items-center justify-between gap-4 p-5 bg-gradient-to-r from-[#7BC5C5]/30 to-[#B8E6E6]/30 rounded-xl border-2 border-[#7BC5C5]/50"
+                            >
+                                <span className="font-semibold text-gray-800">{control.label}</span>
+                                <StatusBadge value={formData?.[control.key]} />
                             </div>
                         ))}
                     </div>

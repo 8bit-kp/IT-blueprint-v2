@@ -6,7 +6,7 @@ const vendors = [
 ];
 
 const CurrentStateDashboard = ({ formData, updateField }) => {
-    // Application Categories - synced with database structure
+
     const applications = formData.applications || {
         productivity: [],
         finance: [],
@@ -15,10 +15,10 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
         additional: []
     };
 
-    // Technical Controls - synced with database structure
+
     const technicalControls = formData.technicalControls || {};
 
-    // Security Controls mapping to technicalControls
+
     const securityControls = [
         { label: "SOC-SIEM", key: "socSiem" },
         { label: "Data Classification", key: "dataClassification" },
@@ -38,7 +38,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
         { label: "SD-WAN", key: "sdWan" },
     ];
 
-    // Infrastructure items - synced with formData structure
+
     const infrastructureItems = [
         { label: "Cloud", key: "cloudVendor" },
         { label: "Virtualization", key: "virtualizationVendor" },
