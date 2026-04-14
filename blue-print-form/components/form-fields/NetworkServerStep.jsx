@@ -2,8 +2,9 @@
 
 import { memo } from "react";
 import { Card, TextInput, TechnicalControlCard, YesNo, ToggleButton, MultiCheckbox } from "./FormComponents";
+import { getVendors } from "@/constants/vendors";
 
-const NetworkServerStep = memo(({ formData, setField, vendors, initialTechControlState }) => {
+const NetworkServerStep = memo(({ formData, setField, initialTechControlState }) => {
   const infraControls = [
     { key: "WAN1", label: "WAN 1" },
     { key: "WAN2", label: "WAN 2" },
@@ -39,7 +40,7 @@ const NetworkServerStep = memo(({ formData, setField, vendors, initialTechContro
                   label={ctl.label}
                   data={currentData}
                   onChange={(newData) => setField(ctl.key, newData)}
-                  vendors={vendors}
+                  vendors={getVendors(ctl.key)}
                   initialTechControlState={initialTechControlState}
                 />
               );
@@ -50,7 +51,7 @@ const NetworkServerStep = memo(({ formData, setField, vendors, initialTechContro
         {/* Network Config & Servers Section */}
         <div className="border-t border-gray-200 pt-6">
           <h3 className="text-sm font-bold text-gray-400 uppercase mb-4 tracking-wider">Network Config & Servers</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <YesNo label="HA Routing?" value={formData.haRouting} onChange={(v) => setField("haRouting", v)} />
             <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 border-b border-gray-200 gap-2">
@@ -79,7 +80,7 @@ const NetworkServerStep = memo(({ formData, setField, vendors, initialTechContro
               )}
             </div>
           </div>
-          
+
           <div className="mt-6 pt-6 border-t border-gray-200">
             <MultiCheckbox label="Desktops - Select all that apply:" options={["Fully patched", "Stored PHI/PII", "Monitored", "Protected", "Backed up"]} values={formData.desktopOptions || []} onChange={(vals) => setField("desktopOptions", vals)} />
           </div>

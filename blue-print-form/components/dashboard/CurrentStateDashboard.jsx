@@ -1,9 +1,5 @@
 import React from "react";
-
-const vendors = [
-    "APC", "ATT", "Barracuda", "Cato", "Cisco", "Dell", "IBM",
-    "Microsoft", "Multi-vendor", "Nodeware", "RapidFire", "VMWare", "No Data"
-];
+import { getVendors } from "@/constants/vendors";
 
 const CurrentStateDashboard = ({ formData, updateField }) => {
 
@@ -54,7 +50,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
     const updateAppField = (category, index, field, value) => {
         const updatedApps = {
             ...applications,
-            [category]: applications[category].map((app, i) => 
+            [category]: applications[category].map((app, i) =>
                 i === index ? { ...app, [field]: value } : app
             )
         };
@@ -62,11 +58,11 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
     };
 
     const addApplication = (category) => {
-        const newApp = { 
-            name: "", 
-            containsSensitiveInfo: "No", 
-            mfa: "No", 
-            backedUp: "No", 
+        const newApp = {
+            name: "",
+            containsSensitiveInfo: "No",
+            mfa: "No",
+            backedUp: "No",
             byodAccess: "No",
             businessPriority: "Medium",
             offering: "SaaS"
@@ -156,63 +152,58 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                         <option value="SaaS">SaaS</option>
                         <option value="On-premise">On-premise</option>
                     </select>
-                    
-                    {/* Sensitive Info Toggle */}
+
                     <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "containsSensitiveInfo", app.containsSensitiveInfo === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${
-                                app.containsSensitiveInfo === "Yes" 
-                                    ? "bg-red-100 text-red-700 hover:bg-red-200" 
-                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${app.containsSensitiveInfo === "Yes"
+                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                    : "bg-red-100 text-red-700 hover:bg-red-200"
+                                }`}
                         >
                             {app.containsSensitiveInfo === "Yes" ? "YES" : "NO"}
                         </button>
                     </div>
-                    
+
                     {/* MFA Toggle */}
                     <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "mfa", app.mfa === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${
-                                app.mfa === "Yes" 
-                                    ? "bg-green-100 text-green-700 hover:bg-green-200" 
-                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${app.mfa === "Yes"
+                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                    : "bg-red-100 text-red-700 hover:bg-red-200"
+                                }`}
                         >
                             {app.mfa === "Yes" ? "YES" : "NO"}
                         </button>
                     </div>
-                    
+
                     {/* Backed Up Toggle */}
                     <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "backedUp", app.backedUp === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${
-                                app.backedUp === "Yes" 
-                                    ? "bg-blue-100 text-blue-700 hover:bg-blue-200" 
-                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${app.backedUp === "Yes"
+                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                    : "bg-red-100 text-red-700 hover:bg-red-200"
+                                }`}
                         >
                             {app.backedUp === "Yes" ? "YES" : "NO"}
                         </button>
                     </div>
-                    
+
                     {/* BYOD Access Toggle */}
                     <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "byodAccess", app.byodAccess === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${
-                                app.byodAccess === "Yes" 
-                                    ? "bg-purple-100 text-purple-700 hover:bg-purple-200" 
-                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${app.byodAccess === "Yes"
+                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                    : "bg-red-100 text-red-700 hover:bg-red-200"
+                                }`}
                         >
                             {app.byodAccess === "Yes" ? "YES" : "NO"}
                         </button>
                     </div>
-                    
+
                     <button
                         onClick={() => removeApplication(category, index)}
                         className="col-span-1 px-2 py-3 text-red-600 hover:bg-red-50 text-xs font-medium transition-colors flex items-center justify-center gap-1"
@@ -237,7 +228,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     className="col-span-3 px-4 py-3 text-sm text-gray-800 border-r border-gray-200 focus:outline-none focus:bg-blue-50"
                 >
                     <option value="">Select Provider...</option>
-                    {vendors.map((v) => (
+                    {getVendors(control.key).map((v) => (
                         <option key={v} value={v}>{v}</option>
                     ))}
                 </select>
@@ -276,7 +267,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     className="col-span-3 px-4 py-3 text-sm text-gray-800 border-r border-gray-200 focus:outline-none focus:bg-blue-50"
                 >
                     <option value="">Select Provider...</option>
-                    {vendors.map((v) => (
+                    {getVendors(item.key).map((v) => (
                         <option key={v} value={v}>{v}</option>
                     ))}
                 </select>
@@ -372,7 +363,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <div>
                         <p className="text-sm font-semibold text-blue-900 mb-1">Dashboard Tips</p>
                         <p className="text-sm text-blue-800">
-                            Add new applications using the <strong>+ Add</strong> buttons. Select providers from the dropdown menu. 
+                            Add new applications using the <strong>+ Add</strong> buttons. Select providers from the dropdown menu.
                             All changes sync with your database. Click <strong>Save Changes</strong> at the top to persist modifications.
                         </p>
                     </div>

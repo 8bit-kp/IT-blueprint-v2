@@ -2,8 +2,9 @@
 
 import { memo } from "react";
 import { TechnicalControlCard } from "./FormComponents";
+import { getVendors } from "@/constants/vendors";
 
-const SecurityTechStep = memo(({ technicalControls, setTechnicalControls, vendors, initialTechControlState }) => {
+const SecurityTechStep = memo(({ technicalControls, setTechnicalControls, initialTechControlState }) => {
   const controls = [
     { key: "nextGenFirewall", label: "Next Gen Firewall" },
     { key: "secureWebGateway", label: "Secure Web Gateway" },
@@ -39,7 +40,7 @@ const SecurityTechStep = memo(({ technicalControls, setTechnicalControls, vendor
                   [ctl.key]: newData
                 }));
               }}
-              vendors={vendors}
+              vendors={getVendors(ctl.key)}
               initialTechControlState={initialTechControlState}
             />
           );

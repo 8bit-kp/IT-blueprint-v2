@@ -17,10 +17,7 @@ import Step4 from "@/components/form-fields/SecurityAdminStep";
 import Step5 from "@/components/form-fields/SecurityTechStep";
 import Step6 from "@/components/form-fields/ApplicationsStep";
 
-const vendors = [
-    "APC", "ATT", "Barracuda", "Cato", "Cisco", "Dell", "IBM",
-    "Microsoft", "Multi-vendor", "Nodeware", "RapidFire", "VMWare", "No Data"
-];
+// Vendors are now managed per-service in constants/vendors.js
 
 const stepTitles = {
     1: "Company Profile",
@@ -269,7 +266,7 @@ export default function BlueprintForm() {
         try {
             // Reset local form data
             resetForm();
-            
+
             // Reset technical controls
             const freshTechControls = {};
             Object.keys(technicalControls).forEach(key => {
@@ -280,7 +277,7 @@ export default function BlueprintForm() {
             // Reset to step 1
             setStep(1);
             setLastSavedStep(0);
-            
+
             // Clear saved step from localStorage
             localStorage.setItem("blueprintFormStep", "1");
 
@@ -360,9 +357,9 @@ Are you sure you want to continue?"
                 <div className="animate-fade-in">
                     {step === 1 && <Step1 formData={formData} setField={setField} />}
                     {step === 2 && <Step2 formData={formData} setField={setField} />}
-                    {step === 3 && <Step3 formData={formData} setField={setField} vendors={vendors} initialTechControlState={initialTechControlState} />}
+                    {step === 3 && <Step3 formData={formData} setField={setField} initialTechControlState={initialTechControlState} />}
                     {step === 4 && <Step4 formData={formData} setField={setField} />}
-                    {step === 5 && <Step5 technicalControls={technicalControls} setTechnicalControls={setTechnicalControls} vendors={vendors} initialTechControlState={initialTechControlState} />}
+                    {step === 5 && <Step5 technicalControls={technicalControls} setTechnicalControls={setTechnicalControls} initialTechControlState={initialTechControlState} />}
                     {step === 6 && <Step6 formData={formData} updateFormData={updateFormData} />}
                 </div>
             </div>
