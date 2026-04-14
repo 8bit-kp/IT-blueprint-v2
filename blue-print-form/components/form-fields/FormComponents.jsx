@@ -1,6 +1,8 @@
 "use client";
 
 import { memo, useState, useEffect, useRef } from "react";
+import { getPriorityButtonClass } from "@/constants/colors";
+
 
 export const Card = ({ title, children, className = "" }) => (
     <div className={`bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden ${className}`}>
@@ -221,14 +223,7 @@ export const TechnicalControlCard = memo(({ label, data, onChange, vendors, init
                                 key={priority}
                                 type="button"
                                 onClick={() => handleChange("businessPriority", priority)}
-                                className={`flex-1 px-2 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${currentPriority === priority
-                                    ? priority === "Critical"
-                                        ? "bg-red-600 text-white shadow-md ring-1 ring-red-700"
-                                        : priority === "High"
-                                            ? "bg-orange-500 text-white shadow-md ring-1 ring-orange-600"
-                                            : "bg-blue-500 text-white shadow-md ring-1 ring-blue-600"
-                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                    }`}
+                                className={`flex-1 px-2 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${getPriorityButtonClass(priority, currentPriority)}`}
                             >
                                 {priority}
                             </button>

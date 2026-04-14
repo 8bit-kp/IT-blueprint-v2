@@ -1,5 +1,6 @@
 import React from "react";
 import { getVendors } from "@/constants/vendors";
+import { getPriorityChipClass, getStatusToggleClass } from "@/constants/colors";
 
 const CurrentStateDashboard = ({ formData, updateField }) => {
 
@@ -96,15 +97,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
         updateField(key, { ...currentValue, [field]: value });
     };
 
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case "Critical": return "bg-red-100 text-red-800 font-bold";
-            case "High": return "bg-orange-100 text-orange-800 font-bold";
-            case "Medium": return "bg-blue-100 text-blue-800 font-bold";
-            case "Low": return "bg-gray-100 text-gray-800";
-            default: return "bg-gray-50 text-gray-600";
-        }
-    };
+
 
     const renderApplicationSection = (title, category, apps) => (
         <div className="mb-4">
@@ -137,7 +130,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.businessPriority || "Medium"}
                         onChange={(e) => updateAppField(category, index, "businessPriority", e.target.value)}
-                        className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityColor(app.businessPriority)}`}
+                        className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessPriority)}`}
                     >
                         <option value="Critical">Critical</option>
                         <option value="High">High</option>
@@ -156,10 +149,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "containsSensitiveInfo", app.containsSensitiveInfo === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${app.containsSensitiveInfo === "Yes"
-                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                    : "bg-red-100 text-red-700 hover:bg-red-200"
-                                }`}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.containsSensitiveInfo)}`}
                         >
                             {app.containsSensitiveInfo === "Yes" ? "YES" : "NO"}
                         </button>
@@ -169,10 +159,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "mfa", app.mfa === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${app.mfa === "Yes"
-                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                    : "bg-red-100 text-red-700 hover:bg-red-200"
-                                }`}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.mfa)}`}
                         >
                             {app.mfa === "Yes" ? "YES" : "NO"}
                         </button>
@@ -182,10 +169,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "backedUp", app.backedUp === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${app.backedUp === "Yes"
-                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                    : "bg-red-100 text-red-700 hover:bg-red-200"
-                                }`}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.backedUp)}`}
                         >
                             {app.backedUp === "Yes" ? "YES" : "NO"}
                         </button>
@@ -195,10 +179,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "byodAccess", app.byodAccess === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${app.byodAccess === "Yes"
-                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                    : "bg-red-100 text-red-700 hover:bg-red-200"
-                                }`}
+                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.byodAccess)}`}
                         >
                             {app.byodAccess === "Yes" ? "YES" : "NO"}
                         </button>
@@ -235,7 +216,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 <select
                     value={value.businessPriority || "Medium"}
                     onChange={(e) => updateTechnicalControl(control.key, "businessPriority", e.target.value)}
-                    className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityColor(value.businessPriority)}`}
+                    className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(value.businessPriority)}`}
                 >
                     <option value="Critical">Critical</option>
                     <option value="High">High</option>
@@ -274,7 +255,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 <select
                     value={value.businessPriority || "Medium"}
                     onChange={(e) => updateInfraField(item.key, "businessPriority", e.target.value)}
-                    className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityColor(value.businessPriority)}`}
+                    className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(value.businessPriority)}`}
                 >
                     <option value="Critical">Critical</option>
                     <option value="High">High</option>

@@ -1,51 +1,25 @@
 import React from "react";
+import { getStatusBadgeClass, getPriorityBadgeClass, getOfferingBadgeClass } from "@/constants/colors";
 
 // ── Color-coded badge helpers ──────────────────────────────────────────────
 
-const StatusBadge = ({ value }) => {
-    const map = {
-        Yes: "bg-green-100 text-green-800 border border-green-300",
-        No: "bg-red-100 text-red-800 border border-red-300",
-        Partial: "bg-teal-100 text-teal-800 border border-teal-300",
-    };
-    const cls = map[value] || "bg-gray-100 text-gray-500 border border-gray-300";
-    return (
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${cls}`}>
-            {value || "—"}
-        </span>
-    );
-};
+const StatusBadge = ({ value }) => (
+    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(value)}`}>
+        {value || "—"}
+    </span>
+);
 
-const PriorityBadge = ({ value }) => {
-    const map = {
-        Critical: "bg-red-600 text-white",
-        High: "bg-orange-500 text-white",
-        Medium: "bg-blue-500 text-white",
-        Low: "bg-gray-400 text-white",
-    };
-    const cls = map[value] || "bg-gray-200 text-gray-500";
-    return (
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${cls}`}>
-            {value || "—"}
-        </span>
-    );
-};
+const PriorityBadge = ({ value }) => (
+    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getPriorityBadgeClass(value)}`}>
+        {value || "—"}
+    </span>
+);
 
-const OfferingBadge = ({ value }) => {
-    const map = {
-        SaaS: "bg-indigo-100 text-indigo-800 border border-indigo-300",
-        "On-premise": "bg-gray-100 text-gray-700 border border-gray-300",
-        "On-Premise": "bg-gray-100 text-gray-700 border border-gray-300",
-        Hybrid: "bg-purple-100 text-purple-800 border border-purple-300",
-        Cloud: "bg-sky-100 text-sky-800 border border-sky-300",
-    };
-    const cls = map[value] || "bg-gray-100 text-gray-500 border border-gray-300";
-    return (
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${cls}`}>
-            {value || "—"}
-        </span>
-    );
-};
+const OfferingBadge = ({ value }) => (
+    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getOfferingBadgeClass(value)}`}>
+        {value || "—"}
+    </span>
+);
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
