@@ -1,4 +1,5 @@
 import React from "react";
+import { getStatusBadgeClass } from "@/constants/colors";
 
 const AdministrationDashboard = ({ formData, updateField }) => {
     const companyFields = [
@@ -55,9 +56,6 @@ const AdministrationDashboard = ({ formData, updateField }) => {
                     <div className="space-y-4">
                         {governanceControls.map((control) => {
                             const value = formData[control.key] || "No";
-                            const bgColor = value === "Yes" ? "bg-white border-2 border-gray-800" : value === "Partial" ? "bg-[#F59E0B]" : "bg-[#DC2626]";
-                            const textColor = value === "Yes" ? "text-gray-900" : "text-white";
-                            
                             return (
                                 <div key={control.key} className="flex items-center rounded-xl overflow-hidden border-2 border-gray-200 hover:border-[#34808A] transition-all shadow-sm">
                                     <div className="flex-1 bg-gradient-to-r from-[#7BC5C5] to-[#B8E6E6] px-6 py-5">
@@ -66,7 +64,7 @@ const AdministrationDashboard = ({ formData, updateField }) => {
                                     <select
                                         value={value}
                                         onChange={(e) => updateField(control.key, e.target.value)}
-                                        className={`px-8 py-5 font-extrabold text-center min-w-[160px] ${bgColor} ${textColor} focus:ring-2 focus:ring-[#34808A] focus:outline-none cursor-pointer text-base`}
+                                        className={`px-8 py-5 font-extrabold text-center min-w-[160px] focus:ring-2 focus:ring-[#34808A] focus:outline-none cursor-pointer text-base ${getStatusBadgeClass(value)} rounded-none border-0`}
                                     >
                                         <option value="Yes">Yes</option>
                                         <option value="Partial">Partial</option>

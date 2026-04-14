@@ -1,4 +1,6 @@
 import React from "react";
+import { getPriorityChipClass } from "@/constants/colors";
+import { getVendors } from "@/constants/vendors";
 
 const OperationalDashboard = ({ formData, updateField }) => {
     const infrastructureVendors = [
@@ -47,20 +49,34 @@ const OperationalDashboard = ({ formData, updateField }) => {
                     <div className="space-y-3">
                         {infrastructureVendors.map((vendor) => {
                             const value = formData[vendor.key] || {};
+                            const vendorList = getVendors(vendor.key);
                             return (
                                 <div key={vendor.key} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 bg-gradient-to-r from-[#B8E6E6]/40 to-[#7BC5C5]/30 rounded-xl border-2 border-[#7BC5C5]/50 hover:border-[#34808A] transition-all">
                                     <div className="font-bold text-gray-800 flex items-center">{vendor.label}</div>
-                                    <input
-                                        type="text"
-                                        value={value.vendor || ""}
-                                        onChange={(e) => updateVendorField(vendor.key, "vendor", e.target.value)}
-                                        placeholder="Enter vendor name..."
-                                        className="px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] focus:placeholder-gray-500 bg-white"
-                                    />
+                                    {vendorList.length > 0 ? (
+                                        <select
+                                            value={value.vendor || ""}
+                                            onChange={(e) => updateVendorField(vendor.key, "vendor", e.target.value)}
+                                            className="px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] bg-white"
+                                        >
+                                            <option value="">Select Vendor...</option>
+                                            {vendorList.map((v) => (
+                                                <option key={v} value={v}>{v}</option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            value={value.vendor || ""}
+                                            onChange={(e) => updateVendorField(vendor.key, "vendor", e.target.value)}
+                                            placeholder="Enter vendor name..."
+                                            className="px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] focus:placeholder-gray-500 bg-white"
+                                        />
+                                    )}
                                     <select
                                         value={value.businessPriority || "Medium"}
                                         onChange={(e) => updateVendorField(vendor.key, "businessPriority", e.target.value)}
-                                        className="px-4 py-2.5 border-2 border-gray-300 rounded-lg font-semibold text-gray-800 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] bg-white"
+                                        className={`px-4 py-2.5 border-2 border-gray-300 rounded-lg font-semibold focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] ${getPriorityChipClass(value.businessPriority)}`}
                                     >
                                         <option value="Critical">Critical</option>
                                         <option value="High">High</option>
@@ -68,13 +84,14 @@ const OperationalDashboard = ({ formData, updateField }) => {
                                         <option value="Low">Low</option>
                                     </select>
                                     <select
-                                        value={value.offering || "SaaS"}
+                                        value={value.offering || "On-Premise"}
                                         onChange={(e) => updateVendorField(vendor.key, "offering", e.target.value)}
                                         className="px-4 py-2.5 border-2 border-gray-300 rounded-lg font-medium text-gray-800 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] bg-white"
                                     >
-                                        <option value="SaaS">SaaS</option>
                                         <option value="On-Premise">On-Premise</option>
+                                        <option value="SaaS">SaaS</option>
                                         <option value="Hybrid">Hybrid</option>
+                                        <option value="Cloud">Cloud</option>
                                     </select>
                                 </div>
                             );

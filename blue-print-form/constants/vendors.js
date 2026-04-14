@@ -2,14 +2,14 @@
  * VENDOR LISTS PER SERVICE
  * ─────────────────────────────────────────────────────────────────────────────
  * To add or remove a vendor for any service, simply edit the array for that
- * service key below. "Others" should always remain as the last entry.
+ * service key below. "Others" must always remain as the last entry.
  *
- * Keys used:
- *   Infrastructure  → WAN, switching, routing, wireless, baremetal,
- *                     virtualization, cloud
- *   Security Stack  → nextGenFirewall, secureWebGateway, casb, dlp, ssaVpn,
- *                     emailSecurity, vulnerabilityMgmt, iam, nac, mfa, mdm,
- *                     edr, dataClassification, socSiem, assetManagement, sdWan
+ * Infrastructure keys: WAN, switching, routing, wireless, baremetal,
+ *                      virtualization, cloud
+ * Security keys:       nextGenFirewall, secureWebGateway, casb, dlp, sslVpn,
+ *                      emailSecurity, vulnerabilityScanning, iam, nac, mfa,
+ *                      mdm, edr, dataClassification, socSiem, assetManagement,
+ *                      sdWan
  */
 
 export const VENDORS = {
@@ -17,7 +17,6 @@ export const VENDORS = {
 
     /** WAN 1 / WAN 2 / WAN 3 */
     WAN: [
-        "Cato",
         "Spectrum",
         "Comcast",
         "Google Fiber",
@@ -27,7 +26,6 @@ export const VENDORS = {
     ],
 
     switching: [
-        "Cato",
         "Cisco",
         "Aruba",
         "Extreme",
@@ -38,7 +36,6 @@ export const VENDORS = {
     ],
 
     routing: [
-        "Cato",
         "Cisco",
         "Aruba",
         "Extreme",
@@ -49,7 +46,6 @@ export const VENDORS = {
     ],
 
     wireless: [
-        "Cato",
         "Cisco",
         "UniFi",
         "Meraki",
@@ -67,7 +63,6 @@ export const VENDORS = {
     ],
 
     virtualization: [
-        "Cato",
         "Microsoft (Hyper-V)",
         "Citrix",
         "Broadcom (VMware)",
@@ -78,12 +73,12 @@ export const VENDORS = {
     ],
 
     cloud: [
-        "Cato",
         "Google Cloud (GCP)",
         "AWS",
         "Microsoft Azure",
         "Oracle Cloud",
         "IBM Cloud",
+        "Alibaba Cloud",
         "Others",
     ],
 
@@ -101,7 +96,7 @@ export const VENDORS = {
     secureWebGateway: [
         "Cato",
         "Zscaler",
-        "Palo Alto",
+        "Palo Alto Networks",
         "Netskope",
         "Cloudflare",
         "Others",
@@ -111,7 +106,7 @@ export const VENDORS = {
         "Cato",
         "Netskope",
         "Microsoft Defender for Cloud Apps",
-        "Palo Alto",
+        "Palo Alto Networks",
         "Others",
     ],
 
@@ -123,8 +118,8 @@ export const VENDORS = {
         "Others",
     ],
 
-    /** SSL VPN */
-    ssaVpn: [
+    /** SSL VPN (was ssaVpn) */
+    sslVpn: [
         "Cato VPN",
         "Cisco AnyConnect",
         "Ivanti",
@@ -142,7 +137,8 @@ export const VENDORS = {
         "Others",
     ],
 
-    vulnerabilityMgmt: [
+    /** Vulnerability Scanning (was vulnerabilityMgmt) */
+    vulnerabilityScanning: [
         "Cato",
         "Tenable",
         "Nodeware",
@@ -155,6 +151,8 @@ export const VENDORS = {
         "Cato",
         "Okta",
         "Microsoft Entra ID",
+        "Ping Identity",
+        "Auth0",
         "Others",
     ],
 
@@ -170,14 +168,13 @@ export const VENDORS = {
     mfa: [
         "Cato",
         "Duo",
-        "Microsoft Entra",
-        "Google Workspace",
+        "Microsoft Entra ID",
+        "Google Workspace (MFA)",
         "Okta",
         "Others",
     ],
 
     mdm: [
-        "Cato",
         "Microsoft Intune",
         "JumpCloud",
         "Jamf / Jamf Pro",
@@ -193,6 +190,8 @@ export const VENDORS = {
         "SentinelOne",
         "Huntress",
         "Bitdefender",
+        "Sophos",
+        "Trend Micro",
         "Others",
     ],
 
@@ -210,7 +209,9 @@ export const VENDORS = {
         "Microsoft Sentinel",
         "Splunk",
         "Google Chronicle",
-        "CrowdStrike Falcon",
+        "CrowdStrike",
+        "Elastic SIEM",
+        "Sumo Logic",
         "Others",
     ],
 
@@ -228,14 +229,14 @@ export const VENDORS = {
         "Cisco Meraki",
         "Fortinet",
         "Zscaler",
-        "Palo Alto",
+        "Palo Alto Networks",
         "Others",
     ],
 };
 
 /**
  * Helper: get vendors for a given service key.
- * Returns an empty array if the key is not found —
+ * Returns an empty array if the key is not recognised —
  * this lets the UI show a free-text field instead of a locked dropdown.
  *
  * Usage:  getVendors("nextGenFirewall")  → ["Cato", "Palo Alto Networks", ...]
