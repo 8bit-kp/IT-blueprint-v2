@@ -44,7 +44,6 @@ const Badge = ({ text, type = "neutral" }) => {
         else if (t === "no" || t === "false" || t === "no data") classes = "bg-gray-50 text-gray-400 border border-gray-100";
         else if (t === "vendor") classes = "bg-indigo-50 text-indigo-700 border border-indigo-100";
     }
-
     return (
         <span className={`px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap ${classes}`}>
             {text}
@@ -169,7 +168,7 @@ const BlueprintSummary = () => {
                     <div className="flex gap-3">
                         <button onClick={() => router.push("/blueprint-form")} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Edit Data</button>
 
-                        <button 
+                        <button
                             onClick={() => router.push("/all-blueprints")}
                             className="px-4 py-2 text-sm font-bold text-white bg-[#935010] hover:bg-[#7a3d0d] rounded-lg shadow-sm transition flex items-center gap-2"
                         >
@@ -354,10 +353,10 @@ const BlueprintSummary = () => {
                             <tbody className="divide-y divide-gray-100">
                                 {Object.entries(formData.technicalControls || {}).map(([key, rawValue]) => {
                                     const { displayValue, businessPriority, offering, rawChoice } = parseControlData(rawValue);
-                                    
+
                                     // Format label with proper capitalization for acronyms
                                     let label = key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
-                                    
+
                                     // Convert specific acronyms to all caps
                                     const acronyms = {
                                         'Sd Wan': 'SD WAN',
@@ -371,7 +370,7 @@ const BlueprintSummary = () => {
                                         'Dlp': 'DLP',
                                         'Casb': 'CASB'
                                     };
-                                    
+
                                     Object.entries(acronyms).forEach(([pattern, replacement]) => {
                                         label = label.replace(pattern, replacement);
                                     });
@@ -419,10 +418,22 @@ const BlueprintSummary = () => {
                                             {apps.map((app, i) => (
                                                 <tr key={i}>
                                                     <td className="px-2 py-2.5 font-semibold text-[#15587B]">{app.name}</td>
-                                                    <td className="px-2 py-2.5"><Badge text={app.containsSensitiveInfo === "Yes" ? "Yes" : null} type="status" /></td>
-                                                    <td className="px-2 py-2.5"><Badge text={app.mfa === "Yes" ? "Yes" : null} type="status" /></td>
-                                                    <td className="px-2 py-2.5"><Badge text={app.backedUp === "Yes" ? "Yes" : null} type="status" /></td>
-                                                    <td className="px-2 py-2.5"><Badge text={app.businessPriority} type="priority" /></td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.containsSensitiveInfo === "Yes" ? "Yes" : "No"} type="status" />
+                                                    </td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.mfa === "Yes" ? "Yes" : "No"} type="status" />
+                                                    </td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.backedUp === "Yes" ? "Yes" : "No"} type="status" />
+                                                    </td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.businessPriority} type="priority" />
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
