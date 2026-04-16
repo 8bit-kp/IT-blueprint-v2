@@ -37,3 +37,32 @@ select:invalid {
 input.placeholder-visible::placeholder {
   color: #4b5563 !important; /* Even darker gray-600 for better contrast */
 }
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+/* THUMB - Chrome/Safari */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #34808A !important;
+  border: 3px solid white;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+
+}
+
+/* THUMB - Firefox */
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #34808A !important;
+  border: 3px solid white;
+  cursor: pointer;
+}

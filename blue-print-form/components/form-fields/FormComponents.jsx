@@ -116,7 +116,10 @@ export const RangeInput = memo(({ label, value, onChange }) => {
                 max="100"
                 value={localValue}
                 onChange={handleChange}
-                className="w-full custom-slider cursor-pointer"
+                style={{
+                    background: `linear-gradient(to right, #34808A ${localValue}%, #e5e7eb ${localValue}%)`
+                }}
+                className="w-full h-3 rounded-lg appearance-none cursor-pointer accent-transparent"
             />
         </div>
     );
