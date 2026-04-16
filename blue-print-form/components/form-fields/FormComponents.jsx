@@ -102,18 +102,21 @@ export const RangeInput = memo(({ label, value, onChange }) => {
     };
 
     return (
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <div className="flex justify-between mb-2">
+        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex justify-between items-center mb-3">
                 <label className="text-sm font-medium text-gray-700">{label}</label>
-                <span className="text-sm font-bold text-[#34808A]">{localValue}%</span>
+                <span className="text-sm font-semibold text-[#34808A] bg-[#34808A]/10 px-2 py-0.5 rounded">
+                    {localValue}%
+                </span>
             </div>
+
             <input
                 type="range"
                 min="0"
                 max="100"
                 value={localValue}
                 onChange={handleChange}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#34808A]"
+                className="w-full custom-slider cursor-pointer"
             />
         </div>
     );
