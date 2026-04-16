@@ -52,36 +52,33 @@ const NetworkServerStep = memo(({ formData, setField, initialTechControlState })
         <div className="border-t border-gray-200 pt-6">
           <h3 className="text-sm font-bold text-gray-400 uppercase mb-4 tracking-wider">Network Config & Servers</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-8">
 
-            {/* LEFT COLUMN */}
             <div className="space-y-3">
               <YesNo
-                label="HA Routing?"
+                label="HA Routing"
                 value={formData.haRouting}
                 onChange={(v) => setField("haRouting", v)}
               />
 
               <YesNo
-                label="Guest Wireless?"
+                label="Guest Wireless"
                 value={formData.guestWireless}
                 onChange={(v) => setField("guestWireless", v)}
               />
 
               <YesNo
-                label="Guest Segmentation?"
+                label="Guest Segmentation"
                 value={formData.guestSegmentation}
                 onChange={(v) => setField("guestSegmentation", v)}
               />
             </div>
 
-            {/* RIGHT COLUMN */}
-            <div className="space-y-4 md:border-l-2 md:border-gray-300 md:pl-8">
 
-              {/* Windows */}
+            <div className="space-y-4">
               <div>
                 <YesNo
-                  label="Windows Servers?"
+                  label="Windows Servers"
                   value={formData.windowsServers}
                   onChange={(v) => setField("windowsServers", v)}
                 />
@@ -101,7 +98,7 @@ const NetworkServerStep = memo(({ formData, setField, initialTechControlState })
               {/* Linux */}
               <div>
                 <YesNo
-                  label="Linux Servers?"
+                  label="Linux Servers"
                   value={formData.linuxServers}
                   onChange={(v) => setField("linuxServers", v)}
                 />

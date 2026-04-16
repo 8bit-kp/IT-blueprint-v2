@@ -17,17 +17,17 @@ export const VENDORS = {
 
     /** WAN 1 / WAN 2 / WAN 3 */
     WAN: [
-        "Spectrum",
+        "AT&T",
         "Comcast",
         "Google Fiber",
-        "AT&T",
+        "Spectrum",
         "Verizon",
         "Others",
     ],
 
     switching: [
-        "Cisco",
         "Aruba",
+        "Cisco",
         "Extreme",
         "Juniper",
         "Meraki",
@@ -36,8 +36,8 @@ export const VENDORS = {
     ],
 
     routing: [
-        "Cisco",
         "Aruba",
+        "Cisco",
         "Extreme",
         "Juniper",
         "Meraki",
@@ -47,38 +47,38 @@ export const VENDORS = {
 
     wireless: [
         "Cisco",
-        "UniFi",
-        "Meraki",
-        "Juniper",
         "Extreme",
+        "Juniper",
+        "Meraki",
+        "UniFi",
         "Others",
     ],
 
     baremetal: [
         "Dell",
-        "IBM",
         "HP",
+        "IBM",
         "Supermicro",
         "Others",
     ],
 
     virtualization: [
-        "Microsoft (Hyper-V)",
-        "Citrix",
         "Broadcom (VMware)",
-        "Proxmox",
-        "Nutanix",
+        "Citrix",
         "Linux (KVM)",
+        "Microsoft (Hyper-V)",
+        "Nutanix",
+        "Proxmox",
         "Others",
     ],
 
     cloud: [
-        "Google Cloud (GCP)",
+        "Alibaba Cloud",
         "AWS",
+        "Google Cloud (GCP)",
+        "IBM Cloud",
         "Microsoft Azure",
         "Oracle Cloud",
-        "IBM Cloud",
-        "Alibaba Cloud",
         "Others",
     ],
 
@@ -86,26 +86,26 @@ export const VENDORS = {
 
     nextGenFirewall: [
         "Cato",
-        "Palo Alto Networks",
-        "Fortinet",
-        "Cisco",
         "Check Point",
+        "Cisco",
+        "Fortinet",
+        "Palo Alto Networks",
         "Others",
     ],
 
     secureWebGateway: [
         "Cato",
-        "Zscaler",
-        "Palo Alto Networks",
-        "Netskope",
         "Cloudflare",
+        "Netskope",
+        "Palo Alto Networks",
+        "Zscaler",
         "Others",
     ],
 
     casb: [
         "Cato",
-        "Netskope",
         "Microsoft Defender for Cloud Apps",
+        "Netskope",
         "Palo Alto Networks",
         "Others",
     ],
@@ -113,83 +113,81 @@ export const VENDORS = {
     dlp: [
         "Cato",
         "Dropsuite",
-        "Zscaler",
         "Microsoft Purview",
+        "Zscaler",
         "Others",
     ],
 
-    /** SSL VPN (was ssaVpn) */
     sslVpn: [
-        "Cato VPN",
         "Cisco AnyConnect",
-        "Ivanti",
+        "Cato VPN",
         "FortiGate",
+        "Ivanti",
         "OpenVPN",
         "Others",
     ],
 
     emailSecurity: [
+        "Barracuda",
         "Cato",
         "IRONSCALES",
-        "Proofpoint",
-        "Barracuda",
         "Microsoft Defender",
+        "Proofpoint",
         "Others",
     ],
 
-    /** Vulnerability Scanning (was vulnerabilityMgmt) */
     vulnerabilityScanning: [
         "Cato",
-        "Tenable",
         "Nodeware",
         "Qualys",
         "Rapid7",
+        "Tenable",
         "Others",
     ],
 
     iam: [
-        "Cato",
-        "Okta",
-        "Microsoft Entra ID",
-        "Ping Identity",
         "Auth0",
+        "Cato",
+        "Microsoft Entra ID",
+        "Okta",
+        "Ping Identity",
         "Others",
     ],
 
     nac: [
-        "Cato",
-        "Cisco ISE",
         "Aruba ClearPass",
+        "Cisco ISE",
         "Extreme Networks",
         "FortiNAC",
+        "Varonis",
         "Others",
     ],
 
     mfa: [
         "Cato",
         "Duo",
-        "Microsoft Entra ID",
         "Google Workspace (MFA)",
+        "Microsoft Entra ID",
         "Okta",
         "Others",
     ],
 
     mdm: [
-        "Microsoft Intune",
-        "JumpCloud",
-        "Jamf / Jamf Pro",
-        "Omnissa (VMware Workspace ONE)",
         "Ivanti",
+        "Jamf / Jamf Pro",
+        "JumpCloud",
+        "Microsoft Intune",
+        "Omnissa (VMware Workspace ONE)",
         "Others",
     ],
 
     edr: [
+        "Bitdefender",
         "Cato",
         "CrowdStrike",
+        "Huntress",
         "Microsoft Defender",
         "SentinelOne",
-        "Huntress",
-        "Bitdefender",
         "Sophos",
         "Trend Micro",
         "Others",
@@ -197,30 +195,30 @@ export const VENDORS = {
 
     dataClassification: [
         "Cato",
-        "Microsoft Purview",
-        "Tableau",
-        "Power BI",
         "Lepide",
+        "Microsoft Purview",
+        "Power BI",
+        "Tableau",
         "Others",
     ],
 
     socSiem: [
         "Cato",
-        "Microsoft Sentinel",
-        "Splunk",
-        "Google Chronicle",
         "CrowdStrike",
         "Elastic SIEM",
+        "Google Chronicle",
+        "Microsoft Sentinel",
+        "Splunk",
         "Sumo Logic",
         "Others",
     ],
 
     assetManagement: [
+        "Asset Panda",
         "Cato",
         "Lansweeper",
         "ScalePad",
         "Zoho Asset Management",
-        "Asset Panda",
         "Others",
     ],
 
@@ -228,12 +226,11 @@ export const VENDORS = {
         "Cato",
         "Cisco Meraki",
         "Fortinet",
-        "Zscaler",
         "Palo Alto Networks",
+        "Zscaler",
         "Others",
     ],
 };
-
 /**
  * Helper: get vendors for a given service key.
  * Returns an empty array if the key is not recognised —
