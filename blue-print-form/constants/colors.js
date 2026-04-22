@@ -155,3 +155,24 @@ export function getPriorityButtonClass(value, current) {
 export function getOfferingBadgeClass(value) {
     return OFFERING_COLORS.badge[value] ?? OFFERING_COLORS.badge.default;
 }
+
+// ── Donut Chart Colors (SecurityVisualsModal / dashboard-visuals) ──────────
+
+/**
+ * Hex colors used for the animated donut charts in the Security Visuals overlay.
+ *   Yes     → green-500
+ *   No      → red-500
+ *   default → gray-300 (no data / empty)
+ */
+export const DONUT_COLORS = {
+    Yes: "#22c55e",      // green-500
+    No: "#ef4444",       // red-500
+    default: "#d1d5db",  // gray-300 (no data)
+};
+
+/**
+ * Returns the hex fill color for a donut arc based on the status value.
+ */
+export function getDonutColor(value) {
+    return DONUT_COLORS[value] ?? DONUT_COLORS.default;
+}

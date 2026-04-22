@@ -11,8 +11,20 @@ import FinancialDocument from "@/components/coverpages/FinancialDocument";
 import OperationalDocument from "@/components/coverpages/OperationalDocument";
 import AdministrationDocument from "@/components/coverpages/AdministrationDocument";
 import CompleteDocument from "@/components/coverpages/CompleteDocument";
+import SecurityVisualsModal from "@/components/dashboard-visuals/SecurityVisualsModal";
 
-const BlueprintCard = ({ title, description, icon, documentComponent, formData, fileName, bgColor = "bg-gradient-to-br from-blue-500 to-blue-600" }) => {
+// ── Blueprint Card ─────────────────────────────────────────────────────────
+
+const BlueprintCard = ({
+    title,
+    description,
+    icon,
+    documentComponent,
+    formData,
+    fileName,
+    bgColor = "bg-gradient-to-br from-blue-500 to-blue-600",
+    onVisualise,
+}) => {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -21,6 +33,7 @@ const BlueprintCard = ({ title, description, icon, documentComponent, formData, 
 
     return (
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+            {/* Card header */}
             <div className={`${bgColor} p-6 text-white`}>
                 <div className="flex items-center gap-4">
                     <div className="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
@@ -32,11 +45,13 @@ const BlueprintCard = ({ title, description, icon, documentComponent, formData, 
                     </div>
                 </div>
             </div>
-            
+
+            {/* Card actions */}
             <div className="p-6">
-                <div className="flex gap-3">
+                {/* Row 1: View Dashboard + Download PDF */}
+                <div className="flex gap-3 mb-3">
                     <button
-                        onClick={() => window.open(`/blueprint-dashboard?type=${fileName}`, '_blank')}
+                        onClick={() => window.open(`/blueprint-dashboard?type=${fileName}`, "_blank")}
                         className="flex-1 px-4 py-2.5 text-sm font-semibold text-[#15587B] bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,10 +63,10 @@ const BlueprintCard = ({ title, description, icon, documentComponent, formData, 
                     {isClient && (
                         <PDFDownloadLink
                             document={documentComponent}
-                            fileName={`${fileName}-${(formData.companyName || "Company").replace(/\s+/g, '_')}.pdf`}
+                            fileName={`${fileName}-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
                             className="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-[#935010] hover:bg-[#7a3d0d] rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
                         >
-                            {({ blob, url, loading, error }) => (
+                            {({ loading }) => (
                                 <>
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -62,10 +77,29 @@ const BlueprintCard = ({ title, description, icon, documentComponent, formData, 
                         </PDFDownloadLink>
                     )}
                 </div>
+
+                {/* Row 2: Visualise Data — only rendered when a handler is provided */}
+                {onVisualise && (
+                    <button
+                        onClick={onVisualise}
+                        className="w-full px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#34808A] to-[#15587B] hover:from-[#2b6d75] hover:to-[#0d3d51] rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                    >
+                        {/* Donut / pie chart icon */}
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                        </svg>
+                        Visualise Data
+                    </button>
+                )}
             </div>
         </div>
     );
 };
+
+// ── Page ───────────────────────────────────────────────────────────────────
 
 const AllBlueprintsPage = () => {
     const router = useRouter();
@@ -73,6 +107,7 @@ const AllBlueprintsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [isClient, setIsClient] = useState(false);
+    const [showSecurityVisuals, setShowSecurityVisuals] = useState(false);
 
     useEffect(() => {
         setIsClient(true);
@@ -123,7 +158,7 @@ const AllBlueprintsPage = () => {
             icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
             documentComponent: <BlueprintDocument companyName={formData.companyName || "—"} preparedDate={new Date()} currentStateData={formData} />,
             fileName: "Current-State-Blueprint",
-            bgColor: "bg-gradient-to-br from-[#15587B] to-[#34808A]"
+            bgColor: "bg-gradient-to-br from-[#15587B] to-[#34808A]",
         },
         {
             title: "Security Blueprint",
@@ -131,7 +166,8 @@ const AllBlueprintsPage = () => {
             icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
             documentComponent: <SecurityDocument companyName={formData.companyName || "—"} preparedDate={new Date()} securityData={formData} />,
             fileName: "Security-Blueprint",
-            bgColor: "bg-gradient-to-br from-red-500 to-red-600"
+            bgColor: "bg-gradient-to-br from-red-500 to-red-600",
+            onVisualise: () => setShowSecurityVisuals(true),
         },
         {
             title: "Financial Blueprint",
@@ -139,7 +175,7 @@ const AllBlueprintsPage = () => {
             icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
             documentComponent: <FinancialDocument companyName={formData.companyName || "—"} preparedDate={new Date()} financialData={formData} />,
             fileName: "Financial-Blueprint",
-            bgColor: "bg-gradient-to-br from-green-500 to-green-600"
+            bgColor: "bg-gradient-to-br from-green-500 to-green-600",
         },
         {
             title: "Operational Blueprint",
@@ -147,7 +183,7 @@ const AllBlueprintsPage = () => {
             icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" /></svg>,
             documentComponent: <OperationalDocument companyName={formData.companyName || "—"} preparedDate={new Date()} operationalData={formData} />,
             fileName: "Operational-Blueprint",
-            bgColor: "bg-gradient-to-br from-purple-500 to-purple-600"
+            bgColor: "bg-gradient-to-br from-purple-500 to-purple-600",
         },
         {
             title: "Administration & Controls Blueprint",
@@ -155,8 +191,8 @@ const AllBlueprintsPage = () => {
             icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
             documentComponent: <AdministrationDocument companyName={formData.companyName || "—"} preparedDate={new Date()} administrationData={formData} />,
             fileName: "Administration-Blueprint",
-            bgColor: "bg-gradient-to-br from-orange-500 to-orange-600"
-        }
+            bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
+        },
     ];
 
     return (
@@ -201,6 +237,7 @@ const AllBlueprintsPage = () => {
                             formData={formData}
                             fileName={blueprint.fileName}
                             bgColor={blueprint.bgColor}
+                            onVisualise={blueprint.onVisualise}
                         />
                     ))}
                 </div>
@@ -210,16 +247,16 @@ const AllBlueprintsPage = () => {
                     {isClient && (
                         <PDFDownloadLink
                             document={
-                                <CompleteDocument 
-                                    companyName={formData.companyName || "—"} 
-                                    preparedDate={new Date()} 
-                                    formData={formData} 
+                                <CompleteDocument
+                                    companyName={formData.companyName || "—"}
+                                    preparedDate={new Date()}
+                                    formData={formData}
                                 />
                             }
-                            fileName={`Complete-IT-Blueprint-${(formData.companyName || "Company").replace(/\s+/g, '_')}.pdf`}
+                            fileName={`Complete-IT-Blueprint-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
                             className="px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-[#15587B] to-[#34808A] hover:from-[#0d3d51] hover:to-[#2b6d75] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3"
                         >
-                            {({ blob, url, loading, error }) => (
+                            {({ loading }) => (
                                 <>
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -231,6 +268,11 @@ const AllBlueprintsPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* Security Visuals Modal */}
+            {showSecurityVisuals && (
+                <SecurityVisualsModal onClose={() => setShowSecurityVisuals(false)} />
+            )}
         </div>
     );
 };
