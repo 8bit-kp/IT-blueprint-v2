@@ -8,6 +8,7 @@ import { useForm } from "@/context/FormContext";
 import { useRouter } from "next/navigation";
 import FormHeader from "@/components/FormHeader";
 import WarningModal from "@/components/WarningModal";
+import SecurityVisualsModal from "@/components/dashboard-visuals/SecurityVisualsModal";
 
 // Import step components
 import Step1 from "@/components/form-fields/CompanyInfoStep";
@@ -42,6 +43,7 @@ export default function BlueprintForm() {
     const [token, setToken] = useState(null);
     const [loadingReset, setLoadingReset] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
+    const [showSecurityVisuals, setShowSecurityVisuals] = useState(false);
 
     const [technicalControls, setTechnicalControls] = useState({
         nextGenFirewall: { ...initialTechControlState },
@@ -246,12 +248,18 @@ export default function BlueprintForm() {
         const success = await saveStep(step);
         if (success) {
             if (step === totalSteps) {
-                router.push("/blueprint-summary");
+                // Show Security Visuals modal before navigating to summary
+                setShowSecurityVisuals(true);
             } else {
                 setStep((prev) => prev + 1);
                 window.scrollTo(0, 0);
             }
         }
+    };
+
+    const handleSecurityVisualsClose = () => {
+        setShowSecurityVisuals(false);
+        router.push("/blueprint-summary");
     };
 
     const handleBack = () => {
@@ -330,6 +338,10 @@ export default function BlueprintForm() {
 
     return (
         <div className="min-h-screen bg-[#F3F4F6] pb-24">
+            {/* Security Blueprint Data Visualisation — shown after final step save */}
+            {showSecurityVisuals && (
+                <SecurityVisualsModal onClose={handleSecurityVisualsClose} />
+            )}
             <FormHeader />
 
             <WarningModal
