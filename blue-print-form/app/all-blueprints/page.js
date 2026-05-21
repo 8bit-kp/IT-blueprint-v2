@@ -74,24 +74,34 @@ const BlueprintCard = ({
     documentComponent,
     formData,
     fileName,
-    onVisualise,
     tag,
+    accentColor,   // { bar: "#hex", barTo: "#hex", icon: "rgba(...)", text: "#hex" }
 }) => {
     const [isClient, setIsClient] = useState(false);
     useEffect(() => { setIsClient(true); }, []);
 
+    const bar     = accentColor?.bar    || "#15587B";
+    const barTo   = accentColor?.barTo  || "#34808A";
+    const iconBg  = accentColor?.icon   || "rgba(21,88,123,0.09)";
+    const iconTxt = accentColor?.text   || "#15587B";
+
     return (
-        <div className="group bg-white rounded-xl border border-gray-200 hover:border-[#34808A]/40 hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
-            {/* Left accent bar via top border */}
-            <div className="h-0.5 w-full bg-gradient-to-r from-[#15587B] to-[#34808A]" />
+        <div className="group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">
+            {/* Accent top bar — unique per card */}
+            <div
+                className="h-1 w-full"
+                style={{ background: `linear-gradient(to right, ${bar}, ${barTo})` }}
+            />
 
             <div className="flex flex-col flex-1 p-6">
                 {/* Header row */}
-                <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-start justify-between gap-3 mb-5">
+                    <div className="flex items-center gap-3.5">
                         {/* Icon badge */}
-                        <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-[#15587B]/8 flex items-center justify-center text-[#15587B]"
-                            style={{ backgroundColor: "rgba(21,88,123,0.08)" }}>
+                        <div
+                            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                            style={{ backgroundColor: iconBg, color: iconTxt }}
+                        >
                             {icon}
                         </div>
                         <div>
@@ -100,7 +110,10 @@ const BlueprintCard = ({
                         </div>
                     </div>
                     {tag && (
-                        <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider text-[#34808A] bg-[#34808A]/10 px-2 py-0.5 rounded-full">
+                        <span
+                            className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                            style={{ color: bar, backgroundColor: iconBg }}
+                        >
                             {tag}
                         </span>
                     )}
@@ -115,8 +128,14 @@ const BlueprintCard = ({
                         {/* View Dashboard */}
                         <button
                             onClick={() => window.open(`/blueprint-dashboard?type=${fileName}`, "_blank")}
-                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-[#15587B] bg-gray-50 hover:bg-[#15587B]/8 border border-gray-200 hover:border-[#15587B]/30 rounded-lg transition-all duration-150"
-                            style={{ "--tw-hover-bg": "rgba(21,88,123,0.08)" }}
+                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-lg transition-all duration-150"
+                            style={{
+                                color: bar,
+                                backgroundColor: "#f9fafb",
+                                borderColor: "#e5e7eb",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = iconBg; e.currentTarget.style.borderColor = bar + "55"; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "#f9fafb"; e.currentTarget.style.borderColor = "#e5e7eb"; }}
                         >
                             <IconDashboard />
                             View Dashboard
@@ -127,7 +146,10 @@ const BlueprintCard = ({
                             <PDFDownloadLink
                                 document={documentComponent}
                                 fileName={`${fileName}-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white bg-[#15587B] hover:bg-[#0f4460] rounded-lg transition-all duration-150"
+                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white rounded-lg transition-all duration-150 shadow-sm"
+                                style={{ backgroundColor: bar }}
+                                onMouseEnter={e => { e.currentTarget.style.opacity = "0.88"; }}
+                                onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
                             >
                                 {({ loading }) => (
                                     <>
@@ -138,23 +160,6 @@ const BlueprintCard = ({
                             </PDFDownloadLink>
                         )}
                     </div>
-
-                    {/* Visualise Data — only for Security */}
-                    {onVisualise && (
-                        <button
-                            onClick={onVisualise}
-                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-[#34808A] bg-[#34808A]/8 hover:bg-[#34808A]/15 border border-[#34808A]/20 hover:border-[#34808A]/40 rounded-lg transition-all duration-150"
-                            style={{ backgroundColor: "rgba(52,128,138,0.07)" }}
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                    d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                    d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                            </svg>
-                            Visualise Data
-                        </button>
-                    )}
                 </div>
             </div>
         </div>
@@ -224,6 +229,7 @@ const AllBlueprintsPage = () => {
             icon: <IconCurrentState />,
             documentComponent: <BlueprintDocument companyName={formData.companyName || "—"} preparedDate={new Date()} currentStateData={formData} />,
             fileName: "Current-State-Blueprint",
+            accentColor: { bar: "#15587B", barTo: "#34808A", icon: "rgba(21,88,123,0.09)", text: "#15587B" },
         },
         {
             title: "Security Blueprint",
@@ -232,7 +238,7 @@ const AllBlueprintsPage = () => {
             icon: <IconSecurity />,
             documentComponent: <SecurityDocument companyName={formData.companyName || "—"} preparedDate={new Date()} securityData={formData} />,
             fileName: "Security-Blueprint",
-            onVisualise: () => setVisualsCollapsed(false),
+            accentColor: { bar: "#b91c1c", barTo: "#ef4444", icon: "rgba(185,28,28,0.08)", text: "#b91c1c" },
         },
         {
             title: "Financial Blueprint",
@@ -241,6 +247,7 @@ const AllBlueprintsPage = () => {
             icon: <IconFinancial />,
             documentComponent: <FinancialDocument companyName={formData.companyName || "—"} preparedDate={new Date()} financialData={formData} />,
             fileName: "Financial-Blueprint",
+            accentColor: { bar: "#047857", barTo: "#10b981", icon: "rgba(4,120,87,0.08)", text: "#047857" },
         },
         {
             title: "Operational Blueprint",
@@ -249,6 +256,7 @@ const AllBlueprintsPage = () => {
             icon: <IconOperational />,
             documentComponent: <OperationalDocument companyName={formData.companyName || "—"} preparedDate={new Date()} operationalData={formData} />,
             fileName: "Operational-Blueprint",
+            accentColor: { bar: "#6d28d9", barTo: "#a78bfa", icon: "rgba(109,40,217,0.08)", text: "#6d28d9" },
         },
         {
             title: "Administration & Controls Blueprint",
@@ -257,6 +265,7 @@ const AllBlueprintsPage = () => {
             icon: <IconAdmin />,
             documentComponent: <AdministrationDocument companyName={formData.companyName || "—"} preparedDate={new Date()} administrationData={formData} />,
             fileName: "Administration-Blueprint",
+            accentColor: { bar: "#b45309", barTo: "#f59e0b", icon: "rgba(180,83,9,0.08)", text: "#b45309" },
         },
     ];
 
@@ -382,7 +391,7 @@ const AllBlueprintsPage = () => {
                     </p>
 
                     {/* ── CARDS GRID ─────────────────────────────────────── */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                         {blueprints.map((bp, idx) => (
                             <BlueprintCard
                                 key={idx}
@@ -393,7 +402,7 @@ const AllBlueprintsPage = () => {
                                 documentComponent={bp.documentComponent}
                                 formData={formData}
                                 fileName={bp.fileName}
-                                onVisualise={bp.onVisualise}
+                                accentColor={bp.accentColor}
                             />
                         ))}
                     </div>
