@@ -11,6 +11,7 @@ import OperationalDocument from "@/components/coverpages/OperationalDocument";
 import AdministrationDocument from "@/components/coverpages/AdministrationDocument";
 import CompleteDocument from "@/components/coverpages/CompleteDocument";
 import SecurityDonutGrid from "@/components/dashboard-visuals/SecurityDonutGrid";
+import ApplicationDonutGrid from "@/components/dashboard-visuals/ApplicationDonutGrid";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -175,6 +176,7 @@ const AllBlueprintsPage = () => {
     const [error, setError] = useState(false);
     const [isClient, setIsClient] = useState(false);
     const [visualsCollapsed, setVisualsCollapsed] = useState(false);
+    const [appsCollapsed, setAppsCollapsed] = useState(false);
 
     useEffect(() => { setIsClient(true); }, []);
 
@@ -379,6 +381,78 @@ const AllBlueprintsPage = () => {
                             </div>
                             <div className="px-6 py-6">
                                 <SecurityDonutGrid formData={formData} />
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* ── APPLICATION VISUALS SECTION ──────────────────────── */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    {/* Collapsible header */}
+                    <button
+                        onClick={() => setAppsCollapsed(v => !v)}
+                        className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors duration-150"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-[#15587B] to-[#34808A] flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                        d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-gray-800">Application Data Visualisation</p>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    All application portfolios · colour = business priority · Red = Critical · Orange = High · Blue = Medium
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                            {/* Legend pills — visible when collapsed */}
+                            {appsCollapsed && (
+                                <div className="hidden sm:flex items-center gap-2">
+                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
+                                        <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Critical
+                                    </span>
+                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
+                                        <span className="w-2 h-2 rounded-full bg-orange-400 inline-block" /> High
+                                    </span>
+                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
+                                        <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" /> Medium
+                                    </span>
+                                </div>
+                            )}
+                            <span className="text-gray-400">
+                                <IconChevron collapsed={appsCollapsed} />
+                            </span>
+                        </div>
+                    </button>
+
+                    {/* Content */}
+                    {!appsCollapsed && (
+                        <>
+                            <div className="h-px bg-gray-100" />
+                            {/* Legend bar */}
+                            <div className="px-6 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-5 text-[11px] font-medium text-gray-500">
+                                <span className="flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
+                                    Critical
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block" />
+                                    High
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" />
+                                    Medium
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" />
+                                    Low
+                                </span>
+                            </div>
+                            <div className="px-6 py-6">
+                                <ApplicationDonutGrid formData={formData} />
                             </div>
                         </>
                     )}
