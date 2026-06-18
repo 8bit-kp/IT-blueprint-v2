@@ -38,7 +38,8 @@ const Badge = ({ text, type = "neutral" }) => {
         if (t === "critical") classes = "bg-red-50 text-red-700 border border-red-100";
         else if (t === "high") classes = "bg-orange-50 text-orange-700 border border-orange-100";
         else if (t === "medium") classes = "bg-blue-50 text-blue-700 border border-blue-100";
-        else classes = "bg-green-50 text-green-700 border border-green-100";
+        else if (t === "low") classes = "bg-green-50 text-green-700 border border-green-100";
+        else classes = "bg-gray-50 text-gray-500 border border-gray-100";
     } else if (type === "status") {
         if (t === "yes" || t === "true" || t === "protected" || t === "fully patched") classes = "bg-teal-50 text-teal-700 border border-teal-100";
         else if (t === "no" || t === "false" || t === "no data") classes = "bg-gray-50 text-gray-400 border border-gray-100";
@@ -396,10 +397,11 @@ const BlueprintSummary = () => {
                 </Card>
 
                 {/* ROW 4: APPLICATIONS (GRID OF TABLES) */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                     {Object.entries(formData.applications || {}).map(([category, apps]) => {
                         if (!apps || apps.length === 0) return null;
-                        const catTitle = category.charAt(0).toUpperCase() + category.slice(1);
+                        const catTitle = category === "hrit" ? "HR / IT"
+                            : category.charAt(0).toUpperCase() + category.slice(1);
 
                         return (
                             <Card key={category} title={`${catTitle} Applications`}>
@@ -408,10 +410,15 @@ const BlueprintSummary = () => {
                                         <thead className="text-xs text-gray-400 uppercase border-b border-gray-100 text-left">
                                             <tr>
                                                 <th className="px-2 py-2 font-medium">Provider</th>
-                                                <th className="px-2 py-2 font-medium">Data</th>
+                                                <th className="px-2 py-2 font-medium">Sensitive</th>
                                                 <th className="px-2 py-2 font-medium">MFA</th>
                                                 <th className="px-2 py-2 font-medium">Backup</th>
                                                 <th className="px-2 py-2 font-medium">Priority</th>
+                                                <th className="px-2 py-2 font-medium">Sensitivity</th>
+                                                <th className="px-2 py-2 font-medium">Biz Sens.</th>
+                                                <th className="px-2 py-2 font-medium">Biz Conf.</th>
+                                                <th className="px-2 py-2 font-medium">PII</th>
+                                                <th className="px-2 py-2 font-medium">HIPAA</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
@@ -433,6 +440,26 @@ const BlueprintSummary = () => {
 
                                                     <td className="px-2 py-2.5">
                                                         <Badge text={app.businessPriority} type="priority" />
+                                                    </td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.sensitivity} type="priority" />
+                                                    </td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.businessSensitivity} type="priority" />
+                                                    </td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.businessConfidentiality} type="priority" />
+                                                    </td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.personallyIdentifiableInfo} type="priority" />
+                                                    </td>
+
+                                                    <td className="px-2 py-2.5">
+                                                        <Badge text={app.hipaaRegulated} type="priority" />
                                                     </td>
                                                 </tr>
                                             ))}

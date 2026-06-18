@@ -3,31 +3,148 @@
 import { memo, useEffect } from "react";
 import { TextInput, YesNoCompact } from "./FormComponents";
 
-// Default applications for each category
+// ── Priority levels (Low → Medium → High → Critical) ──────────────────────
+const PRIORITY_LEVELS = ["Low", "Medium", "High", "Critical"];
+
+// ── Sensitivity classification fields ─────────────────────────────────────
+const SENSITIVITY_FIELDS = [
+    { key: "sensitivity",                label: "Sensitivity" },
+    { key: "businessSensitivity",        label: "Business Sensitivity" },
+    { key: "businessConfidentiality",    label: "Business Confidentiality" },
+    { key: "personallyIdentifiableInfo", label: "Personally Identifiable Information" },
+    { key: "hipaaRegulated",             label: "HIPAA-Regulated" },
+];
+
+// ── Priority button color styles (Low=green, Med=blue, High=orange, Crit=red)
+const getPriorityActiveClass = (priority) => {
+    switch (priority) {
+        case "Low":      return "bg-green-500  text-white shadow-md ring-1 ring-green-600";
+        case "Medium":   return "bg-blue-500   text-white shadow-md ring-1 ring-blue-600";
+        case "High":     return "bg-orange-500 text-white shadow-md ring-1 ring-orange-600";
+        case "Critical": return "bg-red-600    text-white shadow-md ring-1 ring-red-700";
+        default:         return "bg-gray-100   text-gray-600";
+    }
+};
+
+// ── Default applications for each category ────────────────────────────────
 const defaultApplications = {
     productivity: [
-        { id: "prod-1", name: "Microsoft 365", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Critical", offering: "SaaS" },
-        { id: "prod-2", name: "Google Workspace", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "High", offering: "SaaS" },
+        {
+            id: "prod-1", name: "Microsoft 365",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes",
+            businessPriority: "Critical", offering: "SaaS",
+            sensitivity: "High", businessSensitivity: "High",
+            businessConfidentiality: "High", personallyIdentifiableInfo: "Medium", hipaaRegulated: "Low",
+        },
+        {
+            id: "prod-2", name: "Google Workspace",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes",
+            businessPriority: "High", offering: "SaaS",
+            sensitivity: "High", businessSensitivity: "Medium",
+            businessConfidentiality: "Medium", personallyIdentifiableInfo: "Low", hipaaRegulated: "Low",
+        },
     ],
     finance: [
-        { id: "fin-1", name: "QuickBooks", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
-        { id: "fin-2", name: "NetSuite", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "High", offering: "SaaS" },
+        {
+            id: "fin-1", name: "QuickBooks",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No",
+            businessPriority: "Critical", offering: "SaaS",
+            sensitivity: "Critical", businessSensitivity: "Critical",
+            businessConfidentiality: "Critical", personallyIdentifiableInfo: "High", hipaaRegulated: "Low",
+        },
+        {
+            id: "fin-2", name: "NetSuite",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No",
+            businessPriority: "High", offering: "SaaS",
+            sensitivity: "Critical", businessSensitivity: "High",
+            businessConfidentiality: "High", personallyIdentifiableInfo: "High", hipaaRegulated: "Low",
+        },
     ],
     hrit: [
-        { id: "hr-1", name: "Workday", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
-        { id: "hr-2", name: "BambooHR", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "High", offering: "SaaS" },
+        {
+            id: "hr-1", name: "Workday",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No",
+            businessPriority: "Critical", offering: "SaaS",
+            sensitivity: "Critical", businessSensitivity: "High",
+            businessConfidentiality: "Critical", personallyIdentifiableInfo: "Critical", hipaaRegulated: "Low",
+        },
+        {
+            id: "hr-2", name: "BambooHR",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No",
+            businessPriority: "High", offering: "SaaS",
+            sensitivity: "High", businessSensitivity: "High",
+            businessConfidentiality: "High", personallyIdentifiableInfo: "High", hipaaRegulated: "Low",
+        },
     ],
     payroll: [
-        { id: "pay-1", name: "ADP Workforce Now", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
-        { id: "pay-2", name: "Paychex", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No", businessPriority: "Critical", offering: "SaaS" },
+        {
+            id: "pay-1", name: "ADP Workforce Now",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No",
+            businessPriority: "Critical", offering: "SaaS",
+            sensitivity: "Critical", businessSensitivity: "Critical",
+            businessConfidentiality: "Critical", personallyIdentifiableInfo: "Critical", hipaaRegulated: "Low",
+        },
+        {
+            id: "pay-2", name: "Paychex",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "No",
+            businessPriority: "Critical", offering: "SaaS",
+            sensitivity: "Critical", businessSensitivity: "Critical",
+            businessConfidentiality: "Critical", personallyIdentifiableInfo: "Critical", hipaaRegulated: "Low",
+        },
     ],
     additional: [
-        { id: "add-1", name: "Salesforce", containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Critical", offering: "SaaS" },
-        { id: "add-2", name: "Zoom", containsSensitiveInfo: "No", mfa: "Yes", backedUp: "No", byodAccess: "Yes", businessPriority: "Medium", offering: "SaaS" },
-        { id: "add-3", name: "Slack", containsSensitiveInfo: "No", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes", businessPriority: "Medium", offering: "SaaS" },
+        {
+            id: "add-1", name: "Salesforce",
+            containsSensitiveInfo: "Yes", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes",
+            businessPriority: "Critical", offering: "SaaS",
+            sensitivity: "High", businessSensitivity: "High",
+            businessConfidentiality: "High", personallyIdentifiableInfo: "Medium", hipaaRegulated: "Low",
+        },
+        {
+            id: "add-2", name: "Zoom",
+            containsSensitiveInfo: "No", mfa: "Yes", backedUp: "No", byodAccess: "Yes",
+            businessPriority: "Medium", offering: "SaaS",
+            sensitivity: "Low", businessSensitivity: "Low",
+            businessConfidentiality: "Low", personallyIdentifiableInfo: "Low", hipaaRegulated: "Low",
+        },
+        {
+            id: "add-3", name: "Slack",
+            containsSensitiveInfo: "No", mfa: "Yes", backedUp: "Yes", byodAccess: "Yes",
+            businessPriority: "Medium", offering: "SaaS",
+            sensitivity: "Medium", businessSensitivity: "Low",
+            businessConfidentiality: "Low", personallyIdentifiableInfo: "Low", hipaaRegulated: "Low",
+        },
     ],
 };
 
+// ── Priority toggle button group ───────────────────────────────────────────
+// When `value` is empty / undefined the toggle shows all buttons unselected (gray).
+// Only highlights when user explicitly picks a value — so nothing is saved as
+// a silent default and the visualization only shows colour once data exists.
+const PriorityToggle = ({ label, value, onChange }) => (
+    <div>
+        <label className="text-[10px] uppercase font-bold text-gray-400 block mb-2">{label}</label>
+        <div className="flex gap-1.5">
+            {PRIORITY_LEVELS.map((priority) => {
+                const isActive = value === priority;   // ← no || "Low" fallback
+                return (
+                    <button
+                        key={priority}
+                        type="button"
+                        onClick={() => onChange(priority)}
+                        className={`flex-1 px-2 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${
+                            isActive ? getPriorityActiveClass(priority) : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                    >
+                        {priority}
+                    </button>
+                );
+            })}
+        </div>
+    </div>
+);
+
+// ── Single Application Card ────────────────────────────────────────────────
 const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
     return (
         <div className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm relative group hover:shadow-md transition">
@@ -40,6 +157,7 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
                 ✕
             </button>
 
+            {/* Provider Name */}
             <div className="mb-3">
                 <label className="block text-xs font-medium text-gray-500 mb-1">Provider Name</label>
                 <TextInput
@@ -51,31 +169,14 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
             </div>
 
             <div className="space-y-3 mb-4">
-                <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-2">Business Priority</label>
-                    <div className="flex gap-1.5">
-                        {["High", "Medium", "Critical"].map((priority) => {
-                            const currentPriority = app.businessPriority || "Medium";
-                            return (
-                                <button
-                                    key={priority}
-                                    type="button"
-                                    onClick={() => updateApp(index, "businessPriority", priority)}
-                                    className={`flex-1 px-2 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${currentPriority === priority
-                                            ? priority === "Critical"
-                                                ? "bg-red-600 text-white shadow-md ring-1 ring-red-700"
-                                                : priority === "High"
-                                                    ? "bg-orange-500 text-white shadow-md ring-1 ring-orange-600"
-                                                    : "bg-blue-500 text-white shadow-md ring-1 ring-blue-600"
-                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                        }`}
-                                >
-                                    {priority}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
+                {/* Business Priority */}
+                <PriorityToggle
+                    label="Business Priority"
+                    value={app.businessPriority}
+                    onChange={(v) => updateApp(index, "businessPriority", v)}
+                />
+
+                {/* Offering */}
                 <div>
                     <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Offering</label>
                     <select
@@ -88,36 +189,83 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
                         <option value="On-premise">On-prem</option>
                     </select>
                 </div>
+
+                {/* ── Sensitivity Classification Fields ── */}
+                <div className="pt-3 border-t border-gray-100 space-y-3">
+                    <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide">Sensitivity Classification</p>
+                    {SENSITIVITY_FIELDS.map((field) => (
+                        <PriorityToggle
+                            key={field.key}
+                            label={field.label}
+                            value={app[field.key]}
+                            onChange={(v) => updateApp(index, field.key, v)}
+                        />
+                    ))}
+                </div>
             </div>
 
+            {/* Yes/No toggles */}
             <div className="space-y-2 pt-2 border-t border-gray-100">
-                <YesNoCompact label="Sensitive Info" value={app.containsSensitiveInfo} onChange={(v) => updateApp(index, "containsSensitiveInfo", v)} />
-                <YesNoCompact label="MFA Enabled" value={app.mfa} onChange={(v) => updateApp(index, "mfa", v)} />
-                <YesNoCompact label="Backed Up" value={app.backedUp} onChange={(v) => updateApp(index, "backedUp", v)} />
-                <YesNoCompact label="BYOD Access" value={app.byodAccess} onChange={(v) => updateApp(index, "byodAccess", v)} />
+                <YesNoCompact label="Sensitive Info"  value={app.containsSensitiveInfo} onChange={(v) => updateApp(index, "containsSensitiveInfo", v)} />
+                <YesNoCompact label="MFA Enabled"     value={app.mfa}                   onChange={(v) => updateApp(index, "mfa", v)} />
+                <YesNoCompact label="Backed Up"       value={app.backedUp}              onChange={(v) => updateApp(index, "backedUp", v)} />
+                <YesNoCompact label="BYOD Access"     value={app.byodAccess}            onChange={(v) => updateApp(index, "byodAccess", v)} />
             </div>
         </div>
-    )
+    );
 });
 
+ApplicationCard.displayName = "ApplicationCard";
+
+// ── Main Step Component ────────────────────────────────────────────────────
 const ApplicationsStep = memo(({ formData, updateFormData }) => {
-    // Initialize with default applications if empty
+    // Sensitivity field keys we manage
+    const SENS_KEYS = [
+        "sensitivity", "businessSensitivity",
+        "businessConfidentiality", "personallyIdentifiableInfo", "hipaaRegulated",
+    ];
+
+    // Initialize categories that are empty, AND migrate existing apps
+    // that don't yet have the sensitivity fields (older DB documents).
     useEffect(() => {
         const currentApps = formData.applications || {};
-        const needsInitialization = Object.keys(defaultApplications).some(
-            category => !currentApps[category] || currentApps[category].length === 0
+        const needsInit = Object.keys(defaultApplications).some(
+            (cat) => !currentApps[cat] || currentApps[cat].length === 0
         );
 
-        if (needsInitialization) {
+        // Check if any existing app is missing at least one sensitivity field
+        const needsMigration = !needsInit && Object.values(currentApps).some(
+            (arr) => Array.isArray(arr) && arr.some(
+                (app) => SENS_KEYS.some((k) => app[k] === undefined)
+            )
+        );
+
+        if (needsInit) {
             const initializedApps = { ...currentApps };
-            Object.keys(defaultApplications).forEach(category => {
-                if (!initializedApps[category] || initializedApps[category].length === 0) {
-                    initializedApps[category] = [...defaultApplications[category]];
+            Object.keys(defaultApplications).forEach((cat) => {
+                if (!initializedApps[cat] || initializedApps[cat].length === 0) {
+                    initializedApps[cat] = [...defaultApplications[cat]];
                 }
             });
             updateFormData({ applications: initializedApps });
+        } else if (needsMigration) {
+            // For existing apps missing sensitivity fields, set them to ""
+            // so the next Save will persist them explicitly.
+            const migratedApps = {};
+            Object.entries(currentApps).forEach(([cat, arr]) => {
+                migratedApps[cat] = Array.isArray(arr)
+                    ? arr.map((app) => {
+                        const patch = {};
+                        SENS_KEYS.forEach((k) => {
+                            if (app[k] === undefined) patch[k] = "";
+                        });
+                        return Object.keys(patch).length ? { ...app, ...patch } : app;
+                    })
+                    : arr;
+            });
+            updateFormData({ applications: migratedApps });
         }
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const AppGroup = ({ title, category }) => {
         const apps = formData.applications?.[category] || [];
@@ -130,44 +278,76 @@ const ApplicationsStep = memo(({ formData, updateFormData }) => {
             const newApps = [...apps];
             newApps[index] = { ...newApps[index], [key]: val };
             updateAppsList(newApps);
-        }
+        };
 
         const addApp = () => {
-            updateAppsList([...apps, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: "", containsSensitiveInfo: "", mfa: "", backedUp: "", byodAccess: "", businessPriority: "Medium", offering: "SaaS" }]);
-        }
+            updateAppsList([
+                ...apps,
+                {
+                    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    name: "",
+                    containsSensitiveInfo: "",
+                    mfa: "",
+                    backedUp: "",
+                    byodAccess: "",
+                    businessPriority: "",
+                    offering: "",
+                    // Sensitivity fields — empty by default; user must explicitly choose
+                    sensitivity: "",
+                    businessSensitivity: "",
+                    businessConfidentiality: "",
+                    personallyIdentifiableInfo: "",
+                    hipaaRegulated: "",
+                },
+            ]);
+        };
 
         const removeApp = (index) => {
             updateAppsList(apps.filter((_, i) => i !== index));
-        }
+        };
 
         return (
             <div className="mb-8">
                 <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
                     <h3 className="text-lg font-bold text-[#15587B]">{title}</h3>
-                    <button onClick={addApp} className="text-xs bg-[#34808A] text-white px-3 py-1.5 rounded hover:bg-[#2b6f6f] transition">
+                    <button
+                        onClick={addApp}
+                        className="text-xs bg-[#34808A] text-white px-3 py-1.5 rounded hover:bg-[#2b6f6f] transition"
+                    >
                         + Add Application
                     </button>
                 </div>
-                {apps.length === 0 && <div className="text-gray-400 text-sm italic border border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">No applications added in this category yet.</div>}
-
+                {apps.length === 0 && (
+                    <div className="text-gray-400 text-sm italic border border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                        No applications added in this category yet.
+                    </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {apps.map((app, i) => (
-                        <ApplicationCard key={app.id || i} app={app} index={i} updateApp={updateApp} removeApp={removeApp} />
+                        <ApplicationCard
+                            key={app.id || i}
+                            app={app}
+                            index={i}
+                            updateApp={updateApp}
+                            removeApp={removeApp}
+                        />
                     ))}
                 </div>
             </div>
-        )
-    }
+        );
+    };
 
     return (
         <div className="max-w-7xl mx-auto space-y-8 pb-10">
             <AppGroup title="Productivity Applications" category="productivity" />
-            <AppGroup title="Finance Applications" category="finance" />
-            <AppGroup title="HRIT Applications" category="hrit" />
-            <AppGroup title="Payroll Applications" category="payroll" />
-            <AppGroup title="Additional Applications" category="additional" />
+            <AppGroup title="Finance Applications"      category="finance" />
+            <AppGroup title="HRIT Applications"         category="hrit" />
+            <AppGroup title="Payroll Applications"      category="payroll" />
+            <AppGroup title="Additional Applications"   category="additional" />
         </div>
-    )
+    );
 });
+
+ApplicationsStep.displayName = "ApplicationsStep";
 
 export default ApplicationsStep;

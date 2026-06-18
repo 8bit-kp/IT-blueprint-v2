@@ -8,6 +8,12 @@ const appSchema = new mongoose.Schema({
     byodAccess: String,
     businessPriority: String,
     offering: String,
+    // Sensitivity classification fields (added in v2)
+    sensitivity: String,
+    businessSensitivity: String,
+    businessConfidentiality: String,
+    personallyIdentifiableInfo: String,
+    hipaaRegulated: String,
 });
 
 const technicalControlSchema = new mongoose.Schema({

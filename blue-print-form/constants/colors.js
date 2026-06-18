@@ -62,11 +62,11 @@ export const PRIORITY_COLORS = {
      * Active state for priority toggle buttons in the form (TechnicalControlCard).
      */
     button: {
+        Low:      "bg-green-500  text-white shadow-md ring-1 ring-green-600",
         Critical: "bg-red-600    text-white shadow-md ring-1 ring-red-700",
-        High: "bg-orange-500 text-white shadow-md ring-1 ring-orange-600",
-        Medium: "bg-blue-500   text-white shadow-md ring-1 ring-blue-600",
-        Low: "bg-gray-400   text-white shadow-md ring-1 ring-gray-500",
-        default: "bg-gray-100   text-gray-600 hover:bg-gray-200",
+        High:     "bg-orange-500 text-white shadow-md ring-1 ring-orange-600",
+        Medium:   "bg-blue-500   text-white shadow-md ring-1 ring-blue-600",
+        default:  "bg-gray-100   text-gray-600 hover:bg-gray-200",
     },
 
     /**
@@ -74,10 +74,10 @@ export const PRIORITY_COLORS = {
      */
     chip: {
         Critical: "bg-red-100    text-red-800    font-bold",
-        High: "bg-orange-100 text-orange-800 font-bold",
-        Medium: "bg-blue-100   text-blue-800   font-bold",
-        Low: "bg-gray-100  text-gray-800",
-        default: "bg-gray-50    text-gray-600",
+        High:     "bg-orange-100 text-orange-800 font-bold",
+        Medium:   "bg-blue-100   text-blue-800   font-bold",
+        Low:      "bg-green-100  text-green-800  font-bold",
+        default:  "bg-gray-50    text-gray-600",
     },
 
     /**
@@ -85,10 +85,10 @@ export const PRIORITY_COLORS = {
      */
     badge: {
         Critical: "bg-red-600    text-white",
-        High: "bg-orange-500 text-white",
-        Medium: "bg-blue-500   text-white",
-        Low: "bg-gray-400   text-white",
-        default: "bg-gray-200   text-gray-500",
+        High:     "bg-orange-500 text-white",
+        Medium:   "bg-blue-500   text-white",
+        Low:      "bg-green-500  text-white",
+        default:  "bg-gray-200   text-gray-500",
     },
 };
 
@@ -175,4 +175,39 @@ export const DONUT_COLORS = {
  */
 export function getDonutColor(value) {
     return DONUT_COLORS[value] ?? DONUT_COLORS.default;
+}
+
+// ── Priority / Sensitivity Circle Colors ──────────────────────────────────
+
+/**
+ * Hex colors for the solid sensitivity circles in ApplicationDonutGrid.
+ * Low=green, Medium=yellow, High=orange, Critical=red.
+ * Also used for the business-priority donut rings.
+ */
+export const PRIORITY_HEX = {
+    Low:      "#22c55e",  // green-500
+    Medium:   "#eab308",  // yellow-500
+    High:     "#f97316",  // orange-500
+    Critical: "#ef4444",  // red-500
+    default:  "#d1d5db",  // gray-300
+};
+
+export const PRIORITY_HEX_BG = {
+    Low:      "#dcfce7",  // green-100
+    Medium:   "#fef9c3",  // yellow-100
+    High:     "#ffedd5",  // orange-100
+    Critical: "#fee2e2",  // red-100
+    default:  "#f9fafb",
+};
+
+/**
+ * Returns the hex fill colour for a priority/sensitivity value.
+ * Used by ApplicationDonutGrid for both donut rings and sensitivity circles.
+ */
+export function getPriorityHexColor(value) {
+    return PRIORITY_HEX[value] ?? PRIORITY_HEX.default;
+}
+
+export function getPriorityHexBg(value) {
+    return PRIORITY_HEX_BG[value] ?? PRIORITY_HEX_BG.default;
 }

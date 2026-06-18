@@ -65,8 +65,13 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
             mfa: "No",
             backedUp: "No",
             byodAccess: "No",
-            businessPriority: "Medium",
-            offering: "SaaS"
+            businessPriority: "Low",
+            offering: "SaaS",
+            sensitivity: "Low",
+            businessSensitivity: "Low",
+            businessConfidentiality: "Low",
+            personallyIdentifiableInfo: "Low",
+            hipaaRegulated: "Low",
         };
         const updatedApps = {
             ...applications,
@@ -125,66 +130,130 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                         value={app.name || ""}
                         onChange={(e) => updateAppField(category, index, "name", e.target.value)}
                         placeholder="Application name..."
-                        className="col-span-3 px-4 py-3 text-sm text-gray-800 font-medium placeholder-gray-400 border-r border-gray-200 focus:outline-none focus:bg-blue-50 focus:placeholder-gray-500"
+                        className="col-span-2 px-3 py-3 text-xs text-gray-800 font-medium placeholder-gray-400 border-r border-gray-200 focus:outline-none focus:bg-blue-50"
                     />
+                    {/* Business Priority */}
                     <select
-                        value={app.businessPriority || "Medium"}
+                        value={app.businessPriority || "Low"}
                         onChange={(e) => updateAppField(category, index, "businessPriority", e.target.value)}
-                        className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessPriority)}`}
+                        className={`col-span-1 px-1 py-3 text-xs border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessPriority)}`}
                     >
-                        <option value="Critical">Critical</option>
-                        <option value="High">High</option>
-                        <option value="Medium">Medium</option>
                         <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
                     </select>
+                    {/* Offering */}
                     <select
                         value={app.offering || "SaaS"}
                         onChange={(e) => updateAppField(category, index, "offering", e.target.value)}
-                        className="col-span-2 px-3 py-3 text-sm text-gray-700 border-r border-gray-200 focus:outline-none focus:bg-blue-50 font-medium"
+                        className="col-span-1 px-1 py-3 text-xs text-gray-700 border-r border-gray-200 focus:outline-none font-medium"
                     >
                         <option value="SaaS">SaaS</option>
                         <option value="On-premise">On-premise</option>
                     </select>
 
-                    <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
+                    {/* Sensitive Info */}
+                    <div className="col-span-1 px-1 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "containsSensitiveInfo", app.containsSensitiveInfo === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.containsSensitiveInfo)}`}
+                            className={`w-full text-[10px] font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.containsSensitiveInfo)}`}
                         >
-                            {app.containsSensitiveInfo === "Yes" ? "YES" : "NO"}
+                            {app.containsSensitiveInfo === "Yes" ? "Y" : "N"}
                         </button>
                     </div>
 
                     {/* MFA Toggle */}
-                    <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
+                    <div className="col-span-1 px-1 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "mfa", app.mfa === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.mfa)}`}
+                            className={`w-full text-[10px] font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.mfa)}`}
                         >
-                            {app.mfa === "Yes" ? "YES" : "NO"}
+                            {app.mfa === "Yes" ? "Y" : "N"}
                         </button>
                     </div>
 
                     {/* Backed Up Toggle */}
-                    <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
+                    <div className="col-span-1 px-1 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "backedUp", app.backedUp === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.backedUp)}`}
+                            className={`w-full text-[10px] font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.backedUp)}`}
                         >
-                            {app.backedUp === "Yes" ? "YES" : "NO"}
+                            {app.backedUp === "Yes" ? "Y" : "N"}
                         </button>
                     </div>
 
                     {/* BYOD Access Toggle */}
-                    <div className="col-span-1 px-2 py-3 flex items-center justify-center border-r border-gray-200">
+                    <div className="col-span-1 px-1 py-3 flex items-center justify-center border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "byodAccess", app.byodAccess === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-xs font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.byodAccess)}`}
+                            className={`w-full text-[10px] font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.byodAccess)}`}
                         >
-                            {app.byodAccess === "Yes" ? "YES" : "NO"}
+                            {app.byodAccess === "Yes" ? "Y" : "N"}
                         </button>
                     </div>
 
+                    {/* Sensitivity */}
+                    <select
+                        value={app.sensitivity || "Low"}
+                        onChange={(e) => updateAppField(category, index, "sensitivity", e.target.value)}
+                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.sensitivity)}`}
+                    >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Med</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Crit</option>
+                    </select>
+
+                    {/* Business Sensitivity */}
+                    <select
+                        value={app.businessSensitivity || "Low"}
+                        onChange={(e) => updateAppField(category, index, "businessSensitivity", e.target.value)}
+                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessSensitivity)}`}
+                    >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Med</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Crit</option>
+                    </select>
+
+                    {/* Business Confidentiality */}
+                    <select
+                        value={app.businessConfidentiality || "Low"}
+                        onChange={(e) => updateAppField(category, index, "businessConfidentiality", e.target.value)}
+                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessConfidentiality)}`}
+                    >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Med</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Crit</option>
+                    </select>
+
+                    {/* PII */}
+                    <select
+                        value={app.personallyIdentifiableInfo || "Low"}
+                        onChange={(e) => updateAppField(category, index, "personallyIdentifiableInfo", e.target.value)}
+                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.personallyIdentifiableInfo)}`}
+                    >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Med</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Crit</option>
+                    </select>
+
+                    {/* HIPAA */}
+                    <select
+                        value={app.hipaaRegulated || "Low"}
+                        onChange={(e) => updateAppField(category, index, "hipaaRegulated", e.target.value)}
+                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.hipaaRegulated)}`}
+                    >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Med</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Crit</option>
+                    </select>
+
+                    {/* Delete */}
                     <button
                         onClick={() => removeApplication(category, index)}
                         className="col-span-1 px-2 py-3 text-red-600 hover:bg-red-50 text-xs font-medium transition-colors flex items-center justify-center gap-1"
@@ -287,15 +356,19 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 </div>
 
                 {/* Table Header */}
-                <div className="grid grid-cols-12 gap-0 bg-[#0F4C5C] text-white text-sm font-bold sticky top-0 z-10">
-                    <div className="col-span-3 px-4 py-4 border-r border-white/20">APPLICATION / FUNCTION</div>
-                    <div className="col-span-2 px-3 py-4 border-r border-white/20">PRIORITY</div>
-                    <div className="col-span-2 px-3 py-4 border-r border-white/20">OFFERING</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">SENSITIVE</div>
+                <div className="grid grid-cols-12 gap-0 bg-[#0F4C5C] text-white text-[10px] font-bold sticky top-0 z-10">
+                    <div className="col-span-2 px-4 py-4 border-r border-white/20">APPLICATION / FUNCTION</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20">PRIORITY</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20">OFFERING</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">SENS.</div>
                     <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">MFA</div>
                     <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BACKUP</div>
                     <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BYOD</div>
-                    <div className="col-span-1 px-2 py-4">ACTION</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">SENS.</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BIZ SENS.</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BIZ CONF.</div>
+                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">PII</div>
+                    <div className="col-span-1 px-2 py-4 text-center">HIPAA</div>
                 </div>
 
                 <div className="p-6 space-y-6">

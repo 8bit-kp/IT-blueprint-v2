@@ -66,10 +66,24 @@ export async function POST(request) {
 
         console.log(`Saving blueprint for user ${userId}`);
 
-        await Blueprint.updateOne(
-            { userId },
-            { $set: updateData, $setOnInsert: { userId } },
-            { upsert: true }   // runValidators removed – all schema fields are String/loose types
+        // Debug: log first app's sensitivity fields to verify they arrive in the payload
+        const firstApp = updateData?.applications?.productivity?.[0];
+        if (firstApp) {
+            console.log(`[DEBUG] First productivity app: name="${firstApp.name}" sensitivity="${firstApp.sensitivity}" businessSensitivity="${firstApp.businessSensitivity}"`);
+        }
+
+        // Use the raw MongoDB driver (bypass Mongoose strict-schema filtering on
+        // subdocuments). Mongoose's compiled model caches the schema at startup and
+        // can silently strip newly-added fields on sub-document arrays during an
+        // updateOne $set. The raw collection.updateOne has no such restriction.
+        const db = (await connectDB()).connection.db;
+        const collection = db.collection("blueprints");
+        const { ObjectId } = (await import("mongodb"));
+
+        await collection.updateOne(
+            { userId: new ObjectId(userId) },
+            { $set: updateData, $setOnInsert: { userId: new ObjectId(userId) } },
+            { upsert: true }
         );
 
         // Invalidate cache so next GET returns fresh data

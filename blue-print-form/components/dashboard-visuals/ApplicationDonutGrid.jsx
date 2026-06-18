@@ -2,77 +2,102 @@
 
 import React from "react";
 import { PieChart, Pie, Cell } from "recharts";
+import { getPriorityHexColor, getPriorityHexBg } from "@/constants/colors";
 
-// ── Priority → hex color mapping ───────────────────────────────────────────
-// Matches the colors used in the blueprint form ApplicationsStep.jsx
-const PRIORITY_COLORS = {
-    Critical: "#ef4444",   // red-500
-    High: "#f97316",       // orange-500
-    Medium: "#3b82f6",     // blue-500
-    Low: "#9ca3af",        // gray-400
-    default: "#d1d5db",    // gray-300 (no data)
-};
+// ── Sensitivity circle field definitions ───────────────────────────────────
+const SENSITIVITY_CIRCLES = [
+    { key: "sensitivity",                abbr: "S",  label: "Sensitivity" },
+    { key: "businessSensitivity",        abbr: "BS", label: "Business Sensitivity" },
+    { key: "businessConfidentiality",    abbr: "BC", label: "Business Confidentiality" },
+    { key: "personallyIdentifiableInfo", abbr: "PI", label: "Personally Identifiable Information" },
+    { key: "hipaaRegulated",             abbr: "H",  label: "HIPAA-Regulated" },
+];
 
-function getPriorityColor(priority) {
-    return PRIORITY_COLORS[priority] ?? PRIORITY_COLORS.default;
-}
+// ── Solid Sensitivity Circle ────────────────────────────────────────────────
+// Displays a filled circle with a 1-3 letter abbreviation centered inside.
+// Color is driven by the field value: Low=green, Medium=yellow, High=orange, Critical=red.
 
-// ── Priority badge background (subtle) ─────────────────────────────────────
-const PRIORITY_BG = {
-    Critical: "#fee2e2",   // red-100
-    High: "#ffedd5",       // orange-100
-    Medium: "#dbeafe",     // blue-100
-    Low: "#f3f4f6",        // gray-100
-    default: "#f9fafb",
-};
-
-function getPriorityBg(priority) {
-    return PRIORITY_BG[priority] ?? PRIORITY_BG.default;
-}
-
-// ── Single Application Donut Card ──────────────────────────────────────────
-
-const AppDonutCard = ({ appName, priority, offering }) => {
-    const fillColor = getPriorityColor(priority);
-    const trackColor = "#e5e7eb"; // gray-200
-
-    const data = [{ value: 100 }];
-
-    const displayName = appName?.trim() || "Unnamed App";
-    const shortName = displayName.length > 18
-        ? displayName.slice(0, 16) + "…"
-        : displayName;
+const SensitivityCircle = ({ abbr, value, label }) => {
+    const bg    = getPriorityHexColor(value);
+    const text  = "#ffffff";
+    const empty = !value;
 
     return (
         <div
-            className="flex flex-col items-center gap-2 rounded-2xl shadow-md border p-4 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+            className="flex flex-col items-center gap-0.5"
+            title={`${label}: ${value || "Not set"}`}
+        >
+            {/* Circle */}
+            <div
+                className="flex items-center justify-center rounded-full transition-all duration-300 flex-shrink-0"
+                style={{
+                    width: 34,
+                    height: 34,
+                    backgroundColor: empty ? "#e5e7eb" : bg,
+                    boxShadow: empty ? "none" : `0 2px 6px ${bg}55`,
+                }}
+            >
+                <span
+                    className="font-black leading-none select-none"
+                    style={{
+                        fontSize: abbr.length > 2 ? 9 : 11,
+                        color: empty ? "#9ca3af" : text,
+                        letterSpacing: "-0.5px",
+                    }}
+                >
+                    {abbr}
+                </span>
+            </div>
+            {/* Value label below circle */}
+            <span
+                className="text-[8px] font-semibold uppercase leading-none"
+                style={{ color: empty ? "#9ca3af" : bg }}
+            >
+                {value ? value.slice(0, 4) : "—"}
+            </span>
+        </div>
+    );
+};
+
+
+// ── Single Application Donut Card ──────────────────────────────────────────
+
+const AppDonutCard = ({ app }) => {
+    const priority   = app.businessPriority;
+    const fillColor  = getPriorityHexColor(priority);
+    const bgColor    = getPriorityHexBg(priority);
+    const trackColor = "#e5e7eb"; // gray-200
+
+    const displayName = (app.name?.trim()) || "Unnamed App";
+    const shortName   = displayName.length > 18 ? displayName.slice(0, 16) + "…" : displayName;
+
+    return (
+        <div
+            className="flex flex-col items-center rounded-2xl shadow-md border p-4 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
             style={{
                 backgroundColor: "#ffffff",
-                borderColor: fillColor + "33",
+                borderColor: fillColor + "44",
                 borderWidth: "1.5px",
             }}
         >
             {/* Provider name at top */}
             <p
-                className="text-center text-[11px] font-bold leading-tight px-1 truncate w-full"
+                className="text-center text-[11px] font-bold leading-tight px-1 truncate w-full mb-1"
                 title={displayName}
                 style={{ color: fillColor }}
             >
                 {shortName}
             </p>
 
-            {/* Donut */}
+            {/* Donut ring */}
             <div className="relative">
                 <PieChart width={110} height={110}>
                     {/* Background track */}
                     <Pie
                         data={[{ value: 100 }]}
-                        cx={50}
-                        cy={50}
-                        innerRadius={34}
-                        outerRadius={48}
-                        startAngle={90}
-                        endAngle={-270}
+                        cx={50} cy={50}
+                        innerRadius={34} outerRadius={48}
+                        startAngle={90} endAngle={-270}
                         dataKey="value"
                         isAnimationActive={false}
                         stroke="none"
@@ -81,13 +106,10 @@ const AppDonutCard = ({ appName, priority, offering }) => {
                     </Pie>
                     {/* Filled arc */}
                     <Pie
-                        data={data}
-                        cx={50}
-                        cy={50}
-                        innerRadius={34}
-                        outerRadius={48}
-                        startAngle={90}
-                        endAngle={-270}
+                        data={[{ value: 100 }]}
+                        cx={50} cy={50}
+                        innerRadius={34} outerRadius={48}
+                        startAngle={90} endAngle={-270}
                         dataKey="value"
                         isAnimationActive={!!priority}
                         animationBegin={0}
@@ -102,7 +124,7 @@ const AppDonutCard = ({ appName, priority, offering }) => {
                 {/* Center label — priority text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span
-                        className="text-[10px] font-bold leading-tight text-center px-1"
+                        className="text-[10px] font-black leading-tight text-center px-1"
                         style={{ color: fillColor }}
                     >
                         {priority || "—"}
@@ -111,17 +133,26 @@ const AppDonutCard = ({ appName, priority, offering }) => {
             </div>
 
             {/* Offering badge */}
-            {offering && (
+            {app.offering && (
                 <span
-                    className="text-[9px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
-                    style={{
-                        backgroundColor: getPriorityBg(priority),
-                        color: fillColor,
-                    }}
+                    className="text-[9px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full mt-1"
+                    style={{ backgroundColor: bgColor, color: fillColor }}
                 >
-                    {offering}
+                    {app.offering}
                 </span>
             )}
+
+            {/* ── Sensitivity Circles Row ── */}
+            <div className="grid grid-cols-5 place-items-center gap-5 w-full mt-3 pt-3 border-t border-gray-100">
+                {SENSITIVITY_CIRCLES.map((sc) => (
+                    <SensitivityCircle
+                        key={sc.key}
+                        abbr={sc.abbr}
+                        value={app[sc.key]}
+                        label={sc.label}
+                    />
+                ))}
+            </div>
         </div>
     );
 };
@@ -138,26 +169,39 @@ const CategorySection = ({ title, apps }) => {
                 <div>
                     <h3 className="text-lg font-bold">{title}</h3>
                     <p className="text-sm text-white/80 mt-0.5">
-                        {apps.length} application{apps.length !== 1 ? "s" : ""} · colour = business priority
+                        {apps.length} application{apps.length !== 1 ? "s" : ""} · ring = business priority · circles = sensitivity classification
                     </p>
                 </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" title="Critical" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block ml-1" title="High" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block ml-1" title="Medium" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block ml-1" title="Low" />
+                {/* Priority legend dots */}
+                <div className="flex items-center gap-1 flex-shrink-0 text-[10px] text-white/80 gap-3">
+                    {[
+                        { label: "Low",      color: "#22c55e" },
+                        { label: "Medium",   color: "#eab308" },
+                        { label: "High",     color: "#f97316" },
+                        { label: "Critical", color: "#ef4444" },
+                    ].map(({ label, color }) => (
+                        <span key={label} className="flex items-center gap-1">
+                            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: color }} />
+                            {label}
+                        </span>
+                    ))}
                 </div>
             </div>
 
+            {/* Sensitivity circle legend */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4 px-1 text-[10px] text-gray-500 font-medium">
+                <span className="font-semibold text-gray-600">Circles:</span>
+                {SENSITIVITY_CIRCLES.map((sc) => (
+                    <span key={sc.key}>
+                        <span className="font-bold text-gray-700">{sc.abbr}</span> = {sc.label}
+                    </span>
+                ))}
+            </div>
+
             {/* Donut grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                 {apps.map((app, i) => (
-                    <AppDonutCard
-                        key={app.id || i}
-                        appName={app.name}
-                        priority={app.businessPriority}
-                        offering={app.offering}
-                    />
+                    <AppDonutCard key={app.id || i} app={app} />
                 ))}
             </div>
         </div>
@@ -172,20 +216,12 @@ const CategorySection = ({ title, apps }) => {
  * Props:
  *   formData – the raw blueprint document from the DB
  *
- * Reads formData.applications which has the shape:
- *   {
- *     productivity: [{ name, businessPriority, offering, ... }, ...],
- *     finance:      [...],
- *     hrit:         [...],
- *     payroll:      [...],
- *     additional:   [...],
- *   }
- *
  * Each application gets one donut card.
- * Donut colour is driven by businessPriority:
- *   Critical → red   | High → orange | Medium → blue | Low → gray
- * Provider name is displayed at the top of the card.
- * Adding or removing apps in the form is automatically reflected here.
+ * - Donut ring colour  → businessPriority (Low=green, Medium=yellow, High=orange, Critical=red)
+ * - Provider name      → top of card
+ * - Sensitivity circles → S, BS, BC, PI, H — solid filled circles coloured by field value
+ *
+ * Adding or removing apps from the form is automatically reflected here.
  */
 const ApplicationDonutGrid = ({ formData }) => {
     const applications = formData?.applications || {};
