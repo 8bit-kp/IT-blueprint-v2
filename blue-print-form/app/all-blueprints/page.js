@@ -175,8 +175,8 @@ const AllBlueprintsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [isClient, setIsClient] = useState(false);
-    const [visualsCollapsed, setVisualsCollapsed] = useState(false);
-    const [appsCollapsed, setAppsCollapsed] = useState(false);
+    const [visualsCollapsed, setVisualsCollapsed] = useState(true);
+    const [appsCollapsed, setAppsCollapsed] = useState(true);
 
     useEffect(() => { setIsClient(true); }, []);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect } from "react";
+import { memo, useEffect, useState } from "react";
 import { TextInput, YesNoCompact } from "./FormComponents";
 
 // ── Priority levels (Low → Medium → High → Critical) ──────────────────────
@@ -144,8 +144,21 @@ const PriorityToggle = ({ label, value, onChange }) => (
     </div>
 );
 
+// ── Sensitivity dropdown colour helper ────────────────────────────────────
+const getSensSelectClass = (value) => {
+    switch (value) {
+        case "Low":      return "text-green-700  bg-green-50  border-green-200";
+        case "Medium":   return "text-yellow-700 bg-yellow-50 border-yellow-200";
+        case "High":     return "text-orange-700 bg-orange-50 border-orange-200";
+        case "Critical": return "text-red-700    bg-red-50    border-red-200";
+        default:         return "text-gray-500   bg-gray-50   border-gray-200";
+    }
+};
+
 // ── Single Application Card ────────────────────────────────────────────────
 const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
+    const [sensOpen, setSensOpen] = useState(false);
+
     return (
         <div className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm relative group hover:shadow-md transition">
             <button
@@ -190,17 +203,52 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
                     </select>
                 </div>
 
-                {/* ── Sensitivity Classification Fields ── */}
-                <div className="pt-3 border-t border-gray-100 space-y-3">
-                    <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide">Sensitivity Classification</p>
-                    {SENSITIVITY_FIELDS.map((field) => (
-                        <PriorityToggle
-                            key={field.key}
-                            label={field.label}
-                            value={app[field.key]}
-                            onChange={(v) => updateApp(index, field.key, v)}
-                        />
-                    ))}
+                {/* ── Sensitivity Classification — collapsible ── */}
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                    {/* Header row with arrow toggle */}
+                    <button
+                        type="button"
+                        onClick={() => setSensOpen((o) => !o)}
+                        className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
+                    >
+                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wide">
+                            Sensitivity Classification
+                        </span>
+                        <svg
+                            className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${
+                                sensOpen ? "rotate-180" : "rotate-0"
+                            }`}
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    {/* Collapsible body — dropdowns */}
+                    {sensOpen && (
+                        <div className="px-3 py-2 space-y-2 bg-white">
+                            {SENSITIVITY_FIELDS.map((field) => (
+                                <div key={field.key}>
+                                    <label className="text-[9px] uppercase font-bold text-gray-400 block mb-1">
+                                        {field.label}
+                                    </label>
+                                    <select
+                                        value={app[field.key] || ""}
+                                        onChange={(e) => updateApp(index, field.key, e.target.value)}
+                                        className={`w-full text-xs font-semibold p-1.5 border rounded transition-colors ${
+                                            getSensSelectClass(app[field.key])
+                                        }`}
+                                    >
+                                        <option value="">— Not set —</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                        <option value="Critical">Critical</option>
+                                    </select>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -214,6 +262,7 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
         </div>
     );
 });
+
 
 ApplicationCard.displayName = "ApplicationCard";
 
