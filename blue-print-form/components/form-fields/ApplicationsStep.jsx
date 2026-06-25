@@ -266,6 +266,82 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
 
 ApplicationCard.displayName = "ApplicationCard";
 
+// ── App Group (stable top-level component) ────────────────────────────────
+// IMPORTANT: This MUST be defined outside ApplicationsStep.
+// If defined inside the render body, React treats it as a new component type
+// on every render, causing full unmount/remount of the subtree — which destroys
+// focused inputs (focus loss bug) and resets scroll position (scroll bug).
+const AppGroup = ({ title, category, apps, allApplications, updateFormData }) => {
+    const updateAppsList = (newApps) => {
+        updateFormData({ applications: { ...allApplications, [category]: newApps } });
+    };
+
+    const updateApp = (index, key, val) => {
+        const newApps = [...apps];
+        newApps[index] = { ...newApps[index], [key]: val };
+        updateAppsList(newApps);
+    };
+
+    const addApp = () => {
+        updateAppsList([
+            ...apps,
+            {
+                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                name: "",
+                containsSensitiveInfo: "",
+                mfa: "",
+                backedUp: "",
+                byodAccess: "",
+                businessPriority: "",
+                offering: "",
+                // Sensitivity fields — empty by default; user must explicitly choose
+                sensitivity: "",
+                businessSensitivity: "",
+                businessConfidentiality: "",
+                personallyIdentifiableInfo: "",
+                hipaaRegulated: "",
+            },
+        ]);
+    };
+
+    const removeApp = (index) => {
+        updateAppsList(apps.filter((_, i) => i !== index));
+    };
+
+    return (
+        <div className="mb-8">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <h3 className="text-lg font-bold text-[#15587B]">{title}</h3>
+                <button
+                    type="button"
+                    onClick={addApp}
+                    className="text-xs bg-[#34808A] text-white px-3 py-1.5 rounded hover:bg-[#2b6f6f] transition"
+                >
+                    + Add Application
+                </button>
+            </div>
+            {apps.length === 0 && (
+                <div className="text-gray-400 text-sm italic border border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                    No applications added in this category yet.
+                </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {apps.map((app, i) => (
+                    <ApplicationCard
+                        key={app.id || i}
+                        app={app}
+                        index={i}
+                        updateApp={updateApp}
+                        removeApp={removeApp}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+AppGroup.displayName = "AppGroup";
+
 // ── Main Step Component ────────────────────────────────────────────────────
 const ApplicationsStep = memo(({ formData, updateFormData }) => {
     // Sensitivity field keys we manage
@@ -316,83 +392,15 @@ const ApplicationsStep = memo(({ formData, updateFormData }) => {
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const AppGroup = ({ title, category }) => {
-        const apps = formData.applications?.[category] || [];
-
-        const updateAppsList = (newApps) => {
-            updateFormData({ applications: { ...formData.applications, [category]: newApps } });
-        };
-
-        const updateApp = (index, key, val) => {
-            const newApps = [...apps];
-            newApps[index] = { ...newApps[index], [key]: val };
-            updateAppsList(newApps);
-        };
-
-        const addApp = () => {
-            updateAppsList([
-                ...apps,
-                {
-                    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-                    name: "",
-                    containsSensitiveInfo: "",
-                    mfa: "",
-                    backedUp: "",
-                    byodAccess: "",
-                    businessPriority: "",
-                    offering: "",
-                    // Sensitivity fields — empty by default; user must explicitly choose
-                    sensitivity: "",
-                    businessSensitivity: "",
-                    businessConfidentiality: "",
-                    personallyIdentifiableInfo: "",
-                    hipaaRegulated: "",
-                },
-            ]);
-        };
-
-        const removeApp = (index) => {
-            updateAppsList(apps.filter((_, i) => i !== index));
-        };
-
-        return (
-            <div className="mb-8">
-                <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
-                    <h3 className="text-lg font-bold text-[#15587B]">{title}</h3>
-                    <button
-                        onClick={addApp}
-                        className="text-xs bg-[#34808A] text-white px-3 py-1.5 rounded hover:bg-[#2b6f6f] transition"
-                    >
-                        + Add Application
-                    </button>
-                </div>
-                {apps.length === 0 && (
-                    <div className="text-gray-400 text-sm italic border border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
-                        No applications added in this category yet.
-                    </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {apps.map((app, i) => (
-                        <ApplicationCard
-                            key={app.id || i}
-                            app={app}
-                            index={i}
-                            updateApp={updateApp}
-                            removeApp={removeApp}
-                        />
-                    ))}
-                </div>
-            </div>
-        );
-    };
+    const allApplications = formData.applications || {};
 
     return (
         <div className="max-w-7xl mx-auto space-y-8 pb-10">
-            <AppGroup title="Productivity Applications" category="productivity" />
-            <AppGroup title="Finance Applications"      category="finance" />
-            <AppGroup title="HRIT Applications"         category="hrit" />
-            <AppGroup title="Payroll Applications"      category="payroll" />
-            <AppGroup title="Additional Applications"   category="additional" />
+            <AppGroup title="Productivity Applications" category="productivity" apps={allApplications.productivity || []} allApplications={allApplications} updateFormData={updateFormData} />
+            <AppGroup title="Finance Applications"      category="finance"      apps={allApplications.finance      || []} allApplications={allApplications} updateFormData={updateFormData} />
+            <AppGroup title="HRIT Applications"         category="hrit"         apps={allApplications.hrit         || []} allApplications={allApplications} updateFormData={updateFormData} />
+            <AppGroup title="Payroll Applications"      category="payroll"      apps={allApplications.payroll      || []} allApplications={allApplications} updateFormData={updateFormData} />
+            <AppGroup title="Additional Applications"   category="additional"   apps={allApplications.additional   || []} allApplications={allApplications} updateFormData={updateFormData} />
         </div>
     );
 });

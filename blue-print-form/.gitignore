@@ -45,3 +45,7 @@ next-env.d.ts
 # backend specific
 /backend/.env
 /backend/node_modules
+
+# local-only developer documentation (do not push to GitHub)
+/docs/
+CLAUDE.md
