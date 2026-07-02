@@ -137,6 +137,12 @@ export default function BlueprintForm() {
                         };
                     }
 
+                    // Ensure customCategories is always an array even for documents
+                    // created before the custom-categories feature was introduced.
+                    if (!Array.isArray(data.customCategories)) {
+                        data.customCategories = [];
+                    }
+
                     updateFormData(data);
                     setLastSavedStep(data._lastSavedStep || 0);
                 }
@@ -191,6 +197,10 @@ export default function BlueprintForm() {
 
             const normalizedData = {
                 ...formData,
+                // Explicitly include customCategories so it is never accidentally
+                // dropped if formData is a stale closure snapshot. If formData
+                // already has it the value is the same; this just makes the intent clear.
+                customCategories: Array.isArray(formData.customCategories) ? formData.customCategories : [],
                 applications,
                 WAN1: normalizeVendorField(formData.WAN1),
                 WAN2: normalizeVendorField(formData.WAN2),
@@ -290,6 +300,7 @@ export default function BlueprintForm() {
             await axios.post(
                 `${backendUrl}/api/blueprint/save`,
                 {
+                    // Reset all application data including any custom categories
                     applications: {
                         productivity: [],
                         finance: [],
@@ -297,6 +308,10 @@ export default function BlueprintForm() {
                         payroll: [],
                         additional: []
                     },
+                    // Explicitly clear custom categories so MongoDB document matches
+                    // the reset FormContext state (prevents stale custom categories
+                    // surviving a reset in the database).
+                    customCategories: [],
                     _lastSavedStep: 0
                 },
                 {

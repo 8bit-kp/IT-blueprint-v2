@@ -99,12 +99,27 @@ const blueprintSchema = new mongoose.Schema({
     },
 
     // Step 6: Applications
+    // Fixed categories use typed sub-arrays; the field itself is Mixed so that
+    // user-created custom categories (arbitrary keys) can also be stored here
+    // without Mongoose stripping them. The save route uses the raw MongoDB driver
+    // for exactly this reason — see docs/project-memory.md.
     applications: {
-        productivity: [appSchema],
-        finance: [appSchema],
-        hrit: [appSchema],
-        payroll: [appSchema],
-        additional: [appSchema],
+        type: mongoose.Schema.Types.Mixed,
+        default: {
+            productivity: [],
+            finance:      [],
+            hrit:         [],
+            payroll:      [],
+            additional:   [],
+        },
+    },
+
+    // Custom application category metadata (Step 6 — user-created sections)
+    // Each entry: { key: String (slug used as applications[key]), title: String (display name) }
+    // Default categories are NOT listed here — only user-created ones.
+    customCategories: {
+        type: [{ key: String, title: String, _id: false }],
+        default: [],
     },
 });
 

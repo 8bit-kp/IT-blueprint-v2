@@ -400,8 +400,15 @@ const BlueprintSummary = () => {
                 <div className="grid grid-cols-1 gap-6">
                     {Object.entries(formData.applications || {}).map(([category, apps]) => {
                         if (!apps || apps.length === 0) return null;
-                        const catTitle = category === "hrit" ? "HR / IT"
-                            : category.charAt(0).toUpperCase() + category.slice(1);
+
+                        // Resolve display title: custom categories use their stored title,
+                        // built-in categories use their known labels (hrit special-cased).
+                        const customMeta = (formData.customCategories || []).find((c) => c.key === category);
+                        const catTitle = customMeta
+                            ? customMeta.title
+                            : category === "hrit"
+                                ? "HR / IT"
+                                : category.charAt(0).toUpperCase() + category.slice(1);
 
                         return (
                             <Card key={category} title={`${catTitle} Applications`}>

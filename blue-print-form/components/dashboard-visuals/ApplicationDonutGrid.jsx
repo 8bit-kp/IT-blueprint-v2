@@ -224,19 +224,26 @@ const CategorySection = ({ title, apps }) => {
  * Adding or removing apps from the form is automatically reflected here.
  */
 const ApplicationDonutGrid = ({ formData }) => {
-    const applications = formData?.applications || {};
+    const applications   = formData?.applications   || {};
+    const customCats     = formData?.customCategories || [];
 
-    const categories = [
-        { key: "productivity", label: "Productivity Applications" },
-        { key: "finance",      label: "Finance Applications" },
-        { key: "hrit",         label: "HR / IT Applications" },
-        { key: "payroll",      label: "Payroll Applications" },
-        { key: "additional",   label: "Additional Applications" },
-    ];
+    // Title lookup for the five built-in categories
+    const BUILTIN_TITLES = {
+        productivity: "Productivity Applications",
+        finance:      "Finance Applications",
+        hrit:         "HR / IT Applications",
+        payroll:      "Payroll Applications",
+        additional:   "Additional Applications",
+    };
 
-    const hasAnyApp = categories.some(
-        (c) => (applications[c.key]?.length ?? 0) > 0
-    );
+    // Build a unified title map: built-in keys + user-created keys
+    const titleMap = { ...BUILTIN_TITLES };
+    customCats.forEach((cc) => { titleMap[cc.key] = cc.title; });
+
+    // Render every key present in applications (including custom ones)
+    const categoryKeys = Object.keys(applications);
+
+    const hasAnyApp = categoryKeys.some((k) => (applications[k]?.length ?? 0) > 0);
 
     if (!hasAnyApp) {
         return (
@@ -248,11 +255,11 @@ const ApplicationDonutGrid = ({ formData }) => {
 
     return (
         <div>
-            {categories.map((cat) => (
+            {categoryKeys.map((key) => (
                 <CategorySection
-                    key={cat.key}
-                    title={cat.label}
-                    apps={applications[cat.key] || []}
+                    key={key}
+                    title={titleMap[key] || (key.charAt(0).toUpperCase() + key.slice(1))}
+                    apps={applications[key] || []}
                 />
             ))}
         </div>

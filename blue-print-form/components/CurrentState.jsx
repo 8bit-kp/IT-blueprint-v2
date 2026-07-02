@@ -205,15 +205,31 @@ const transformFormData = (inputData) => {
   // --- SECTION 1: APPLICATIONS ---
   const appRows = [];
   const appCategories = inputData.applications || {};
-  const targetCategories = ['productivity', 'finance', 'hrit', 'payroll', 'additional'];
 
-  targetCategories.forEach(cat => {
+  // Built-in category display labels
+  const BUILTIN_LABELS = {
+    productivity: "Productivity",
+    finance:      "Finance",
+    hrit:         "HRIT",
+    payroll:      "Payroll",
+    additional:   "Additional",
+  };
+
+  // Merge custom category titles from metadata
+  const categoryLabels = { ...BUILTIN_LABELS };
+  (inputData.customCategories || []).forEach((cc) => {
+    categoryLabels[cc.key] = cc.title;
+  });
+
+  // Iterate all category keys present in the applications object (built-in + custom)
+  Object.keys(appCategories).forEach(cat => {
     const apps = appCategories[cat] || [];
+    const catLabel = categoryLabels[cat] || (cat.charAt(0).toUpperCase() + cat.slice(1));
     if (Array.isArray(apps)) {
       apps.forEach(app => {
         if (app.name) {
           appRows.push({
-            function: cat.charAt(0).toUpperCase() + cat.slice(1),
+            function: catLabel,
             provider: app.name,
             priority: app.businessPriority ? app.businessPriority : "Low",
             offering: app.offering ? app.offering : "No Data"

@@ -49,7 +49,10 @@ export const FormProvider = ({ children }) => {
       hrit: [],
       payroll: [],
       additional: []
-    }
+    },
+    // Custom user-defined application categories (Step 6)
+    // Each entry: { key: string (slug), title: string (display name) }
+    customCategories: []
   });
 
   const [step, setStep] = useState(1);
@@ -110,7 +113,9 @@ export const FormProvider = ({ children }) => {
         hrit: [],
         payroll: [],
         additional: []
-      }
+      },
+      // Custom user-defined application categories (Step 6)
+      customCategories: []
     }), []);
 
   // Memoize context value to prevent unnecessary re-renders
