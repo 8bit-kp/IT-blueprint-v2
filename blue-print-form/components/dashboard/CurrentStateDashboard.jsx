@@ -12,7 +12,6 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
         additional: []
     };
 
-
     const technicalControls = formData.technicalControls || {};
 
 
@@ -102,96 +101,118 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
         updateField(key, { ...currentValue, [field]: value });
     };
 
-
+    const APP_ROW_COL_DEFS = [
+        { key: 'name', label: 'name', min: 180, weight: 3 },      // Application / Function
+        { key: 'priority', min: 76, weight: 1 },                  // Priority
+        { key: 'offering', min: 76, weight: 1 },                  // Offering
+        { key: 'sens1', min: 52, weight: 0.6 },                   // Sens.
+        { key: 'mfa', min: 52, weight: 0.6 },                     // MFA
+        { key: 'backup', min: 52, weight: 0.6 },                  // Backup
+        { key: 'byod', min: 52, weight: 0.6 },                    // BYOD
+        { key: 'sens2', min: 58, weight: 0.7 },                   // Sens.
+        { key: 'bizS', min: 58, weight: 0.7 },                    // Biz S.
+        { key: 'bizC', min: 58, weight: 0.7 },                    // Biz C.
+        { key: 'pii', min: 58, weight: 0.7 },                     // PII
+        { key: 'hipaa', min: 58, weight: 0.7 },                   // HIPAA
+        { key: 'delete', min: 64, weight: 0.8 },                  // Delete (needs room for label)
+    ];
+    const APP_ROW_COLS = APP_ROW_COL_DEFS.map((c) => `minmax(${c.min}px, ${c.weight}fr)`).join(' ');
+    const APP_ROW_MIN_WIDTH = `${APP_ROW_COL_DEFS.reduce((sum, c) => sum + c.min, 0)}px`;
 
     const renderApplicationSection = (title, category, apps) => (
-        <div className="mb-4">
-            <div className="flex items-center justify-between mb-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="border-b border-gray-100 last:border-0">
+            {/* Category label — full-width, flush, no horizontal offset */}
+            <div className="flex items-center justify-between px-4 py-2 bg-gray-50/70">
                 <div className="flex items-center gap-2">
-                    <div className="w-1 h-4 bg-[#34808A] rounded-full" />
-                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide">{title}</h4>
+                    <div className="w-1 h-3.5 bg-[#34808A]/60 rounded-full" />
+                    <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{title}</h4>
                 </div>
                 <button
                     onClick={() => addApplication(category)}
-                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#15587B] bg-[#15587B]/8 hover:bg-[#15587B]/15 rounded-md transition-all"
+                    className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-[#15587B] rounded transition-all"
                     style={{ backgroundColor: 'rgba(21,88,123,0.08)' }}
                 >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
                     </svg>
                     Add
                 </button>
             </div>
             {apps.length === 0 && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-sm text-gray-500">
-                    No applications added yet. Click "+ Add" to add one.
+                <div className="px-4 py-3 text-[11px] text-gray-400 italic">
+                    No applications yet — click Add to create one.
                 </div>
             )}
             {apps.map((app, index) => (
-                <div key={index} className="grid grid-cols-12 gap-0 mb-1 bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-[#7BC5C5] transition-colors">
+                <div
+                    key={index}
+                    className="grid gap-0 mb-1 bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-[#7BC5C5] transition-colors"
+                    style={{ gridTemplateColumns: APP_ROW_COLS, width: '100%', minWidth: APP_ROW_MIN_WIDTH }}
+                >
+                    {/* Application Name */}
                     <input
                         type="text"
                         value={app.name || ""}
                         onChange={(e) => updateAppField(category, index, "name", e.target.value)}
                         placeholder="Application name..."
-                        className="col-span-2 px-3 py-3 text-xs text-gray-800 font-medium placeholder-gray-400 border-r border-gray-200 focus:outline-none focus:bg-blue-50"
+                        className="px-3 py-3 text-xs text-gray-800 font-medium placeholder-gray-400 border-r border-gray-200 focus:outline-none focus:bg-blue-50 min-w-0"
                     />
                     {/* Business Priority */}
                     <select
                         value={app.businessPriority || "Low"}
                         onChange={(e) => updateAppField(category, index, "businessPriority", e.target.value)}
-                        className={`col-span-1 px-1 py-3 text-xs border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessPriority)}`}
+                        className={`px-1 py-3 text-xs border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessPriority)}`}
                     >
                         <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
+                        <option value="Medium">Med</option>
                         <option value="High">High</option>
-                        <option value="Critical">Critical</option>
+                        <option value="Critical">Crit</option>
                     </select>
                     {/* Offering */}
                     <select
                         value={app.offering || "SaaS"}
                         onChange={(e) => updateAppField(category, index, "offering", e.target.value)}
-                        className="col-span-1 px-1 py-3 text-xs text-gray-700 border-r border-gray-200 focus:outline-none font-medium"
+                        className="px-1 py-3 text-xs text-gray-700 border-r border-gray-200 focus:outline-none font-medium"
                     >
                         <option value="SaaS">SaaS</option>
-                        <option value="On-premise">On-premise</option>
+                        <option value="On-premise">On-prem</option>
                     </select>
 
-                    {/* Sensitive Info */}
-                    <div className="col-span-1 px-1 py-3 flex items-center justify-center border-r border-gray-200">
+                    {/* Sensitive Info — full-cell toggle */}
+                    <div className="p-0 border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "containsSensitiveInfo", app.containsSensitiveInfo === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-[10px] font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.containsSensitiveInfo)}`}
+                            className={`w-full h-full py-3 flex items-center justify-center text-[10px] font-bold transition-colors ${getStatusToggleClass(app.containsSensitiveInfo)}`}
                         >
                             {app.containsSensitiveInfo === "Yes" ? "Y" : "N"}
                         </button>
                     </div>
 
-                    {/* MFA Toggle */}
-                    <div className="col-span-1 px-1 py-3 flex items-center justify-center border-r border-gray-200">
+                    {/* MFA — full-cell toggle */}
+                    <div className="p-0 border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "mfa", app.mfa === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-[10px] font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.mfa)}`}
+                            className={`w-full h-full py-3 flex items-center justify-center text-[10px] font-bold transition-colors ${getStatusToggleClass(app.mfa)}`}
                         >
                             {app.mfa === "Yes" ? "Y" : "N"}
                         </button>
                     </div>
 
-                    {/* Backed Up Toggle */}
-                    <div className="col-span-1 px-1 py-3 flex items-center justify-center border-r border-gray-200">
+                    {/* Backed Up — full-cell toggle */}
+                    <div className="p-0 border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "backedUp", app.backedUp === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-[10px] font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.backedUp)}`}
+                            className={`w-full h-full py-3 flex items-center justify-center text-[10px] font-bold transition-colors ${getStatusToggleClass(app.backedUp)}`}
                         >
                             {app.backedUp === "Yes" ? "Y" : "N"}
                         </button>
                     </div>
 
-                    {/* BYOD Access Toggle */}
-                    <div className="col-span-1 px-1 py-3 flex items-center justify-center border-r border-gray-200">
+                    {/* BYOD — full-cell toggle */}
+                    <div className="p-0 border-r border-gray-200">
                         <button
                             onClick={() => updateAppField(category, index, "byodAccess", app.byodAccess === "Yes" ? "No" : "Yes")}
-                            className={`w-full text-[10px] font-bold py-1.5 rounded transition-colors ${getStatusToggleClass(app.byodAccess)}`}
+                            className={`w-full h-full py-3 flex items-center justify-center text-[10px] font-bold transition-colors ${getStatusToggleClass(app.byodAccess)}`}
                         >
                             {app.byodAccess === "Yes" ? "Y" : "N"}
                         </button>
@@ -201,7 +222,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.sensitivity || "Low"}
                         onChange={(e) => updateAppField(category, index, "sensitivity", e.target.value)}
-                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.sensitivity)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.sensitivity)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -213,7 +234,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.businessSensitivity || "Low"}
                         onChange={(e) => updateAppField(category, index, "businessSensitivity", e.target.value)}
-                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessSensitivity)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessSensitivity)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -225,7 +246,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.businessConfidentiality || "Low"}
                         onChange={(e) => updateAppField(category, index, "businessConfidentiality", e.target.value)}
-                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessConfidentiality)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessConfidentiality)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -237,7 +258,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.personallyIdentifiableInfo || "Low"}
                         onChange={(e) => updateAppField(category, index, "personallyIdentifiableInfo", e.target.value)}
-                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.personallyIdentifiableInfo)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.personallyIdentifiableInfo)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -249,7 +270,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.hipaaRegulated || "Low"}
                         onChange={(e) => updateAppField(category, index, "hipaaRegulated", e.target.value)}
-                        className={`col-span-1 px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.hipaaRegulated)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.hipaaRegulated)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -257,13 +278,15 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                         <option value="Critical">Crit</option>
                     </select>
 
-                    {/* Delete */}
+                    {/* Delete — trash icon, minimal 32px column */}
                     <button
                         onClick={() => removeApplication(category, index)}
-                        className="col-span-1 px-2 py-3 text-red-600 hover:bg-red-50 text-xs font-medium transition-colors flex items-center justify-center gap-1"
+                        className="flex items-center justify-center py-3 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        title="Remove application"
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </button>
                 </div>
@@ -362,36 +385,48 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     </div>
                 </div>
 
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-0 bg-gray-100 text-gray-600 text-[10px] font-bold border-b border-gray-200">
-                    <div className="col-span-2 px-4 py-3 border-r border-gray-200">APPLICATION / FUNCTION</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200">PRIORITY</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200">OFFERING</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">SENS.</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">MFA</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">BACKUP</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">BYOD</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">SENS.</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">BIZ SENS.</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">BIZ CONF.</div>
-                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">PII</div>
-                    <div className="col-span-1 px-2 py-3 text-center">HIPAA</div>
-                </div>
-
-                <div className="p-5 space-y-6">
-                    {/* Applications Section */}
-                    <div className="flex items-center gap-2 -mx-5 -mt-5 px-5 py-3 bg-gray-50 border-b border-gray-100 mb-4">
-                        <div className="w-1 h-4 bg-[#34808A] rounded-full" />
-                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Applications</h3>
+                {/* Table Header + Application Rows — horizontally scrollable as a unit */}
+                <div className="overflow-x-auto">
+                    {/* Header — uses APP_ROW_COLS, stretches to 100% (min-width floor for small screens) */}
+                    <div
+                        className="grid gap-0 bg-gray-100 text-gray-600 text-[10px] font-bold border-b border-gray-200"
+                        style={{ gridTemplateColumns: APP_ROW_COLS, width: '100%', minWidth: APP_ROW_MIN_WIDTH }}
+                    >
+                        <div className="px-3 py-3 border-r border-gray-200">APPLICATION / FUNCTION</div>
+                        <div className="px-2 py-3 border-r border-gray-200">PRIORITY</div>
+                        <div className="px-2 py-3 border-r border-gray-200">OFFERING</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">SENS.</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">MFA</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">BACKUP</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">BYOD</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">SENS.</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">BIZ S.</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">BIZ C.</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">PII</div>
+                        <div className="px-1 py-3 border-r border-gray-200 text-center">HIPAA</div>
+                        <div className="px-1 py-3 text-center">DELETE</div>
                     </div>
-                    {renderApplicationSection("Productivity", "productivity", applications.productivity || [])}
-                    {renderApplicationSection("Finance", "finance", applications.finance || [])}
-                    {renderApplicationSection("HR/IT", "hrit", applications.hrit || [])}
-                    {renderApplicationSection("Payroll", "payroll", applications.payroll || [])}
-                    {renderApplicationSection("Additional", "additional", applications.additional || [])}
 
-                    {/* Security Section */}
-                    <div className="flex items-center gap-2 -mx-5 px-5 py-3 bg-gray-50 border-t border-b border-gray-100 mt-6 mb-4">
+                    {/* Application section labels + rows — stretch to 100% so the whole
+                         table fills the card width, with a min-width floor for scrolling
+                         on narrow screens instead of being pinned to max-content. */}
+                    <div className="pb-3" style={{ width: '100%', minWidth: APP_ROW_MIN_WIDTH }}>
+                        {/* Applications section label */}
+                        <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border-b border-gray-100">
+                            <div className="w-1 h-4 bg-[#34808A] rounded-full" />
+                            <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Applications</h3>
+                        </div>
+                        {renderApplicationSection("Productivity", "productivity", applications.productivity || [])}
+                        {renderApplicationSection("Finance", "finance", applications.finance || [])}
+                        {renderApplicationSection("HR/IT", "hrit", applications.hrit || [])}
+                        {renderApplicationSection("Payroll", "payroll", applications.payroll || [])}
+                        {renderApplicationSection("Additional", "additional", applications.additional || [])}
+                    </div>
+                </div>{/* end overflow-x-auto */}
+
+                {/* Security Section */}
+                <div className="px-5 space-y-4 pb-5">
+                    <div className="flex items-center gap-2 py-3 bg-gray-50 border-t border-b border-gray-100 -mx-5 px-5 mt-2 mb-4">
                         <div className="w-1 h-4 bg-[#34808A] rounded-full" />
                         <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Security Technical Controls</h3>
                     </div>
@@ -404,7 +439,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     {securityControls.map((control) => renderTechnicalControlRow(control))}
 
                     {/* Infrastructure Section */}
-                    <div className="flex items-center gap-2 -mx-5 px-5 py-3 bg-gray-50 border-t border-b border-gray-100 mt-6 mb-4">
+                    <div className="flex items-center gap-2 py-3 bg-gray-50 border-t border-b border-gray-100 -mx-5 px-5 mt-4 mb-4">
                         <div className="w-1 h-4 bg-[#34808A] rounded-full" />
                         <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Infrastructure &amp; Network</h3>
                     </div>
