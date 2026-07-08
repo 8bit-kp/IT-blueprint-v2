@@ -62,25 +62,26 @@ const SecurityDashboard = ({ formData }) => {
     const dbTechControls = formData?.technicalControls || {};
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             {/* ── Technical Controls Table ───────────────────────────────── */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
-                    <h2 className="text-2xl font-bold">Security Technical Controls</h2>
-                    <p className="text-sm text-white/90 mt-1">
-                        Data fetched from your Security Technical Controls submission
-                    </p>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+                    <div>
+                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Security Technical Controls</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Data fetched from your Security Technical Controls submission</p>
+                    </div>
                 </div>
-                <div className="p-6">
+                <div className="p-5">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse">
                             <thead>
-                                <tr className="bg-[#0F4C5C] text-white text-sm">
-                                    <th className="px-4 py-4 text-left font-bold">Control</th>
-                                    <th className="px-4 py-4 text-left font-bold">Status</th>
-                                    <th className="px-4 py-4 text-left font-bold">Vendor / Provider</th>
-                                    <th className="px-4 py-4 text-left font-bold">Priority</th>
-                                    <th className="px-4 py-4 text-left font-bold">Offering</th>
+                                <tr className="bg-gray-100 text-gray-600 text-xs">
+                                    <th className="px-4 py-3 text-left font-bold">Control</th>
+                                    <th className="px-4 py-3 text-left font-bold">Status</th>
+                                    <th className="px-4 py-3 text-left font-bold">Vendor / Provider</th>
+                                    <th className="px-4 py-3 text-left font-bold">Priority</th>
+                                    <th className="px-4 py-3 text-left font-bold">Offering</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -121,19 +122,22 @@ const SecurityDashboard = ({ formData }) => {
             </div>
 
             {/* ── Administrative Controls Grid ───────────────────────────── */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
-                    <h2 className="text-2xl font-bold">Governance &amp; Administrative Controls</h2>
-                    <p className="text-sm text-white/90 mt-1">Policy framework and compliance status</p>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+                    <div>
+                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Governance &amp; Administrative Controls</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Policy framework and compliance status</p>
+                    </div>
                 </div>
-                <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {adminControls.map((control) => (
                             <div
                                 key={control.key}
-                                className="flex items-center justify-between gap-4 p-5 bg-gradient-to-r from-[#7BC5C5]/30 to-[#B8E6E6]/30 rounded-xl border-2 border-[#7BC5C5]/50"
+                                className="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-colors"
                             >
-                                <span className="font-semibold text-gray-800">{control.label}</span>
+                                <span className="font-semibold text-gray-700 text-sm">{control.label}</span>
                                 <StatusBadge value={formData?.[control.key]} />
                             </div>
                         ))}

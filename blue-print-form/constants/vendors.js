@@ -1,6 +1,6 @@
 /**
  * VENDOR LISTS PER SERVICE
- * ─────────────────────────────────────────────────────────────────────────────
+
  * To add or remove a vendor for any service, simply edit the array for that
  * service key below. "Others" must always remain as the last entry.
  *

@@ -132,7 +132,7 @@ const BlueprintDashboardContent = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[#F3F4F6]">
             {/* Header Component */}
             <DashboardHeader
                 blueprintType={blueprintType}
@@ -144,8 +144,7 @@ const BlueprintDashboardContent = () => {
             {/* Save Message Component */}
             <SaveMessage message={message} />
 
-            {/* Dashboard Content */}
-            <div className="max-w-7xl mx-auto py-8 px-8">
+            <div className="max-w-7xl mx-auto py-6 px-6">
                 {renderDashboard()}
             </div>
         </div>

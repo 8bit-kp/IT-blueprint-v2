@@ -106,13 +106,17 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
 
     const renderApplicationSection = (title, category, apps) => (
         <div className="mb-4">
-            <div className="flex items-center justify-between mb-2 bg-gradient-to-r from-[#0F4C5C] to-[#15587B] px-4 py-2.5 rounded-t-lg">
-                <h4 className="text-sm font-bold text-white capitalize">{category}</h4>
+            <div className="flex items-center justify-between mb-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 bg-[#34808A] rounded-full" />
+                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide">{title}</h4>
+                </div>
                 <button
                     onClick={() => addApplication(category)}
-                    className="px-3 py-1.5 text-xs bg-white/20 hover:bg-white/30 text-white rounded-md transition-all flex items-center gap-1"
+                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#15587B] bg-[#15587B]/8 hover:bg-[#15587B]/15 rounded-md transition-all"
+                    style={{ backgroundColor: 'rgba(21,88,123,0.08)' }}
                 >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                     </svg>
                     Add
@@ -348,33 +352,37 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
     return (
         <div className="space-y-6">
             {/* Main Table Container */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                 {/* Title */}
-                <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-6">
-                    <h2 className="text-3xl font-bold">Current State</h2>
-                    <p className="text-sm text-white/90 mt-2">Applications • Security • Infrastructure</p>
+                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+                    <div>
+                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Current State</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Applications · Security · Infrastructure</p>
+                    </div>
                 </div>
 
                 {/* Table Header */}
-                <div className="grid grid-cols-12 gap-0 bg-[#0F4C5C] text-white text-[10px] font-bold sticky top-0 z-10">
-                    <div className="col-span-2 px-4 py-4 border-r border-white/20">APPLICATION / FUNCTION</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20">PRIORITY</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20">OFFERING</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">SENS.</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">MFA</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BACKUP</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BYOD</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">SENS.</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BIZ SENS.</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">BIZ CONF.</div>
-                    <div className="col-span-1 px-2 py-4 border-r border-white/20 text-center">PII</div>
-                    <div className="col-span-1 px-2 py-4 text-center">HIPAA</div>
+                <div className="grid grid-cols-12 gap-0 bg-gray-100 text-gray-600 text-[10px] font-bold border-b border-gray-200">
+                    <div className="col-span-2 px-4 py-3 border-r border-gray-200">APPLICATION / FUNCTION</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200">PRIORITY</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200">OFFERING</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">SENS.</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">MFA</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">BACKUP</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">BYOD</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">SENS.</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">BIZ SENS.</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">BIZ CONF.</div>
+                    <div className="col-span-1 px-2 py-3 border-r border-gray-200 text-center">PII</div>
+                    <div className="col-span-1 px-2 py-3 text-center">HIPAA</div>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-5 space-y-6">
                     {/* Applications Section */}
-                    <div className="bg-gradient-to-r from-[#0F4C5C] to-[#15587B] text-white px-4 py-3 rounded-lg -mx-6 -mt-6 mb-4">
-                        <h3 className="text-base font-bold">Applications</h3>
+                    <div className="flex items-center gap-2 -mx-5 -mt-5 px-5 py-3 bg-gray-50 border-b border-gray-100 mb-4">
+                        <div className="w-1 h-4 bg-[#34808A] rounded-full" />
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Applications</h3>
                     </div>
                     {renderApplicationSection("Productivity", "productivity", applications.productivity || [])}
                     {renderApplicationSection("Finance", "finance", applications.finance || [])}
@@ -383,10 +391,11 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     {renderApplicationSection("Additional", "additional", applications.additional || [])}
 
                     {/* Security Section */}
-                    <div className="bg-gradient-to-r from-[#7BC5C5] to-[#B8E6E6] text-gray-900 px-4 py-3 rounded-lg -mx-6 mt-8 mb-4">
-                        <h3 className="text-base font-bold">Security Technical Controls</h3>
+                    <div className="flex items-center gap-2 -mx-5 px-5 py-3 bg-gray-50 border-t border-b border-gray-100 mt-6 mb-4">
+                        <div className="w-1 h-4 bg-[#34808A] rounded-full" />
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Security Technical Controls</h3>
                     </div>
-                    <div className="grid grid-cols-12 gap-0 bg-gray-100 text-gray-700 text-xs font-bold mb-2">
+                    <div className="grid grid-cols-12 gap-0 bg-gray-100 text-gray-600 text-xs font-bold mb-2 rounded-lg overflow-hidden">
                         <div className="col-span-3 px-4 py-2">CONTROL</div>
                         <div className="col-span-3 px-4 py-2">PROVIDER</div>
                         <div className="col-span-2 px-3 py-2">PRIORITY</div>
@@ -395,10 +404,11 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     {securityControls.map((control) => renderTechnicalControlRow(control))}
 
                     {/* Infrastructure Section */}
-                    <div className="bg-gradient-to-r from-[#7BC5C5] to-[#B8E6E6] text-gray-900 px-4 py-3 rounded-lg -mx-6 mt-8 mb-4">
-                        <h3 className="text-base font-bold">Infrastructure & Network</h3>
+                    <div className="flex items-center gap-2 -mx-5 px-5 py-3 bg-gray-50 border-t border-b border-gray-100 mt-6 mb-4">
+                        <div className="w-1 h-4 bg-[#34808A] rounded-full" />
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Infrastructure &amp; Network</h3>
                     </div>
-                    <div className="grid grid-cols-12 gap-0 bg-gray-100 text-gray-700 text-xs font-bold mb-2">
+                    <div className="grid grid-cols-12 gap-0 bg-gray-100 text-gray-600 text-xs font-bold mb-2 rounded-lg overflow-hidden">
                         <div className="col-span-3 px-4 py-2">COMPONENT</div>
                         <div className="col-span-3 px-4 py-2">PROVIDER</div>
                         <div className="col-span-2 px-3 py-2">PRIORITY</div>
@@ -409,18 +419,18 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
             </div>
 
             {/* Help Text */}
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-5">
-                <div className="flex items-start gap-3">
-                    <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-start gap-3 shadow-sm">
+                <div className="w-7 h-7 rounded-lg bg-[#34808A]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-4 h-4 text-[#34808A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <div>
-                        <p className="text-sm font-semibold text-blue-900 mb-1">Dashboard Tips</p>
-                        <p className="text-sm text-blue-800">
-                            Add new applications using the <strong>+ Add</strong> buttons. Select providers from the dropdown menu.
-                            All changes sync with your database. Click <strong>Save Changes</strong> at the top to persist modifications.
-                        </p>
-                    </div>
+                </div>
+                <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-0.5">Dashboard Tips</p>
+                    <p className="text-xs text-gray-500">
+                        Add new applications using the <strong>+ Add</strong> buttons. Select providers from the dropdown.
+                        Click <strong>Save Changes</strong> at the top to persist modifications.
+                    </p>
                 </div>
             </div>
         </div>

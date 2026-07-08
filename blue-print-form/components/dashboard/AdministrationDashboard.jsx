@@ -21,18 +21,21 @@ const AdministrationDashboard = ({ formData, updateField }) => {
     ];
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             {/* Company Profile Section */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
-                    <h2 className="text-2xl font-bold">Company Profile</h2>
-                    <p className="text-sm text-white/90 mt-1">Basic organizational information</p>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+                    <div>
+                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Company Profile</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Basic organizational information</p>
+                    </div>
                 </div>
-                <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {companyFields.map((field) => (
-                            <div key={field.key} className="flex flex-col gap-2">
-                                <label className="font-bold text-gray-700 text-sm">{field.label}</label>
+                            <div key={field.key} className="flex flex-col gap-1.5">
+                                <label className="font-semibold text-gray-600 text-xs uppercase tracking-wide">{field.label}</label>
                                 <input
                                     type="text"
                                     value={formData[field.key] || ""}
@@ -47,19 +50,22 @@ const AdministrationDashboard = ({ formData, updateField }) => {
             </div>
 
             {/* Governance Controls Section */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
-                    <h2 className="text-2xl font-bold">Administrative Controls</h2>
-                    <p className="text-sm text-white/90 mt-1">Governance and compliance framework</p>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+                    <div>
+                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Administrative Controls</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Governance and compliance framework</p>
+                    </div>
                 </div>
-                <div className="p-6">
-                    <div className="space-y-4">
+                <div className="p-5">
+                    <div className="space-y-3">
                         {governanceControls.map((control) => {
                             const value = formData[control.key] || "No";
                             return (
-                                <div key={control.key} className="flex items-center rounded-xl overflow-hidden border-2 border-gray-200 hover:border-[#34808A] transition-all shadow-sm">
-                                    <div className="flex-1 bg-gradient-to-r from-[#7BC5C5] to-[#B8E6E6] px-6 py-5">
-                                        <span className="font-bold text-gray-900">{control.label}</span>
+                                <div key={control.key} className="flex items-center justify-between rounded-xl overflow-hidden border border-gray-200 hover:border-[#34808A]/50 transition-all shadow-sm">
+                                    <div className="flex-1 px-5 py-4 bg-gray-50">
+                                        <span className="font-semibold text-gray-700 text-sm">{control.label}</span>
                                     </div>
                                     <select
                                         value={value}

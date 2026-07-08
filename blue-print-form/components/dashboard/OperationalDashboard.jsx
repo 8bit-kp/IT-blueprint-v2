@@ -38,21 +38,24 @@ const OperationalDashboard = ({ formData, updateField }) => {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             {/* Infrastructure Vendors Section */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
-                    <h2 className="text-2xl font-bold">Infrastructure Vendors</h2>
-                    <p className="text-sm text-white/90 mt-1">Network and server infrastructure providers</p>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+                    <div>
+                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Infrastructure Vendors</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Network and server infrastructure providers</p>
+                    </div>
                 </div>
-                <div className="p-6">
+                <div className="p-5">
                     <div className="space-y-3">
                         {infrastructureVendors.map((vendor) => {
                             const value = formData[vendor.key] || {};
                             const vendorList = getVendors(vendor.key);
                             return (
-                                <div key={vendor.key} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 bg-gradient-to-r from-[#B8E6E6]/40 to-[#7BC5C5]/30 rounded-xl border-2 border-[#7BC5C5]/50 hover:border-[#34808A] transition-all">
-                                    <div className="font-bold text-gray-800 flex items-center">{vendor.label}</div>
+                                <div key={vendor.key} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-all">
+                                    <div className="font-semibold text-gray-700 text-sm flex items-center">{vendor.label}</div>
                                     {vendorList.length > 0 ? (
                                         <select
                                             value={value.vendor || ""}
@@ -101,16 +104,19 @@ const OperationalDashboard = ({ formData, updateField }) => {
             </div>
 
             {/* Network Configuration Section */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
-                    <h2 className="text-2xl font-bold">Network Configuration</h2>
-                    <p className="text-sm text-white/90 mt-1">WAN connections and network topology</p>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+                    <div>
+                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Network Configuration</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">WAN connections and network topology</p>
+                    </div>
                 </div>
-                <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {networkConfig.map((config) => (
-                            <div key={config.key} className="flex items-center gap-4 p-5 bg-gradient-to-r from-[#7BC5C5]/30 to-[#B8E6E6]/30 rounded-xl border-2 border-[#7BC5C5]/50 hover:border-[#34808A] transition-all">
-                                <label className="flex-1 font-bold text-gray-800">{config.label}</label>
+                            <div key={config.key} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-all">
+                                <label className="flex-1 font-semibold text-gray-700 text-sm">{config.label}</label>
                                 <input
                                     type="text"
                                     value={formData[config.key] || ""}
@@ -125,16 +131,19 @@ const OperationalDashboard = ({ formData, updateField }) => {
             </div>
 
             {/* Facilities Section */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-8 py-5">
-                    <h2 className="text-2xl font-bold">Facilities Information</h2>
-                    <p className="text-sm text-white/90 mt-1">Physical infrastructure and data centers</p>
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+                    <div>
+                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Facilities Information</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Physical infrastructure and data centers</p>
+                    </div>
                 </div>
-                <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {facilities.map((facility) => (
-                            <div key={facility.key} className="flex items-center gap-4 p-5 bg-gradient-to-r from-[#7BC5C5]/30 to-[#B8E6E6]/30 rounded-xl border-2 border-[#7BC5C5]/50 hover:border-[#34808A] transition-all">
-                                <label className="flex-1 font-bold text-gray-800">{facility.label}</label>
+                            <div key={facility.key} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-all">
+                                <label className="flex-1 font-semibold text-gray-700 text-sm">{facility.label}</label>
                                 <input
                                     type="text"
                                     value={formData[facility.key] || ""}
