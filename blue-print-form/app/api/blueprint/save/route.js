@@ -3,6 +3,7 @@ import connectDB from "@/lib/db";
 import Blueprint from "@/models/Blueprint";
 import { verifyToken } from "@/lib/auth";
 import { blueprintCache } from "@/lib/blueprintCache";
+import { validateBlueprint } from "@/lib/validation/blueprintSchema";
 
 
 function deepClean(obj) {
@@ -70,6 +71,22 @@ export async function POST(request) {
         const firstApp = updateData?.applications?.productivity?.[0];
         if (firstApp) {
             console.log(`[DEBUG] First productivity app: name="${firstApp.name}" sensitivity="${firstApp.sensitivity}" businessSensitivity="${firstApp.businessSensitivity}"`);
+        }
+
+        // Step 3 (validation): run Zod shape/type check on the sanitized payload.
+        // This runs AFTER hasInvalidKey() and deepClean() — never on the raw input.
+        // Validation is shape/type only — no business logic, no required-field enforcement.
+        const validation = validateBlueprint(updateData);
+        if (!validation.success) {
+            console.warn(`Payload validation failed for user ${userId}:`, validation.errors);
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Payload validation failed",
+                    errors: validation.errors,
+                },
+                { status: 400 }
+            );
         }
 
         // Use the raw MongoDB driver (bypass Mongoose strict-schema filtering on

@@ -339,7 +339,16 @@ Are you sure you want to continue?"
             />
 
             <div className="max-w-7xl mx-auto px-4 py-6">
-                <ProgressBar step={step} totalSteps={totalSteps} />
+                <ProgressBar
+                    step={step}
+                    totalSteps={totalSteps}
+                    onStepClick={(targetStep) => {
+                        if (targetStep !== step) {
+                            setStep(targetStep);
+                            window.scrollTo(0, 0);
+                        }
+                    }}
+                />
 
                 <div className="flex justify-between items-end mb-6">
                     <div>
