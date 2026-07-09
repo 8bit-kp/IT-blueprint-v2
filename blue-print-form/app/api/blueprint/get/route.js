@@ -8,7 +8,7 @@ export async function GET(request) {
     try {
         await connectDB();
 
-        const userId = verifyToken(request);
+        const userId = await verifyToken(request);
 
         console.log(`Fetching blueprint for user: ${userId}`);
 

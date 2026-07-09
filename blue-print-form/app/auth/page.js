@@ -53,11 +53,13 @@ const Auth = () => {
             const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
             const res = await axios.post(
                 `${backendUrl}/api/auth/${endpoint}`,
-                payload
+                payload,
+                { withCredentials: true } // Ensures the auth_token cookie is received and stored
             );
 
-            if (res.data.token) {
-                localStorage.setItem("token", res.data.token);
+            if (isLogin && res.data.username) {
+                // JWT is now stored in an HTTP-only cookie by the server.
+                // Only persist the display name for the Navbar.
                 localStorage.setItem("username", res.data.username);
             }
 

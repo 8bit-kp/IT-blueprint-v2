@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { blueprintAPI } from "@/utils/api";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import BlueprintDocument from "@/components/coverpages/BlueprintDocument";
 import SecurityDocument from "@/components/coverpages/SecurityDocument";
@@ -182,13 +182,14 @@ const AllBlueprintsPage = () => {
 
     useEffect(() => {
         const fetchBlueprint = async () => {
-            const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-            if (!token) { router.push("/auth"); return; }
+            // Auth guard: username in localStorage is the client-side login indicator.
+            // Real auth is enforced server-side via the HTTP-only cookie.
+            const username = typeof window !== "undefined" ? localStorage.getItem("username") : null;
+            if (!username) { router.push("/auth"); return; }
             try {
                 setLoading(true);
-                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/blueprint/get`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                // blueprintAPI uses withCredentials — cookie is sent automatically.
+                const res = await blueprintAPI.getBlueprint();
                 if (res.data && Object.keys(res.data).length > 0) {
                     setFormData(res.data);
                 } else {

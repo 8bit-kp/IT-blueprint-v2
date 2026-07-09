@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { blueprintAPI } from "@/utils/api";
 import SecurityDonutGrid from "./SecurityDonutGrid";
 
 // ── Loading Spinner (lightweight inline) ──────────────────────────────────
@@ -32,9 +32,10 @@ const SecurityVisualsModal = ({ onClose }) => {
     // Fetch fresh data every time the modal opens
     useEffect(() => {
         const fetchData = async () => {
-            const token =
-                typeof window !== "undefined" ? localStorage.getItem("token") : null;
-            if (!token) {
+            // Auth guard: username in localStorage is the client-side login indicator.
+            const username =
+                typeof window !== "undefined" ? localStorage.getItem("username") : null;
+            if (!username) {
                 setError("You are not logged in. Please log in and try again.");
                 setLoading(false);
                 return;
@@ -42,10 +43,8 @@ const SecurityVisualsModal = ({ onClose }) => {
 
             try {
                 setLoading(true);
-                const res = await axios.get(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/blueprint/get`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
+                // blueprintAPI uses withCredentials — cookie is sent automatically.
+                const res = await blueprintAPI.getBlueprint();
                 setFormData(res.data);
             } catch (err) {
                 console.error("SecurityVisualsModal fetch error:", err);

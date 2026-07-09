@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
+import { blueprintAPI } from "@/utils/api";
 
 // Import Dashboard Components
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -26,17 +26,18 @@ const BlueprintDashboardContent = () => {
 
     useEffect(() => {
         const fetchBlueprint = async () => {
-            const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-            if (!token) {
+            // Auth guard: username in localStorage is the client-side login indicator.
+            // Real auth is enforced server-side via the HTTP-only cookie.
+            const username = typeof window !== "undefined" ? localStorage.getItem("username") : null;
+            if (!username) {
                 router.push("/auth");
                 return;
             }
 
             try {
                 setLoading(true);
-                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/blueprint/get`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                // blueprintAPI uses withCredentials — cookie is sent automatically.
+                const res = await blueprintAPI.getBlueprint();
 
                 if (res.data && Object.keys(res.data).length > 0) {
                     setFormData(res.data);
@@ -55,34 +56,32 @@ const BlueprintDashboardContent = () => {
     }, [router, blueprintType]);
 
     const handleSave = async () => {
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!token) {
+        // Auth guard
+        const username = typeof window !== "undefined" ? localStorage.getItem("username") : null;
+        if (!username) {
             router.push("/auth");
             return;
         }
 
         try {
             setSaving(true);
-            
+
             // Clean the formData before sending - remove _id and __v fields
             const { _id, __v, ...cleanData } = formData;
-            
+
             console.log("Saving blueprint data:", cleanData);
-            
-            const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/blueprint/save`,
-                cleanData,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            
+
+            // blueprintAPI uses withCredentials — cookie is sent automatically.
+            const response = await blueprintAPI.saveBlueprint(cleanData);
+
             console.log("Save response:", response.data);
-            
+
             setMessage("✓ Changes saved successfully!");
             setTimeout(() => setMessage(""), 3000);
         } catch (err) {
             console.error("Error saving blueprint:", err);
             console.error("Error response:", err.response?.data);
-            
+
             const errorMsg = err.response?.data?.message || "Error saving changes. Please try again.";
             setMessage(`✗ ${errorMsg}`);
             setTimeout(() => setMessage(""), 5000);

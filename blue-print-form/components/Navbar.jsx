@@ -4,20 +4,31 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FiLogOut, FiUser, FiLogIn } from "react-icons/fi";
+import { authAPI } from "@/utils/api";
 
 function Navbar() {
   const [username, setUsername] = useState(null);
 
   useEffect(() => {
+    // Username is stored in localStorage only for display purposes.
+    // The actual authentication token lives in an HTTP-only cookie.
     const storedUser = localStorage.getItem("username");
     if (storedUser) {
       setUsername(storedUser);
     }
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Ask the server to expire the auth_token HTTP-only cookie.
+      await authAPI.logout();
+    } catch {
+      // If the server call fails the cookie may already be expired or missing.
+      // Proceed with client-side cleanup regardless.
+    }
+
+    // Clear the display username from localStorage.
     localStorage.removeItem("username");
-    localStorage.removeItem("token");
     setUsername(null);
 
     toast.success("Logged out successfully 👋");

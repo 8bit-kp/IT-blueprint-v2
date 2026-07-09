@@ -1,47 +1,37 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// Create axios instance with default config
+// Create axios instance with default config.
+// Authentication is now handled via HTTP-only cookies set by /api/auth/login.
+// withCredentials: true ensures the browser automatically attaches the cookie
+// on every cross-origin request (required when NEXT_PUBLIC_BACKEND_URL differs from the UI origin).
 const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
 
 const api = axios.create({
   baseURL,
-  timeout: 15000, // 15 seconds default timeout
+  timeout: 15000,
+  withCredentials: true, // Send cookies with every request
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor - Add auth token to all requests
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor - Handle common errors
+// Response interceptor — handle common errors.
+// No request interceptor needed: the browser attaches the auth cookie automatically.
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // Handle common errors
     if (error.response) {
       const status = error.response.status;
 
       switch (status) {
         case 401:
           toast.error('Session expired. Please login again.');
-          localStorage.removeItem('token');
-          localStorage.removeItem('username');
-          // Redirect to auth page after a short delay
+          // Clear the display username stored for the Navbar — the auth cookie
+          // will have been expired by the server or will be rejected on next request.
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('username');
+          }
           setTimeout(() => {
             window.location.href = '/auth';
           }, 1500);
@@ -51,6 +41,9 @@ api.interceptors.response.use(
           break;
         case 404:
           toast.error('Resource not found.');
+          break;
+        case 429:
+          toast.error(error.response.data?.message || 'Too many requests. Please wait and try again.');
           break;
         case 500:
           toast.error('Server error. Please try again later.');
@@ -72,19 +65,22 @@ api.interceptors.response.use(
 
 // API methods
 export const blueprintAPI = {
-  // Get blueprint data
+  // Get blueprint data — cookie sent automatically via withCredentials.
   getBlueprint: () => api.get('/api/blueprint/get'),
 
-  // Save blueprint data
+  // Save blueprint data — cookie sent automatically via withCredentials.
   saveBlueprint: (data) => api.post('/api/blueprint/save', data),
 };
 
 export const authAPI = {
-  // Login
+  // Login — server sets the auth_token cookie in the response.
   login: (credentials) => api.post('/api/auth/login', credentials),
 
-  // Register
+  // Register — no cookie interaction.
   register: (userData) => api.post('/api/auth/register', userData),
+
+  // Logout — server expires the auth_token cookie.
+  logout: () => api.post('/api/auth/logout'),
 };
 
 export default api;

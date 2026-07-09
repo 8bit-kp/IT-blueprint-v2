@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, memo, useRef } from "react";
-import axios from "axios";
+import { blueprintAPI } from "@/utils/api";
 import toast from "react-hot-toast";
 import ProgressBar from "@/components/ProgressBar";
 import { useForm } from "@/context/FormContext";
@@ -40,7 +40,6 @@ export default function BlueprintForm() {
     const [loadingSave, setLoadingSave] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
     const [lastSavedStep, setLastSavedStep] = useState(0);
-    const [token, setToken] = useState(null);
     const [loadingReset, setLoadingReset] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
 
@@ -86,27 +85,25 @@ export default function BlueprintForm() {
         localStorage.setItem("blueprintFormStep", step.toString());
     }, [step]);
 
-    // Initial Fetch - Optimized
+    // Initial Fetch
     useEffect(() => {
         if (typeof window === "undefined") return;
 
-        const storedToken = localStorage.getItem("token");
-        if (!storedToken) {
+        // Auth guard: username in localStorage means the user logged in recently.
+        // The actual authentication is enforced server-side via the HTTP-only cookie.
+        const storedUsername = localStorage.getItem("username");
+        if (!storedUsername) {
             toast.error("Please login first");
             router.push("/auth");
             return;
         }
-        setToken(storedToken);
 
         const fetchBlueprint = async () => {
             setLoadingData(true);
 
             try {
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-                const res = await axios.get(`${backendUrl}/api/blueprint/get`, {
-                    headers: { Authorization: `Bearer ${storedToken}` },
-                    timeout: 10000,
-                });
+                // blueprintAPI uses withCredentials — cookie is sent automatically.
+                const res = await blueprintAPI.getBlueprint();
                 const data = res.data || {};
 
                 if (data && Object.keys(data).length) {
@@ -137,8 +134,6 @@ export default function BlueprintForm() {
                         };
                     }
 
-                    // Ensure customCategories is always an array even for documents
-                    // created before the custom-categories feature was introduced.
                     if (!Array.isArray(data.customCategories)) {
                         data.customCategories = [];
                     }
@@ -149,8 +144,7 @@ export default function BlueprintForm() {
             } catch (err) {
                 console.error("fetch blueprint err", err);
                 if (err.response?.status === 401) {
-                    // Clear invalid token
-                    localStorage.removeItem("token");
+                    localStorage.removeItem("username");
                     toast.error("Session expired. Please login again.");
                     router.push("/auth");
                 } else if (err.code === 'ECONNABORTED') {
@@ -215,15 +209,8 @@ export default function BlueprintForm() {
                 _lastSavedStep: currentStep
             };
 
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-            const response = await axios.post(
-                `${backendUrl}/api/blueprint/save`,
-                normalizedData,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    timeout: 15000
-                }
-            );
+            // blueprintAPI uses withCredentials — cookie is sent automatically.
+            const response = await blueprintAPI.saveBlueprint(normalizedData);
 
             setLastSavedStep(currentStep);
             toast.success(response.data?.message || "Saved successfully");
@@ -231,8 +218,7 @@ export default function BlueprintForm() {
         } catch (err) {
             console.error("Save error:", err);
             if (err.response?.status === 401) {
-                // Clear invalid token
-                localStorage.removeItem("token");
+                localStorage.removeItem("username");
                 toast.error("Session expired. Please login again.");
                 setTimeout(() => router.push("/auth"), 2000);
             } else if (err.code === 'ECONNABORTED') {
@@ -295,37 +281,25 @@ export default function BlueprintForm() {
             // Clear saved step from localStorage
             localStorage.setItem("blueprintFormStep", "1");
 
-            // Delete data from backend
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-            await axios.post(
-                `${backendUrl}/api/blueprint/save`,
-                {
-                    // Reset all application data including any custom categories
-                    applications: {
-                        productivity: [],
-                        finance: [],
-                        hrit: [],
-                        payroll: [],
-                        additional: []
-                    },
-                    // Explicitly clear custom categories so MongoDB document matches
-                    // the reset FormContext state (prevents stale custom categories
-                    // surviving a reset in the database).
-                    customCategories: [],
-                    _lastSavedStep: 0
+            // blueprintAPI uses withCredentials — cookie is sent automatically.
+            await blueprintAPI.saveBlueprint({
+                applications: {
+                    productivity: [],
+                    finance: [],
+                    hrit: [],
+                    payroll: [],
+                    additional: []
                 },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    timeout: 15000
-                }
-            );
+                customCategories: [],
+                _lastSavedStep: 0
+            });
 
             toast.success("All data has been reset to default values");
             window.scrollTo(0, 0);
         } catch (err) {
             console.error("Reset error:", err);
             if (err.response?.status === 401) {
-                localStorage.removeItem("token");
+                localStorage.removeItem("username");
                 toast.error("Session expired. Please login again.");
                 setTimeout(() => router.push("/auth"), 2000);
             } else {

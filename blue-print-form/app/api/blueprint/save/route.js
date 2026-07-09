@@ -34,7 +34,7 @@ export async function POST(request) {
     try {
         await connectDB();
 
-        const userId = verifyToken(request);
+        const userId = await verifyToken(request);
 
         if (!userId) {
             return NextResponse.json(

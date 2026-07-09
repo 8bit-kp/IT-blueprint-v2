@@ -19,12 +19,12 @@ const FeatureCard = ({ icon: Icon, title, desc }) => (
 export default function Home() {
   const router = useRouter();
 
-  // Helper for auth checks
+  // Helper for auth checks — checks localStorage.username as the client-side
+  // login indicator. The real auth is enforced server-side via HTTP-only cookie.
   const handleNavigation = (path) => {
     if (typeof window !== 'undefined') {
       const username = localStorage.getItem("username");
-      const token = localStorage.getItem("token");
-      if (username && token) {
+      if (username) {
         router.push(path);
       } else {
         router.push("/auth");
