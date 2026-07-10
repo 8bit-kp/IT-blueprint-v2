@@ -4,7 +4,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { FiUser, FiMail, FiLock, FiBriefcase, FiArrowLeft } from "react-icons/fi";
+import { FiUser, FiMail, FiLock, FiBriefcase, FiArrowLeft, FiCheck } from "react-icons/fi";
 
 // Reusable InputField component
 const InputField = ({ icon: Icon, ...props }) => (
@@ -17,6 +17,44 @@ const InputField = ({ icon: Icon, ...props }) => (
             className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-[#34808A] focus:border-[#34808A] block transition-all placeholder-gray-500 ${props.className || ""}`}
         />
     </div>
+);
+
+// Password rules — must match server-side validatePassword() in app/api/auth/register/route.js
+const PASSWORD_RULES = [
+    { label: "At least 8 characters",  test: (pw) => pw.length >= 8 },
+    { label: "At least one letter",     test: (pw) => /[a-zA-Z]/.test(pw) },
+    { label: "At least one number",     test: (pw) => /[0-9]/.test(pw) },
+];
+
+// Defined at module scope (not inside a render body) to keep the reference stable.
+const PasswordHint = ({ password }) => (
+    <ul className="mt-2.5 space-y-1.5 px-1">
+        {PASSWORD_RULES.map(({ label, test }) => {
+            const met = password.length > 0 && test(password);
+            const started = password.length > 0;
+            return (
+                <li
+                    key={label}
+                    className={`flex items-center gap-2 text-xs font-medium transition-colors duration-200 ${
+                        met ? "text-[#34808A]" : started ? "text-red-400" : "text-gray-400"
+                    }`}
+                >
+                    <span
+                        className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-200 ${
+                            met
+                                ? "bg-[#34808A] border-[#34808A] text-white"
+                                : started
+                                ? "border-red-300 text-red-400"
+                                : "border-gray-300"
+                        }`}
+                    >
+                        {met && <FiCheck size={9} strokeWidth={3} />}
+                    </span>
+                    {label}
+                </li>
+            );
+        })}
+    </ul>
 );
 
 const Auth = () => {
@@ -175,6 +213,8 @@ const Auth = () => {
                                 onChange={handleChange}
                                 autoComplete={isLogin ? "current-password" : "new-password"}
                             />
+                            {/* Password strength checklist — registration only */}
+                            {!isLogin && <PasswordHint password={formData.password} />}
                         </div>
 
                         {/* Submit Button */}
