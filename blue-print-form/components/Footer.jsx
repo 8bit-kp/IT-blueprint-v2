@@ -4,11 +4,11 @@ const Footer = () => {
       <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
         <span>&copy; {new Date().getFullYear()} Consltek. All rights reserved.</span>
         <span className="hidden sm:inline text-gray-300">|</span>
-        <a href="#" className="hover:text-[#15587B] transition-colors" onClick={(e) => e.preventDefault()} title="Privacy Policy — coming soon">
+        <a href="/privacy-policy" className="hover:text-[#15587B] transition-colors">
           Privacy Policy
         </a>
         <span className="hidden sm:inline text-gray-300">|</span>
-        <a href="#" className="hover:text-[#15587B] transition-colors" onClick={(e) => e.preventDefault()} title="Terms of Service — coming soon">
+        <a href="/terms-of-service" className="hover:text-[#15587B] transition-colors">
           Terms of Service
         </a>
       </div>

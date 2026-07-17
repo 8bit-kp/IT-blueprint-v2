@@ -1,6 +1,6 @@
 "use client";
 
-import { FiArrowRight, FiFileText, FiShield, FiCpu, FiLayers, FiLock, FiDatabase, FiCheckCircle } from "react-icons/fi";
+import { FiArrowRight, FiFileText, FiShield, FiCpu, FiLayers, FiLock, FiDatabase, FiCheckCircle, FiUserCheck, FiEyeOff } from "react-icons/fi";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useRouter } from "next/navigation";
@@ -16,11 +16,16 @@ const FeatureCard = ({ icon: Icon, title, desc }) => (
   </div>
 );
 
-// Trust signal pill
-const TrustPill = ({ icon: Icon, label }) => (
-  <div className="flex items-center gap-2 bg-white/70 border border-gray-200 rounded-full px-4 py-2 shadow-sm text-sm text-gray-600">
-    <Icon size={14} className="text-[#34808A] flex-shrink-0" />
-    <span>{label}</span>
+// Security control card
+const SecurityCard = ({ icon: Icon, title, desc }) => (
+  <div className="flex items-start gap-3 bg-[#15587B]/5 border border-[#15587B]/10 rounded-xl p-4">
+    <div className="w-8 h-8 bg-[#15587B]/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+      <Icon size={15} className="text-[#15587B]" />
+    </div>
+    <div>
+      <p className="text-xs font-bold text-[#15587B] uppercase tracking-wide mb-0.5">{title}</p>
+      <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+    </div>
   </div>
 );
 
@@ -117,19 +122,55 @@ export default function Home() {
         </div>
 
         {/* Trust & Data Security Section */}
-        <div className="w-full max-w-6xl mt-16 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl shadow-sm p-8">
-          <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-[#15587B] mb-2">Your data is handled with care</h2>
-            <p className="text-sm text-gray-500 max-w-xl mx-auto">
-              Consltek is an IT consulting firm. This tool is provided to clients and consultants to document IT environments as part of an engagement. Your information is not sold or shared with third parties.
-            </p>
+        <div className="w-full max-w-6xl mt-16 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl shadow-sm overflow-hidden">
+          {/* Header bar */}
+          <div className="bg-[#15587B] px-8 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <FiShield size={18} className="text-white/80" />
+              <h2 className="text-base font-bold text-white tracking-wide">Enterprise Data Security Standards</h2>
+            </div>
+            <span className="inline-flex items-center gap-1.5 bg-white/15 border border-white/20 text-white/90 text-xs font-semibold px-3 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              SOC 2-Aligned Infrastructure
+            </span>
           </div>
-          <div className="flex flex-wrap justify-center gap-3">
-            <TrustPill icon={FiLock} label="Encrypted in transit (HTTPS)" />
-            <TrustPill icon={FiDatabase} label="Stored in MongoDB Atlas (cloud)" />
-            <TrustPill icon={FiShield} label="Session secured with HTTP-only cookies" />
-            <TrustPill icon={FiCheckCircle} label="Access-controlled per account" />
-            <TrustPill icon={FiCheckCircle} label="Not shared with third parties" />
+          {/* Cards grid */}
+          <div className="p-8">
+            <p className="text-sm text-gray-500 mb-6 max-w-2xl">
+              This platform is operated by Consltek exclusively for active client engagements. All submitted IT environment data is treated as confidential and processed in accordance with the following security controls.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <SecurityCard
+                icon={FiLock}
+                title="TLS 1.2+ Encryption in Transit"
+                desc="All data exchanged between your browser and our servers is protected by Transport Layer Security, preventing interception or tampering."
+              />
+              <SecurityCard
+                icon={FiDatabase}
+                title="SOC 2-Aligned Cloud Data Residency"
+                desc="Assessment data is persisted in MongoDB Atlas, a SOC 2 Type II certified cloud database service with encryption at rest."
+              />
+              <SecurityCard
+                icon={FiShield}
+                title="Secure Session Management"
+                desc="Sessions are maintained via short-lived JWT tokens stored in HTTP-only, Secure cookies — inaccessible to client-side scripts and protected against XSS."
+              />
+              <SecurityCard
+                icon={FiUserCheck}
+                title="Server-Side Token Revocation"
+                desc="All active sessions can be invalidated server-side at any time without requiring a password reset, providing immediate access control enforcement."
+              />
+              <SecurityCard
+                icon={FiCheckCircle}
+                title="Credential-Based Tenant Isolation"
+                desc="Blueprint data is strictly scoped to the authenticated account. No cross-account data access is permitted at the application or database layer."
+              />
+              <SecurityCard
+                icon={FiEyeOff}
+                title="No Third-Party Data Disclosure"
+                desc="Your IT environment data is not sold, rented, or shared with any third party. It is used solely to fulfil your Consltek consulting engagement."
+              />
+            </div>
           </div>
         </div>
 
