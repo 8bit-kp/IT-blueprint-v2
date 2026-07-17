@@ -1,5 +1,6 @@
 import React from "react";
 import { getStatusBadgeClass, getPriorityBadgeClass, getOfferingBadgeClass } from "@/constants/colors";
+import { TECHNICAL_CONTROLS, ADMIN_CONTROLS } from "@/lib/reports/shared/controlMaps";
 
 // ── Color-coded badge helpers ──────────────────────────────────────────────
 
@@ -24,39 +25,7 @@ const OfferingBadge = ({ value }) => (
 // ── Main Component ─────────────────────────────────────────────────────────
 
 const SecurityDashboard = ({ formData }) => {
-    // Keys match exactly what the Blueprint model stores under technicalControls
-    const technicalControls = [
-        { label: "Next Gen Firewall", key: "nextGenFirewall" },
-        { label: "Secure Web Gateway", key: "secureWebGateway" },
-        { label: "CASB", key: "casb" },
-        { label: "Data Loss Prevention", key: "dlp" },
-        { label: "SSL VPN", key: "sslVpn" },
-        { label: "Email Security", key: "emailSecurity" },
-        { label: "Vulnerability Scanning", key: "vulnerabilityScanning" },
-        { label: "IAM", key: "iam" },
-        { label: "NAC", key: "nac" },
-        { label: "MFA", key: "mfa" },
-        { label: "MDM", key: "mdm" },
-        { label: "EDR", key: "edr" },
-        { label: "Data Classification", key: "dataClassification" },
-        { label: "SOC - SIEM", key: "socSiem" },
-        { label: "Asset Management", key: "assetManagement" },
-        { label: "SD-WAN", key: "sdWan" },
-    ];
-
-    const adminControls = [
-        { label: "Security Committee", key: "securityCommittee" },
-        { label: "IT Governance", key: "itGovernance" },
-        { label: "Security Policies", key: "securityPolicies" },
-        { label: "Risk Assessment", key: "riskAssessment" },
-        { label: "Incident Response", key: "incidentResponse" },
-        { label: "Business Continuity", key: "businessContinuity" },
-        { label: "Disaster Recovery", key: "disasterRecovery" },
-        { label: "Security Training", key: "securityTraining" },
-        { label: "Third Party Risk", key: "thirdPartyRisk" },
-        { label: "Vulnerability Management", key: "vulnerabilityManagement" },
-        { label: "Penetration Testing", key: "penetrationTest" },
-    ];
+    // Imported from lib/reports/shared/controlMaps — single source of truth
 
     // Pull nested technicalControls object from DB data
     const dbTechControls = formData?.technicalControls || {};
@@ -85,7 +54,7 @@ const SecurityDashboard = ({ formData }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {technicalControls.map((control, index) => {
+                                {TECHNICAL_CONTROLS.map((control, index) => {
                                     const value = dbTechControls[control.key] || {};
                                     return (
                                         <tr
@@ -132,7 +101,7 @@ const SecurityDashboard = ({ formData }) => {
                 </div>
                 <div className="p-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {adminControls.map((control) => (
+                        {ADMIN_CONTROLS.map((control) => (
                             <div
                                 key={control.key}
                                 className="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-colors"

@@ -25,7 +25,7 @@ const CompanyInfoStep = memo(({ formData, setField }) => {
   };
 
   return (
-    <Card title="General Information" className="max-w-4xl mx-auto">
+    <Card title="General Information" className="max-w-5xl mx-auto">
       <p className="text-xs text-gray-400 mb-5">Fields marked <span className="text-red-500">*</span> are required.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="col-span-1 md:col-span-2">

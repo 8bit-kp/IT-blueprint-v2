@@ -547,7 +547,7 @@ const ApplicationsStep = memo(({ formData, updateFormData }) => {
                 />
             )}
 
-            <div className="max-w-7xl mx-auto space-y-8 pb-10">
+            <div className="max-w-5xl mx-auto space-y-8 pb-10">
                 {/* ── Built-in categories (never deletable) ─────────────────── */}
                 <AppGroup title="Productivity Applications" category="productivity" apps={allApplications.productivity || []} allApplications={allApplications} updateFormData={updateFormData} isCustom={false} onDeleteCategory={handleDeleteCategory} />
                 <AppGroup title="Finance Applications"      category="finance"      apps={allApplications.finance      || []} allApplications={allApplications} updateFormData={updateFormData} isCustom={false} onDeleteCategory={handleDeleteCategory} />

@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback, memo, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { blueprintAPI } from "@/utils/api";
 import toast from "react-hot-toast";
 import ProgressBar from "@/components/ProgressBar";
+import FormSidebarNav from "@/components/navigation/FormSidebarNav";
 import { useForm } from "@/context/FormContext";
 import { useRouter } from "next/navigation";
 import FormHeader from "@/components/FormHeader";
 import WarningModal from "@/components/WarningModal";
-
 
 // Import step components
 import Step1 from "@/components/form-fields/CompanyInfoStep";
@@ -17,8 +17,6 @@ import Step3 from "@/components/form-fields/NetworkServerStep";
 import Step4 from "@/components/form-fields/SecurityAdminStep";
 import Step5 from "@/components/form-fields/SecurityTechStep";
 import Step6 from "@/components/form-fields/ApplicationsStep";
-
-// Vendors are now managed per-service in constants/vendors.js
 
 const stepTitles = {
     1: "Company Profile",
@@ -43,6 +41,10 @@ export default function BlueprintForm() {
     const [loadingReset, setLoadingReset] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
 
+    // Ref for the scrollable main-content column so step navigation can
+    // scroll it back to the top (instead of relying on window.scrollTo which
+    // does not work when only the inner div is scrolling).
+    const contentRef = useRef(null);
 
     const [technicalControls, setTechnicalControls] = useState({
         nextGenFirewall: { ...initialTechControlState },
@@ -79,7 +81,7 @@ export default function BlueprintForm() {
         }
     }, [setStep, totalSteps]);
 
-    // Save step to localStorage whenever it changes
+    // Persist step to localStorage whenever it changes
     useEffect(() => {
         if (typeof window === "undefined") return;
         localStorage.setItem("blueprintFormStep", step.toString());
@@ -89,8 +91,6 @@ export default function BlueprintForm() {
     useEffect(() => {
         if (typeof window === "undefined") return;
 
-        // Auth guard: username in localStorage means the user logged in recently.
-        // The actual authentication is enforced server-side via the HTTP-only cookie.
         const storedUsername = localStorage.getItem("username");
         if (!storedUsername) {
             toast.error("Please login first");
@@ -102,7 +102,6 @@ export default function BlueprintForm() {
             setLoadingData(true);
 
             try {
-                // blueprintAPI uses withCredentials — cookie is sent automatically.
                 const res = await blueprintAPI.getBlueprint();
                 const data = res.data || {};
 
@@ -139,9 +138,8 @@ export default function BlueprintForm() {
                     }
 
                     // Pre-fill company info from account registration data if the
-                    // blueprint fields are still empty (i.e. new user who hasn't
-                    // filled Step 1 yet). Account data was stored in localStorage
-                    // at login time via the auth page.
+                    // blueprint fields are still empty (new user who hasn't filled
+                    // Step 1 yet). Account data was stored at login time.
                     if (!data.email) {
                         const accountEmail = localStorage.getItem("userEmail");
                         if (accountEmail) data.email = accountEmail;
@@ -154,8 +152,7 @@ export default function BlueprintForm() {
                     updateFormData(data);
                     setLastSavedStep(data._lastSavedStep || 0);
                 } else {
-                    // New user — no saved blueprint. Pre-fill company info from
-                    // account registration data stored at login time.
+                    // New user — no saved blueprint yet. Pre-fill from account data.
                     const accountEmail = localStorage.getItem("userEmail");
                     const accountCompanyName = localStorage.getItem("userCompanyName");
                     if (accountEmail || accountCompanyName) {
@@ -216,9 +213,6 @@ export default function BlueprintForm() {
 
             const normalizedData = {
                 ...formData,
-                // Explicitly include customCategories so it is never accidentally
-                // dropped if formData is a stale closure snapshot. If formData
-                // already has it the value is the same; this just makes the intent clear.
                 customCategories: Array.isArray(formData.customCategories) ? formData.customCategories : [],
                 applications,
                 WAN1: normalizeVendorField(formData.WAN1),
@@ -234,7 +228,6 @@ export default function BlueprintForm() {
                 _lastSavedStep: currentStep
             };
 
-            // blueprintAPI uses withCredentials — cookie is sent automatically.
             const response = await blueprintAPI.saveBlueprint(normalizedData);
 
             setLastSavedStep(currentStep);
@@ -261,6 +254,12 @@ export default function BlueprintForm() {
         }
     };
 
+    const scrollToTop = () => {
+        // Scroll the inner content column (desktop) and the window (mobile)
+        contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     const handleSaveOnly = async () => {
         await saveStep(step);
     };
@@ -272,41 +271,40 @@ export default function BlueprintForm() {
                 router.push("/blueprint-summary");
             } else {
                 setStep((prev) => prev + 1);
-                window.scrollTo(0, 0);
+                scrollToTop();
             }
         }
     };
 
-
+    const handleStepClick = (targetStep) => {
+        if (targetStep !== step) {
+            setStep(targetStep);
+            scrollToTop();
+        }
+    };
 
     const handleBack = () => {
         if (step > 1) {
             setStep(step - 1);
-            window.scrollTo(0, 0);
+            scrollToTop();
         }
     };
 
     const handleResetData = async () => {
         setLoadingReset(true);
         try {
-            // Reset local form data
             resetForm();
 
-            // Reset technical controls
             const freshTechControls = {};
             Object.keys(technicalControls).forEach(key => {
                 freshTechControls[key] = { ...initialTechControlState };
             });
             setTechnicalControls(freshTechControls);
 
-            // Reset to step 1
             setStep(1);
             setLastSavedStep(0);
-
-            // Clear saved step from localStorage
             localStorage.setItem("blueprintFormStep", "1");
 
-            // blueprintAPI uses withCredentials — cookie is sent automatically.
             await blueprintAPI.saveBlueprint({
                 applications: {
                     productivity: [],
@@ -320,7 +318,7 @@ export default function BlueprintForm() {
             });
 
             toast.success("All data has been reset to default values");
-            window.scrollTo(0, 0);
+            scrollToTop();
         } catch (err) {
             console.error("Reset error:", err);
             if (err.response?.status === 401) {
@@ -347,8 +345,9 @@ export default function BlueprintForm() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F3F4F6] pb-24">
+        <div className="min-h-screen bg-[#F3F4F6] font-sans">
 
+            {/* ── Top Header (sticky) ──────────────────────────────────────── */}
             <FormHeader />
 
             <WarningModal
@@ -363,35 +362,53 @@ Are you sure you want to continue?"
                 cancelText="Cancel"
             />
 
-            <div className="max-w-7xl mx-auto px-4 py-6">
-                <ProgressBar
+            {/* ── Body: Sidebar + Content ──────────────────────────────────── */}
+            <div className="flex">
+
+                {/* Sidebar — desktop only, sticky below header */}
+                <FormSidebarNav
                     step={step}
                     totalSteps={totalSteps}
-                    onStepClick={(targetStep) => {
-                        if (targetStep !== step) {
-                            setStep(targetStep);
-                            window.scrollTo(0, 0);
-                        }
-                    }}
+                    lastSavedStep={lastSavedStep}
+                    stepTitles={stepTitles}
+                    onStepClick={handleStepClick}
                 />
 
-                <div className="flex justify-between items-end mb-6">
-                    <div>
-                        <h2 className="text-2xl font-bold text-[#15587B]">{stepTitles[step]}</h2>
-                        <p className="text-sm text-gray-500">Please fill in the details below.</p>
-                    </div>
-                </div>
+                {/* Main content column — no outer max-width; each step Card owns its own */}
+                <div ref={contentRef} className="flex-1 min-w-0 pb-24">
+                    <div className="px-4 py-6">
 
-                <div className="animate-fade-in">
-                    {step === 1 && <Step1 formData={formData} setField={setField} />}
-                    {step === 2 && <Step2 formData={formData} setField={setField} />}
-                    {step === 3 && <Step3 formData={formData} setField={setField} initialTechControlState={initialTechControlState} />}
-                    {step === 4 && <Step4 formData={formData} setField={setField} />}
-                    {step === 5 && <Step5 technicalControls={technicalControls} setTechnicalControls={setTechnicalControls} initialTechControlState={initialTechControlState} />}
-                    {step === 6 && <Step6 formData={formData} updateFormData={updateFormData} />}
+                        {/* Progress bar — visible on all screen sizes */}
+                        <div className="max-w-5xl mx-auto mb-6">
+                            <ProgressBar
+                                step={step}
+                                totalSteps={totalSteps}
+                                onStepClick={handleStepClick}
+                            />
+                        </div>
+
+                        {/* Step heading — same max-width as all step cards */}
+                        <div className="flex justify-between items-end mb-6 max-w-5xl mx-auto px-0">
+                            <div>
+                                <h2 className="text-2xl font-bold text-[#15587B]">{stepTitles[step]}</h2>
+                                <p className="text-sm text-gray-500">Please fill in the details below.</p>
+                            </div>
+                        </div>
+
+                        {/* Active step component */}
+                        <div className="animate-fade-in">
+                            {step === 1 && <Step1 formData={formData} setField={setField} />}
+                            {step === 2 && <Step2 formData={formData} setField={setField} />}
+                            {step === 3 && <Step3 formData={formData} setField={setField} initialTechControlState={initialTechControlState} />}
+                            {step === 4 && <Step4 formData={formData} setField={setField} />}
+                            {step === 5 && <Step5 technicalControls={technicalControls} setTechnicalControls={setTechnicalControls} initialTechControlState={initialTechControlState} />}
+                            {step === 6 && <Step6 formData={formData} updateFormData={updateFormData} />}
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            {/* ── Fixed Bottom Action Bar ──────────────────────────────────── */}
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-4">
