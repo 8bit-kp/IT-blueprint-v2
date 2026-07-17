@@ -138,8 +138,33 @@ export default function BlueprintForm() {
                         data.customCategories = [];
                     }
 
+                    // Pre-fill company info from account registration data if the
+                    // blueprint fields are still empty (i.e. new user who hasn't
+                    // filled Step 1 yet). Account data was stored in localStorage
+                    // at login time via the auth page.
+                    if (!data.email) {
+                        const accountEmail = localStorage.getItem("userEmail");
+                        if (accountEmail) data.email = accountEmail;
+                    }
+                    if (!data.companyName) {
+                        const accountCompanyName = localStorage.getItem("userCompanyName");
+                        if (accountCompanyName) data.companyName = accountCompanyName;
+                    }
+
                     updateFormData(data);
                     setLastSavedStep(data._lastSavedStep || 0);
+                } else {
+                    // New user — no saved blueprint. Pre-fill company info from
+                    // account registration data stored at login time.
+                    const accountEmail = localStorage.getItem("userEmail");
+                    const accountCompanyName = localStorage.getItem("userCompanyName");
+                    if (accountEmail || accountCompanyName) {
+                        updateFormData((prev) => ({
+                            ...prev,
+                            ...(accountEmail ? { email: accountEmail } : {}),
+                            ...(accountCompanyName ? { companyName: accountCompanyName } : {}),
+                        }));
+                    }
                 }
             } catch (err) {
                 console.error("fetch blueprint err", err);

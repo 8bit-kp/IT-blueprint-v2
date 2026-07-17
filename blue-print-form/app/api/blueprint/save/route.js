@@ -21,7 +21,7 @@ function deepClean(obj) {
     return obj;
 }
 
-// Reject payloads that contain keys starting with $ or containing .
+
 function hasInvalidKey(obj) {
     if (!obj || typeof obj !== "object") return false;
     for (const key of Object.keys(obj)) {

@@ -97,8 +97,11 @@ const Auth = () => {
 
             if (isLogin && res.data.username) {
                 // JWT is now stored in an HTTP-only cookie by the server.
-                // Only persist the display name for the Navbar.
+                // Persist display name for the Navbar and account fields for
+                // pre-filling the Company Info step on first use.
                 localStorage.setItem("username", res.data.username);
+                if (res.data.email) localStorage.setItem("userEmail", res.data.email);
+                if (res.data.companyName) localStorage.setItem("userCompanyName", res.data.companyName);
             }
 
             toast.success(

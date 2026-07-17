@@ -81,6 +81,8 @@ export async function POST(request) {
         const response = NextResponse.json({
             message: "Login successful",
             username: user.username,
+            email: user.email || "",
+            companyName: user.companyName || "",
             blueprint: blueprintData,
         });
 

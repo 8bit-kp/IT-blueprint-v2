@@ -27,8 +27,10 @@ function Navbar() {
       // Proceed with client-side cleanup regardless.
     }
 
-    // Clear the display username from localStorage.
+    // Clear the display username and account fields from localStorage.
     localStorage.removeItem("username");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userCompanyName");
     setUsername(null);
 
     toast.success("Logged out successfully 👋");
