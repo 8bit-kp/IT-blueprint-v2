@@ -32,12 +32,12 @@ const DashboardHeader = ({ blueprintType, companyName, onSave, saving }) => {
                     <button
                         onClick={() => router.push("/all-blueprints")}
                         className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-[#15587B] hover:bg-gray-100 px-2.5 py-1.5 rounded-lg transition-all"
-                        aria-label="Go back to all blueprints"
+                        aria-label="Go back to Reports"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        All Blueprints
+                        Reports
                     </button>
 
                     <div className="w-px h-5 bg-gray-200" />

@@ -23,6 +23,9 @@ const COLORS = {
   rowEven: "#F9FAFB",
   rowOdd: "#FFFFFF",
 
+  // operations band
+  operationsBand: "#7b5422",
+
   // priority chips
   priorityCriticalBg: "#FEE2E2",
   priorityCriticalText: "#B91C1C",
@@ -127,6 +130,7 @@ const styles = StyleSheet.create({
 // Helper for chip colors
 const chipStyles = (priority) => {
   const p = (priority || "").toLowerCase().trim();
+  if (!p || p === "—" || p === "-") return { backgroundColor: "#f3f4f6", color: "#9ca3af" };
   if (p === "critical") return { backgroundColor: COLORS.priorityCriticalBg, color: COLORS.priorityCriticalText };
   if (p === "high") return { backgroundColor: COLORS.priorityHighBg, color: COLORS.priorityHighText };
   if (p === "medium") return { backgroundColor: COLORS.priorityMediumBg, color: COLORS.priorityMediumText };
@@ -201,6 +205,32 @@ const transformFormData = (inputData) => {
     }
     return { pri: "N/A", off: "N/A" };
   };
+
+  // --- SECTION 0: OPERATIONS ---
+  // Business context rows — general operational information from Step 6.
+  // Workflow-signal rows (data flow, provisioning, SSO, MFA, offboarding)
+  // are owned by the Business Workflows step and will be appended here when
+  // that step is implemented.
+  const opsRows = [];
+
+  if (inputData.primaryBusinessFunction) {
+    opsRows.push({ function: "Primary Business", provider: inputData.primaryBusinessFunction, priority: "—", offering: "—" });
+  }
+  if (inputData.primaryCustomerType) {
+    opsRows.push({ function: "Customer Type", provider: inputData.primaryCustomerType, priority: "—", offering: "—" });
+  }
+  if (inputData.geographicReach) {
+    opsRows.push({ function: "Geographic Reach", provider: inputData.geographicReach, priority: "—", offering: "—" });
+  }
+  if (inputData.numberOfLocations) {
+    opsRows.push({ function: "Business Locations", provider: inputData.numberOfLocations, priority: "—", offering: "—" });
+  }
+  if (inputData.highestBusinessPriority) {
+    opsRows.push({ function: "Top Business Priority", provider: inputData.highestBusinessPriority, priority: "—", offering: "—" });
+  }
+  if (inputData.operationalChallenges && inputData.operationalChallenges.length > 0) {
+    opsRows.push({ function: "Key Challenges", provider: inputData.operationalChallenges.join(", "), priority: "—", offering: "—" });
+  }
 
   // --- SECTION 1: APPLICATIONS ---
   const appRows = [];
@@ -311,8 +341,9 @@ const transformFormData = (inputData) => {
 
   const infraRows = [...dynamicInfraRows, ...staticInfraRows];
 
-  // Combine
+  // Combine — operations section always rendered with at least the workflow signal rows
   return [
+    { section: "operations", color: COLORS.operationsBand, rows: opsRows.length ? opsRows : [{ function: "Not assessed", provider: "No operational data provided", priority: "—", offering: "—" }] },
     { section: "applications", color: COLORS.applicationsBand, rows: appRows.length ? appRows : [{ function: "None", provider: "No Apps", priority: "Low", offering: "-" }] },
     { section: "security", color: COLORS.securityBand, rows: securityRows },
     { section: "infrastructure", color: COLORS.infraBand, rows: infraRows },

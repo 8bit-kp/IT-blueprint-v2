@@ -4,11 +4,12 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { blueprintAPI } from "@/utils/api";
 import {
-    FiBriefcase, FiServer, FiShield, FiGrid, FiFileText, FiHome, FiEdit
+    FiBriefcase, FiServer, FiShield, FiGrid, FiFileText, FiHome, FiEdit, FiActivity
 } from "react-icons/fi";
 import SummarySidebarNav from "@/components/navigation/SummarySidebarNav";
 import { parseControlData } from "@/lib/reports/shared/parseControlData";
 import { resolveCategoryTitle } from "@/lib/reports/shared/labels";
+import AdvisorHandoffBanner from "@/components/engagement/AdvisorHandoffBanner";
 
 // ── Section registry ───────────────────────────────────────────────────────
 // Each entry maps to a <section id="..."> element in the page body.
@@ -16,6 +17,7 @@ const SUMMARY_SECTIONS = [
     { id: "company",        label: "Company",        Icon: FiBriefcase },
     { id: "infrastructure", label: "Infrastructure", Icon: FiServer },
     { id: "security",       label: "Security",       Icon: FiShield },
+    { id: "operations",     label: "Operations",     Icon: FiActivity },
     { id: "applications",   label: "Applications",   Icon: FiGrid },
 ];
 
@@ -31,11 +33,20 @@ const SectionCard = ({ title, children, className = "" }) => (
     </div>
 );
 
-const DetailRow = ({ label, value }) => (
+const DetailRow = ({ label, value, optional = false }) => (
     <div className="flex justify-between items-start py-2 border-b border-gray-50 last:border-0 text-sm">
         <span className="text-gray-500 font-medium">{label}</span>
-        <span className="text-gray-800 font-semibold text-right max-w-[60%] truncate" title={value?.toString()}>
-            {value || "—"}
+        <span
+            className={`font-semibold text-right max-w-[60%] truncate ${
+                !value
+                    ? optional
+                        ? "text-gray-400 italic text-xs"
+                        : "text-amber-600 text-xs"
+                    : "text-gray-800"
+            }`}
+            title={value?.toString()}
+        >
+            {value || "Not provided"}
         </span>
     </div>
 );
@@ -145,7 +156,7 @@ const BlueprintSummary = () => {
             <div className="min-h-screen flex items-center justify-center bg-[#F3F4F6]">
                 <div className="text-center">
                     <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#15587B] mb-4" />
-                    <p className="text-gray-600 font-medium">Loading Blueprint Summary…</p>
+                    <p className="text-gray-600 font-medium">Loading Assessment Summary…</p>
                 </div>
             </div>
         );
@@ -175,9 +186,9 @@ const BlueprintSummary = () => {
                             <FiFileText className="w-5 h-5" />
                         </div>
                         <div>
-                            <h1 className="text-lg font-bold text-gray-800 leading-none">Blueprint Summary</h1>
+                            <h1 className="text-lg font-bold text-gray-800 leading-none">Assessment Summary</h1>
                             <p className="text-xs text-gray-500 mt-0.5">
-                                Configuration for{" "}
+                                Current State Report —{" "}
                                 <span className="font-semibold text-[#34808A]">{formData.companyName || "—"}</span>
                             </p>
                         </div>
@@ -238,6 +249,12 @@ const BlueprintSummary = () => {
                 <div className="flex-1 min-w-0">
                     <div className="max-w-5xl mx-auto px-4 py-8 space-y-12 pb-20">
 
+                        {/* ── Handoff Banner ────────────────────────────── */}
+                        <AdvisorHandoffBanner
+                            title="Your Current State Report has been generated"
+                            description="This summary reflects your completed Current State Assessment. A Consltek advisor will review your assessment and reach out to schedule a consultation. The full Assessment with Remediation Plan — including gap analysis, risk assessment, and prioritised remediation — is developed during that engagement."
+                        />
+
                         {/* ── SECTION 1: Company ──────────────────────────── */}
                         <section
                             id="company"
@@ -251,13 +268,19 @@ const BlueprintSummary = () => {
                                 <SectionCard title="Company Profile">
                                     <div className="space-y-1">
                                         <DetailRow label="Company" value={formData.companyName} />
-                                        <DetailRow label="Contact" value={formData.contactName} />
+                                        <DetailRow label="Contact" value={formData.contactName} optional />
                                         <DetailRow label="Email" value={formData.email} />
-                                        <DetailRow label="Phone" value={formData.phoneNumber} />
+                                        <DetailRow label="Phone" value={formData.phoneNumber} optional />
                                         <DetailRow
                                             label="Industry"
                                             value={formData.industry === "Other" ? formData.otherIndustry : formData.industry}
                                         />
+                                        <DetailRow label="Deployment Model" value={formData.deploymentModel} />
+                                        <DetailRow label="IT Management" value={formData.itManagement} />
+                                        <DetailRow label="MSP Relationship" value={formData.mspRelationship} />
+                                        {formData.mspRelationship === "Yes" && (
+                                            <DetailRow label="MSP Name" value={formData.mspName} optional />
+                                        )}
                                         <div className="grid grid-cols-2 gap-4 mt-4 pt-3 border-t border-gray-100">
                                             <div className="text-center">
                                                 <span className="block text-xs text-gray-400 uppercase">Employees</span>
@@ -429,7 +452,51 @@ const BlueprintSummary = () => {
                             </SectionCard>
                         </section>
 
-                        {/* ── SECTION 4: Applications ──────────────────────── */}
+                        {/* ── SECTION 4: Operations ────────────────────────── */}
+                        <section
+                            id="operations"
+                            ref={(el) => { sectionRefs.current["operations"] = el; }}
+                            className="scroll-mt-20 space-y-6"
+                        >
+                            <SectionHeader label="Business Operations" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                {/* Business Context */}
+                                <SectionCard title="Business Context">
+                                    <div className="space-y-1">
+                                        <DetailRow label="Primary Function"   value={formData.primaryBusinessFunction}   optional />
+                                        <DetailRow label="Products / Services" value={formData.mainProductsServices}     optional />
+                                        <DetailRow label="Customer Type"       value={formData.primaryCustomerType}      optional />
+                                        <DetailRow label="Geographic Reach"    value={formData.geographicReach}          optional />
+                                        <DetailRow label="Locations"           value={formData.numberOfLocations}        optional />
+                                    </div>
+                                </SectionCard>
+
+                                {/* Business Criticality */}
+                                <SectionCard title="Business Criticality">
+                                    <div className="space-y-1">
+                                        <DetailRow label="Critical Function"   value={formData.criticalBusinessFunction} optional />
+                                        <DetailRow label="24/7 Systems"        value={formData.systemsRequiring24x7}     optional />
+                                        <DetailRow label="Top Priority"        value={formData.highestBusinessPriority}  optional />
+                                        {(formData.operationalChallenges || []).length > 0 && (
+                                            <div className="flex flex-col gap-1 pt-2 border-t border-gray-50">
+                                                <span className="text-xs text-gray-500 font-medium">Operational Challenges</span>
+                                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                                    {formData.operationalChallenges.map((c) => (
+                                                        <span key={c} className="px-2 py-0.5 bg-[#15587B]/8 text-[#15587B] text-xs font-semibold rounded-full border border-[#15587B]/20">
+                                                            {c}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </SectionCard>
+                            </div>
+
+                        </section>
+
+                        {/* ── SECTION 5: Applications ───────────────────────── */}
                         <section
                             id="applications"
                             ref={(el) => { sectionRefs.current["applications"] = el; }}

@@ -145,12 +145,12 @@ const Auth = () => {
 
                     <div className="text-center mb-8">
                         <h2 className="text-2xl font-bold text-[#15587B]">
-                            {isLogin ? "Welcome Back" : "Get Started"}
+                            {isLogin ? "Welcome Back" : "Create Your Account"}
                         </h2>
                         <p className="text-sm text-gray-500 mt-2">
                             {isLogin
-                                ? "Enter your credentials to access your dashboard."
-                                : "Create your account to start building blueprints."}
+                                ? "Sign in to access your Current State Assessment."
+                                : "Create your account to begin your Current State Assessment."}
                         </p>
                     </div>
 
@@ -235,6 +235,17 @@ const Auth = () => {
                                     ? "Sign In"
                                     : "Create Account"}
                         </button>
+
+                        {/* Privacy acknowledgement — registration only */}
+                        {!isLogin && (
+                            <p className="text-xs text-gray-400 text-center leading-relaxed pt-1">
+                                By creating an account you agree to Consltek&apos;s{" "}
+                                <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#34808A] hover:underline font-medium">Privacy Policy</a>
+                                {" "}and{" "}
+                                <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-[#34808A] hover:underline font-medium">Terms of Use</a>
+                                .
+                            </p>
+                        )}
                     </form>
 
                     {/* Toggle Login/Register */}

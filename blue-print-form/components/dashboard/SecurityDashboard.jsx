@@ -38,7 +38,7 @@ const SecurityDashboard = ({ formData }) => {
                     <div className="h-5 w-1 bg-[#34808A] rounded-full" />
                     <div>
                         <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Security Technical Controls</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">Data fetched from your Security Technical Controls submission</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Security controls inventory from your Current State Assessment</p>
                     </div>
                 </div>
                 <div className="p-5">
@@ -96,7 +96,7 @@ const SecurityDashboard = ({ formData }) => {
                     <div className="h-5 w-1 bg-[#34808A] rounded-full" />
                     <div>
                         <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Governance &amp; Administrative Controls</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">Policy framework and compliance status</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Governance and administrative controls inventory from your assessment</p>
                     </div>
                 </div>
                 <div className="p-5">

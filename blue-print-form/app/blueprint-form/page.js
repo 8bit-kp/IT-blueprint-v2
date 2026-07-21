@@ -16,7 +16,8 @@ import Step2 from "@/components/form-fields/InfrastructureStep";
 import Step3 from "@/components/form-fields/NetworkServerStep";
 import Step4 from "@/components/form-fields/SecurityAdminStep";
 import Step5 from "@/components/form-fields/SecurityTechStep";
-import Step6 from "@/components/form-fields/ApplicationsStep";
+import Step6 from "@/components/form-fields/BusinessOperationsStep";
+import Step7 from "@/components/form-fields/ApplicationsStep";
 
 const stepTitles = {
     1: "Company Profile",
@@ -24,7 +25,8 @@ const stepTitles = {
     3: "Network & Server Infra",
     4: "Governance & Admin Controls",
     5: "Security Technical Controls",
-    6: "Applications Portfolio",
+    6: "Business Operations",
+    7: "Applications Portfolio",
 };
 
 const initialTechControlState = { choice: "Yes", vendor: "", businessPriority: "Critical", offering: "SaaS" };
@@ -33,13 +35,14 @@ const initialTechControlState = { choice: "Yes", vendor: "", businessPriority: "
 
 export default function BlueprintForm() {
     const router = useRouter();
-    const totalSteps = 6;
+    const totalSteps = 7;
     const { formData, updateFormData, step, setStep, resetForm } = useForm();
     const [loadingSave, setLoadingSave] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
     const [lastSavedStep, setLastSavedStep] = useState(0);
     const [loadingReset, setLoadingReset] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
+    const [stepErrors, setStepErrors] = useState({});
 
     // Ref for the scrollable main-content column so step navigation can
     // scroll it back to the top (instead of relying on window.scrollTo which
@@ -68,6 +71,43 @@ export default function BlueprintForm() {
     const setField = useCallback((key, value) => {
         updateFormData((prev) => ({ ...prev, [key]: value }));
     }, [updateFormData]);
+
+    const clearError = useCallback((fieldName) => {
+        setStepErrors(prev => {
+            if (!prev[fieldName]) return prev;
+            const { [fieldName]: _removed, ...rest } = prev;
+            return rest;
+        });
+    }, []);
+
+    const validateStep1 = useCallback((data) => {
+        const errors = {};
+        if (!data.companyName?.trim()) {
+            errors.companyName = "Please enter your organisation's name to continue.";
+        }
+        const email = data.email?.trim() || "";
+        if (!email) {
+            errors.email = "Please enter a valid business email address.";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.email = "This doesn't look like a valid email address. Please check and try again.";
+        }
+        if (!data.industry) {
+            errors.industry = "Please select the industry that best describes your organisation.";
+        }
+        if (!data.employees) {
+            errors.employees = "Please select your approximate employee count to continue.";
+        }
+        if (!data.deploymentModel) {
+            errors.deploymentModel = "Please select your primary deployment model to continue.";
+        }
+        if (!data.itManagement) {
+            errors.itManagement = "Please indicate how your IT environment is managed.";
+        }
+        if (!data.mspRelationship) {
+            errors.mspRelationship = "Please indicate whether your organisation has an existing MSP relationship.";
+        }
+        return errors;
+    }, []);
 
     // Restore step from localStorage on mount
     useEffect(() => {
@@ -265,10 +305,19 @@ export default function BlueprintForm() {
     };
 
     const handleSaveAndNext = async () => {
+        if (step === 1) {
+            const errors = validateStep1(formData);
+            if (Object.keys(errors).length > 0) {
+                setStepErrors(errors);
+                scrollToTop();
+                return;
+            }
+        }
+        setStepErrors({});
         const success = await saveStep(step);
         if (success) {
             if (step === totalSteps) {
-                router.push("/blueprint-summary");
+                router.push("/assessment-complete");
             } else {
                 setStep((prev) => prev + 1);
                 scrollToTop();
@@ -278,6 +327,7 @@ export default function BlueprintForm() {
 
     const handleStepClick = (targetStep) => {
         if (targetStep !== step) {
+            setStepErrors({});
             setStep(targetStep);
             scrollToTop();
         }
@@ -285,6 +335,7 @@ export default function BlueprintForm() {
 
     const handleBack = () => {
         if (step > 1) {
+            setStepErrors({});
             setStep(step - 1);
             scrollToTop();
         }
@@ -338,7 +389,7 @@ export default function BlueprintForm() {
             <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
                 <div className="text-center">
                     <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#15587B] mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading your blueprint...</p>
+                    <p className="text-gray-600 font-medium">Loading your assessment...</p>
                 </div>
             </div>
         );
@@ -391,18 +442,23 @@ Are you sure you want to continue?"
                         <div className="flex justify-between items-end mb-6 max-w-5xl mx-auto px-0">
                             <div>
                                 <h2 className="text-2xl font-bold text-[#15587B]">{stepTitles[step]}</h2>
-                                <p className="text-sm text-gray-500">Please fill in the details below.</p>
+                                <p className="text-sm text-gray-500">
+                                    {step === 1
+                                        ? "This information contextualises your assessment for your Consltek advisor."
+                                        : "All fields on this step are optional — completing them improves your Current State Report."}
+                                </p>
                             </div>
                         </div>
 
                         {/* Active step component */}
                         <div className="animate-fade-in">
-                            {step === 1 && <Step1 formData={formData} setField={setField} />}
+                            {step === 1 && <Step1 formData={formData} setField={setField} errors={stepErrors} clearError={clearError} />}
                             {step === 2 && <Step2 formData={formData} setField={setField} />}
                             {step === 3 && <Step3 formData={formData} setField={setField} initialTechControlState={initialTechControlState} />}
                             {step === 4 && <Step4 formData={formData} setField={setField} />}
                             {step === 5 && <Step5 technicalControls={technicalControls} setTechnicalControls={setTechnicalControls} initialTechControlState={initialTechControlState} />}
-                            {step === 6 && <Step6 formData={formData} updateFormData={updateFormData} />}
+                            {step === 6 && <Step6 formData={formData} setField={setField} />}
+                            {step === 7 && <Step7 formData={formData} updateFormData={updateFormData} />}
                         </div>
                     </div>
                 </div>
@@ -462,7 +518,7 @@ Are you sure you want to continue?"
                             disabled={loadingSave || loadingReset}
                             className="px-6 sm:px-8 py-2.5 text-sm text-white bg-[#15587B] hover:bg-[#0f4460] disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg font-bold shadow-md transition flex items-center gap-2"
                         >
-                            {step === totalSteps ? "Finish & Review" : "Next Step →"}
+                            {step === totalSteps ? "Complete Assessment" : "Next Step →"}
                         </button>
                     </div>
                 </div>

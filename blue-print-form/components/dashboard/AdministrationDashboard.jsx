@@ -55,7 +55,7 @@ const AdministrationDashboard = ({ formData, updateField }) => {
                     <div className="h-5 w-1 bg-[#34808A] rounded-full" />
                     <div>
                         <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Administrative Controls</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">Governance and compliance framework</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Governance and administrative controls inventory from your assessment</p>
                     </div>
                 </div>
                 <div className="p-5">

@@ -1,6 +1,6 @@
 "use client";
 
-import { FiArrowRight, FiFileText, FiShield, FiCpu, FiLayers, FiLock, FiDatabase, FiCheckCircle, FiUserCheck, FiEyeOff } from "react-icons/fi";
+import { FiArrowRight, FiFileText, FiShield, FiCpu, FiLayers, FiLock, FiDatabase, FiCheckCircle, FiUserCheck, FiEyeOff, FiUsers, FiHelpCircle, FiBarChart2 } from "react-icons/fi";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,17 @@ const SecurityCard = ({ icon: Icon, title, desc }) => (
       <p className="text-xs font-bold text-[#15587B] uppercase tracking-wide mb-0.5">{title}</p>
       <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
     </div>
+  </div>
+);
+
+// Why-we-collect card
+const WhyCard = ({ icon: Icon, title, children }) => (
+  <div className="bg-white/70 border border-gray-200 rounded-xl p-6 flex flex-col gap-3">
+    <div className="w-9 h-9 bg-[#34808A]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+      <Icon size={18} className="text-[#34808A]" />
+    </div>
+    <h3 className="text-sm font-bold text-[#15587B]">{title}</h3>
+    <div className="text-sm text-gray-500 leading-relaxed space-y-1">{children}</div>
   </div>
 );
 
@@ -121,6 +132,96 @@ export default function Home() {
           />
         </div>
 
+        {/* Why We Collect This Information */}
+        <div className="w-full max-w-6xl mt-16">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#34808A]/10 text-[#34808A] text-xs font-bold uppercase tracking-wider mb-3">
+              Transparency
+            </div>
+            <h2 className="text-2xl font-bold text-[#15587B] mb-2">Why we ask these questions</h2>
+            <p className="text-sm text-gray-500 max-w-xl mx-auto">
+              Before requesting IT environment information, we want to be clear about why it's needed, how it will be used, and who will have access to it.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <WhyCard icon={FiHelpCircle} title="Why this information is requested">
+              <p>
+                Consltek advisors need an accurate picture of your current IT environment before they can offer meaningful guidance.
+              </p>
+              <p>
+                Without structured discovery, consulting engagements spend multiple sessions collecting information that could be documented in advance — adding time and cost before any analysis begins.
+              </p>
+              <p>
+                The assessment replaces that unstructured gathering with a single, efficient process.
+              </p>
+            </WhyCard>
+
+            <WhyCard icon={FiBarChart2} title="How it is used">
+              <p>Your assessment data is used to:</p>
+              <ul className="list-disc pl-4 space-y-1 mt-1">
+                <li>Generate your <strong className="text-gray-700">Current State Report</strong> immediately after completion.</li>
+                <li>Help your assigned advisor prepare for your consultation with accurate, current information.</li>
+                <li>Provide the structured starting point for your <strong className="text-gray-700">Assessment with Remediation Plan</strong>.</li>
+              </ul>
+              <p className="mt-1">It is not used for any other purpose.</p>
+            </WhyCard>
+
+            <WhyCard icon={FiUsers} title="Who has access">
+              <p>
+                Access is strictly limited to:
+              </p>
+              <ul className="list-disc pl-4 space-y-1 mt-1">
+                <li>Your <strong className="text-gray-700">assigned Consltek advisor</strong>.</li>
+                <li>Consltek staff <strong className="text-gray-700">directly supporting</strong> your engagement and report processing.</li>
+              </ul>
+              <p className="mt-1">
+                No assessment data is shared with, sold to, or accessible by any party outside Consltek. Consltek personnel cannot access accounts they are not directly assigned to.
+              </p>
+            </WhyCard>
+          </div>
+        </div>
+
+        {/* About Consltek */}
+        <div className="w-full max-w-6xl mt-8 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl shadow-sm p-8">
+          <div className="flex flex-col md:flex-row items-start gap-8">
+            {/* Left: brand mark */}
+            <div className="flex-shrink-0 flex flex-col items-center md:items-start gap-3">
+              <img src="/conslteklogo.png" alt="Consltek" className="h-10 object-contain" />
+              <div className="flex flex-col gap-1.5">
+                {[
+                  "Infrastructure Advisory",
+                  "Security Consulting",
+                  "Technology Strategy",
+                ].map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-block px-2.5 py-0.5 rounded-full bg-[#15587B]/8 text-[#15587B] text-[10px] font-semibold uppercase tracking-wide"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="hidden md:block w-px self-stretch bg-gray-200" />
+
+            {/* Right: description */}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-[#15587B] mb-3">About Consltek</h2>
+              <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                Consltek is a professional IT consulting firm specialising in infrastructure assessment, security advisory, and technology strategy for mid-market organisations. Our work is grounded in structured discovery — we assess what exists before recommending what should change.
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                The IT Blueprint platform was built to accelerate that discovery process. Rather than spending the first phase of an engagement manually gathering information, advisors can begin consultation with an accurate, current-state inventory already in hand.
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                The assessment is provided at no cost. The consulting engagement — where real analysis and planning occur — follows after your advisor reviews the Current State Report.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Trust & Data Security Section */}
         <div className="w-full max-w-6xl mt-16 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl shadow-sm overflow-hidden">
           {/* Header bar */}
@@ -157,13 +258,13 @@ export default function Home() {
               />
               <SecurityCard
                 icon={FiUserCheck}
-                title="Server-Side Token Revocation"
-                desc="All active sessions can be invalidated server-side at any time without requiring a password reset, providing immediate access control enforcement."
+                title="Revocable Access Control"
+                desc="Access to your assessment can be revoked at any time by authorized Consltek administrators, without requiring a password reset."
               />
               <SecurityCard
                 icon={FiCheckCircle}
-                title="Credential-Based Tenant Isolation"
-                desc="Blueprint data is strictly scoped to the authenticated account. No cross-account data access is permitted at the application or database layer."
+                title="Your Data Is Isolated to Your Organization"
+                desc="Assessment data is strictly scoped to your account. No other customer or Consltek user can access your data at any layer of the system."
               />
               <SecurityCard
                 icon={FiEyeOff}
@@ -180,7 +281,7 @@ export default function Home() {
             <div>
               <h2 className="text-xl font-bold text-[#15587B] mb-2">What happens after the assessment?</h2>
               <p className="text-sm text-gray-500 max-w-xl">
-                Once your current-state documentation is complete, a Consltek consultant will review it with you to identify gaps, security risks, and opportunities for improvement — leading to a roadmap tailored to your organisation.
+                Once your Current State Assessment is complete, a Consltek advisor reviews your report and schedules a consultation. From there, Consltek delivers the <strong className="text-gray-600">Assessment with Remediation Plan</strong> — a professional engagement covering gap analysis, risk assessment, and a prioritised remediation roadmap tailored to your organisation.
               </p>
             </div>
             <button

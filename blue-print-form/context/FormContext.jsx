@@ -15,6 +15,10 @@ export const FormProvider = ({ children }) => {
     employees: "",
     remotePercentage: 0,
     contractorPercentage: 0,
+    deploymentModel: "",
+    itManagement: "",
+    mspRelationship: "",
+    mspName: "",
     // Facilities & Infrastructure defaults
     physicalOffices: "1",
     hasDataCenters: "Yes",
@@ -52,7 +56,20 @@ export const FormProvider = ({ children }) => {
     },
     // Custom user-defined application categories (Step 6)
     // Each entry: { key: string (slug), title: string (display name) }
-    customCategories: []
+    customCategories: [],
+    // Business Operations (Step 6)
+    primaryBusinessFunction: "",
+    mainProductsServices: "",
+    numberOfLocations: "",
+    primaryCustomerType: "",
+    geographicReach: "",
+    criticalBusinessFunction: "",
+    systemsRequiring24x7: "",
+    highestBusinessPriority: "",
+    operationalChallenges: [],
+    // Note: workflow-signal fields (data flow, provisioning, SSO, MFA,
+    // offboarding, critical dependencies) are owned by the Business Workflows
+    // step and are not stored here.
   });
 
   const [step, setStep] = useState(1);
@@ -79,6 +96,10 @@ export const FormProvider = ({ children }) => {
       employees: "",
       remotePercentage: 0,
       contractorPercentage: 0,
+      deploymentModel: "",
+      itManagement: "",
+      mspRelationship: "",
+      mspName: "",
       // Facilities & Infrastructure defaults
       physicalOffices: "1",
       hasDataCenters: "Yes",
@@ -115,7 +136,20 @@ export const FormProvider = ({ children }) => {
         additional: []
       },
       // Custom user-defined application categories (Step 6)
-      customCategories: []
+      customCategories: [],
+      // Business Operations (Step 6)
+      primaryBusinessFunction: "",
+      mainProductsServices: "",
+      numberOfLocations: "",
+      primaryCustomerType: "",
+      geographicReach: "",
+      criticalBusinessFunction: "",
+      systemsRequiring24x7: "",
+      highestBusinessPriority: "",
+      operationalChallenges: [],
+      // Note: workflow-signal fields (data flow, provisioning, SSO, MFA,
+      // offboarding, critical dependencies) are owned by the Business Workflows
+      // step and are not stored here.
     }), []);
 
   // Memoize context value to prevent unnecessary re-renders

@@ -128,7 +128,7 @@ export const ToggleButton = memo(({ options, value, onChange }) => {
     );
 });
 
-export const TextInput = memo(({ placeholder, value, onChange, type = "text", className = "" }) => {
+export const TextInput = memo(({ placeholder, value, onChange, type = "text", className = "", error = false }) => {
     const [localValue, setLocalValue] = useState(value || "");
     const timerRef = useRef(null);
 
@@ -155,7 +155,7 @@ export const TextInput = memo(({ placeholder, value, onChange, type = "text", cl
         <input
             type={type}
             placeholder={placeholder}
-            className={`block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#34808A] focus:ring-1 focus:ring-[#34808A] sm:text-sm p-2.5 text-gray-900 placeholder:text-gray-500 ${className}`}
+            className={`block w-full rounded-md border shadow-sm sm:text-sm p-2.5 text-gray-900 placeholder:text-gray-500 ${error ? "border-red-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 bg-red-50/30" : "border-gray-300 focus:border-[#34808A] focus:ring-1 focus:ring-[#34808A]"} ${className}`}
             value={localValue}
             onChange={handleChange}
             onBlur={handleBlur}

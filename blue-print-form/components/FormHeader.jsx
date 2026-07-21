@@ -27,10 +27,10 @@ const FormHeader = () => {
           {/* Title Block */}
           <div className="flex flex-col justify-center">
             <h1 className="text-lg md:text-xl font-bold text-[#15587B] tracking-tight leading-tight">
-              Manage Your IT Blueprint
+              Current State Assessment
             </h1>
             <span className="text-[10px] sm:text-xs text-gray-400 font-semibold tracking-wide uppercase">
-              System Configuration
+              IT Blueprint Platform
             </span>
           </div>
         </div>

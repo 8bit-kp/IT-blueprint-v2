@@ -114,7 +114,21 @@ const blueprintSchema = new mongoose.Schema({
         },
     },
 
-    // Custom application category metadata (Step 6 — user-created sections)
+    // Step 6: Business Operations
+    primaryBusinessFunction: String,
+    mainProductsServices: String,
+    numberOfLocations: String,
+    primaryCustomerType: String,
+    geographicReach: String,
+    criticalBusinessFunction: String,
+    systemsRequiring24x7: String,
+    highestBusinessPriority: String,
+    operationalChallenges: [String],
+    // Note: workflow-signal fields (data flow, provisioning, SSO, MFA,
+    // offboarding, critical dependencies) are owned by the Business Workflows
+    // step schema section — they are not stored under Business Operations.
+
+    // Custom application category metadata (Step 7 — user-created sections)
     // Each entry: { key: String (slug used as applications[key]), title: String (display name) }
     // Default categories are NOT listed here — only user-created ones.
     customCategories: {

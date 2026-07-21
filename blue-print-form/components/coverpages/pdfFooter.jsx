@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
 /**
  * logoSrc can be a public path (e.g., "/conslteklogo.png") or imported asset.
  */
-const PdfFooter = ({ companyName = "—", logoSrc = "/conslteklogo.png" }) => (
+const PdfFooter = ({ companyName = "—", logoSrc = "/conslteklogo.png", documentLabel = "IT Blueprint" }) => (
   <View style={styles.container} fixed>
     <View style={styles.leftWrap}>
       <View style={styles.tealBlock} />
@@ -40,7 +40,7 @@ const PdfFooter = ({ companyName = "—", logoSrc = "/conslteklogo.png" }) => (
     </View>
 
     <View style={styles.rightWrap}>
-      <Text style={styles.rightText}>IT Blueprint for {companyName}</Text>
+      <Text style={styles.rightText}>{documentLabel} for {companyName}</Text>
       <Text style={styles.sep}>|</Text>
       <Text style={styles.rightText}>PAGE</Text>
       <Text

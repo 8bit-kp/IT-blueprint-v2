@@ -10,16 +10,17 @@ import {
     FiWifi,
     FiShield,
     FiLock,
+    FiActivity,
     FiGrid,
 } from "react-icons/fi";
 
 // One icon per step — order matches stepTitles in blueprint-form/page.js
-const STEP_ICONS = [FiBriefcase, FiServer, FiWifi, FiShield, FiLock, FiGrid];
+const STEP_ICONS = [FiBriefcase, FiServer, FiWifi, FiShield, FiLock, FiActivity, FiGrid];
 
 /**
  * FormSidebarNav
  *
- * Collapsible left-hand sidebar for the 6-step IT Blueprint form.
+ * Collapsible left-hand sidebar for the 7-step Current State Assessment form.
  *
  * Props:
  *   step          {number}            Current active step (1-indexed).

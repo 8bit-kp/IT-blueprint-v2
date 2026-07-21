@@ -12,6 +12,8 @@ import AdministrationDocument from "@/components/coverpages/AdministrationDocume
 import CompleteDocument from "@/components/coverpages/CompleteDocument";
 import SecurityDonutGrid from "@/components/dashboard-visuals/SecurityDonutGrid";
 import ApplicationDonutGrid from "@/components/dashboard-visuals/ApplicationDonutGrid";
+import AdvisorHandoffBanner from "@/components/engagement/AdvisorHandoffBanner";
+import StatusCard from "@/components/engagement/StatusCard";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -75,8 +77,10 @@ const BlueprintCard = ({
     documentComponent,
     formData,
     fileName,
+    downloadName,  // human-readable PDF filename (decoupled from routing key)
     tag,
     accentColor,   // { bar: "#hex", barTo: "#hex", icon: "rgba(...)", text: "#hex" }
+    reportStatus = "ready",  // "ready" | "pending" | "in_progress" — future-ready
 }) => {
     const [isClient, setIsClient] = useState(false);
     useEffect(() => { setIsClient(true); }, []);
@@ -120,8 +124,18 @@ const BlueprintCard = ({
                     )}
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-100 mb-4" />
+                {/* Divider + status */}
+                <div className="border-t border-gray-100 pt-3 mb-3 flex items-center justify-between">
+                    <StatusCard
+                        status={reportStatus}
+                        label={
+                            reportStatus === "ready"       ? "Report Ready" :
+                            reportStatus === "pending"     ? "Advisor Review Pending" :
+                            reportStatus === "in_progress" ? "In Progress" :
+                                                              "Report Ready"
+                        }
+                    />
+                </div>
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2 mt-auto">
@@ -146,7 +160,7 @@ const BlueprintCard = ({
                         {isClient && (
                             <PDFDownloadLink
                                 document={documentComponent}
-                                fileName={`${fileName}-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
+                                fileName={`${downloadName || fileName}-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
                                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white rounded-lg transition-all duration-150 shadow-sm"
                                 style={{ backgroundColor: bar }}
                                 onMouseEnter={e => { e.currentTarget.style.opacity = "0.88"; }}
@@ -209,16 +223,16 @@ const AllBlueprintsPage = () => {
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-3">
             <div className="w-8 h-8 border-2 border-[#34808A] border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-gray-400 font-medium">Loading blueprints…</p>
+            <p className="text-sm text-gray-400 font-medium">Loading your report…</p>
         </div>
     );
 
     if (error || !formData) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-3">
-            <p className="text-sm font-semibold text-gray-600">No blueprint data found.</p>
+            <p className="text-sm font-semibold text-gray-600">No assessment data found.</p>
             <button onClick={() => router.push("/blueprint-form")}
                 className="text-xs text-[#34808A] underline underline-offset-2">
-                Return to Form
+                Return to Assessment
             </button>
         </div>
     );
@@ -226,48 +240,53 @@ const AllBlueprintsPage = () => {
     // ── Blueprint definitions ──────────────────────────────────────────────
     const blueprints = [
         {
-            title: "Current State Blueprint",
-            description: "Complete overview of current IT infrastructure",
+            title: "Current State Report",
+            description: "Complete inventory of current IT infrastructure & environment",
             tag: "Overview",
             icon: <IconCurrentState />,
             documentComponent: <BlueprintDocument companyName={formData.companyName || "—"} preparedDate={new Date()} currentStateData={formData} />,
             fileName: "Current-State-Blueprint",
+            downloadName: "Current-State-Report",
             accentColor: { bar: "#15587B", barTo: "#34808A", icon: "rgba(21,88,123,0.09)", text: "#15587B" },
         },
         {
-            title: "Security Blueprint",
-            description: "Security controls, technical defenses & policies",
+            title: "Security Controls Summary",
+            description: "Inventory of current security controls, technical defenses & policies",
             tag: "Security",
             icon: <IconSecurity />,
             documentComponent: <SecurityDocument companyName={formData.companyName || "—"} preparedDate={new Date()} securityData={formData} />,
             fileName: "Security-Blueprint",
+            downloadName: "Security-Controls-Summary",
             accentColor: { bar: "#b91c1c", barTo: "#ef4444", icon: "rgba(185,28,28,0.08)", text: "#b91c1c" },
         },
         {
-            title: "Financial Blueprint",
-            description: "Financial applications & business-critical systems",
+            title: "Financial Applications Summary",
+            description: "Inventory of current financial applications & business-critical systems",
             tag: "Finance",
             icon: <IconFinancial />,
             documentComponent: <FinancialDocument companyName={formData.companyName || "—"} preparedDate={new Date()} financialData={formData} />,
             fileName: "Financial-Blueprint",
+            downloadName: "Financial-Applications-Summary",
             accentColor: { bar: "#047857", barTo: "#10b981", icon: "rgba(4,120,87,0.08)", text: "#047857" },
         },
         {
-            title: "Operational Blueprint",
-            description: "Network infrastructure, servers & operations",
+            title: "Infrastructure & Operations Summary",
+            description: "Inventory of current network infrastructure, servers & operations",
             tag: "Operations",
             icon: <IconOperational />,
             documentComponent: <OperationalDocument companyName={formData.companyName || "—"} preparedDate={new Date()} operationalData={formData} />,
             fileName: "Operational-Blueprint",
+            downloadName: "Infrastructure-Operations-Summary",
             accentColor: { bar: "#6d28d9", barTo: "#a78bfa", icon: "rgba(109,40,217,0.08)", text: "#6d28d9" },
         },
         {
-            title: "Administration & Controls Blueprint",
-            description: "Governance, policies & administrative controls",
+            title: "Governance & Controls Summary",
+            description: "Inventory of current governance policies & administrative controls",
             tag: "Governance",
             icon: <IconAdmin />,
             documentComponent: <AdministrationDocument companyName={formData.companyName || "—"} preparedDate={new Date()} administrationData={formData} />,
             fileName: "Administration-Blueprint",
+            downloadName: "Governance-Controls-Summary",
             accentColor: { bar: "#b45309", barTo: "#f59e0b", icon: "rgba(180,83,9,0.08)", text: "#b45309" },
         },
     ];
@@ -287,7 +306,7 @@ const AllBlueprintsPage = () => {
                             </svg>
                         </div>
                         <div>
-                            <h1 className="text-base font-semibold text-gray-800 leading-none">All Blueprints</h1>
+                            <h1 className="text-base font-semibold text-gray-800 leading-none">Current State Report</h1>
                             <p className="text-xs text-gray-400 mt-0.5">
                                 {formData.companyName}
                             </p>
@@ -469,10 +488,16 @@ const AllBlueprintsPage = () => {
                     )}
                 </div>
 
+                {/* ── ADVISOR HANDOFF BANNER ───────────────────────────── */}
+                <AdvisorHandoffBanner
+                    title="Your Current State Report has been generated"
+                    description="The sections below are your Current State Report — an automated inventory of your IT environment as documented in your assessment. A Consltek advisor will review this report and reach out to schedule a consultation. The full Assessment with Remediation Plan — including gap analysis, risk assessment, and prioritised remediation — is developed during that engagement."
+                />
+
                 {/* ── SECTION LABEL ─────────────────────────────────────── */}
                 <div>
                     <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
-                        Blueprint Documents
+                        Report Sections
                     </p>
 
                     {/* ── CARDS GRID ─────────────────────────────────────── */}
@@ -487,6 +512,7 @@ const AllBlueprintsPage = () => {
                                 documentComponent={bp.documentComponent}
                                 formData={formData}
                                 fileName={bp.fileName}
+                                downloadName={bp.downloadName}
                                 accentColor={bp.accentColor}
                             />
                         ))}
@@ -496,8 +522,8 @@ const AllBlueprintsPage = () => {
                 {/* ── DOWNLOAD ALL ──────────────────────────────────────── */}
                 <div className="border-t border-gray-200 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
-                        <p className="text-sm font-semibold text-gray-700">Complete Documentation Package</p>
-                        <p className="text-xs text-gray-400 mt-0.5">All 5 blueprints compiled into a single PDF file</p>
+                        <p className="text-sm font-semibold text-gray-700">Complete Current State Report</p>
+                        <p className="text-xs text-gray-400 mt-0.5">All report sections compiled into a single PDF file</p>
                     </div>
                     {isClient && (
                         <PDFDownloadLink
@@ -508,7 +534,7 @@ const AllBlueprintsPage = () => {
                                     formData={formData}
                                 />
                             }
-                            fileName={`Complete-IT-Blueprint-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
+                            fileName={`Complete-Current-State-Report-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
                             className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-lg shadow-sm transition-all duration-150 whitespace-nowrap"
                         >
                             {({ loading }) => (
