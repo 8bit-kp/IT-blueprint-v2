@@ -101,7 +101,7 @@ const StepCover = ({ report, companyName, assessmentDate }) => {
                         IT Security Assessment
                     </p>
                     <h1 className="text-2xl font-extrabold text-[#15587B] leading-tight">
-                        Current State Report
+                        Security Score
                     </h1>
                     {companyName && (
                         <p className="text-base font-semibold text-gray-700">{companyName}</p>
@@ -120,9 +120,9 @@ const StepCover = ({ report, companyName, assessmentDate }) => {
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white shadow-sm"
                         style={{ backgroundColor: maturity.color }}
                     >
-                        <span>IT Maturity Level {maturity.level}</span>
-                        <span className="opacity-70">—</span>
-                        <span>{maturity.name}</span>
+                        <span className="opacity-70">IT Maturity Level {maturity.level}</span>
+                        <span className="opacity-70">-</span>
+                        <span className="bold">{maturity.name}</span>
                     </span>
                 </div>
             </div>
