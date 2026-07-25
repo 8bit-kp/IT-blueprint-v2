@@ -3,51 +3,77 @@
 /**
  * app/assessment-report/page.js
  *
- * 5-step interactive Current State Report viewer.
+ * Single-page executive dashboard for the Current State Report.
  *
- * Steps:
- *   1. Cover              — speedometer gauge, company name, maturity badge
- *   2. Executive Summary  — gauge, maturity, strengths, critical risks
- *   3. Key Metrics        — 6 KPI cards + 3 risk indicators
- *   4. Score Breakdown    — deduction waterfall + category radar
- *   5. Category Scores    — horizontal bar chart + category cards
+ * Replaces the previous 5-step paginated flow (Cover / Executive Summary /
+ * Key Metrics / Score Breakdown / Category Scores) with one continuous
+ * scroll organized into anchored sections, navigable via the floating
+ * ReportSidebar. No scoring or maturity logic changed — generateReport()
+ * output is rendered as-is; only presentation and navigation changed.
+ *
+ * Sections:
+ *   Overview            — score gauge, maturity badge, headline KPI row
+ *   Organization         — company profile facts (raw blueprint)
+ *   Infrastructure        — facilities, network, servers (raw blueprint)
+ *   Security              — category radar/bars, waterfall, risks, strengths
+ *   Business Operations  — business context, criticality, challenges
+ *   Business Workflows   — transparent "not yet collected" notice
+ *   Applications          — technology stack / application inventory
+ *   Assessment Data       — full category table, data availability notes
  *
  * Guards:
  *   - Redirects to /auth if not logged in (localStorage.username absent)
  *   - Redirects to /blueprint-form if no meaningful blueprint data exists
- *
- * No Consltek branding on this page (brand-neutral report output).
  */
 
-import React, { useState, useEffect } from "react";
-import { useRouter }                  from "next/navigation";
-import { blueprintAPI }               from "@/utils/api";
-import { generateReport }             from "@/lib/report/index.js";
-import GaugeChart                     from "@/components/report-charts/GaugeChart";
-import CategoryRadar                  from "@/components/report-charts/CategoryRadar";
-import WaterfallChart                 from "@/components/report-charts/WaterfallChart";
-import HorizontalBarChart             from "@/components/report-charts/HorizontalBarChart";
-import ProgressRing                   from "@/components/report-charts/ProgressRing";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+    FiHome, FiBriefcase, FiServer, FiShield, FiTrendingUp,
+    FiGitBranch, FiGrid, FiFileText, FiCheckCircle, FiAlertTriangle,
+} from "react-icons/fi";
+import { blueprintAPI } from "@/utils/api";
+import { generateReport } from "@/lib/report/index.js";
 
-// ── Brand colours ─────────────────────────────────────────────────────────────
+import GaugeChart from "@/components/report-charts/GaugeChart";
+import CategoryRadar from "@/components/report-charts/CategoryRadar";
+import WaterfallChart from "@/components/report-charts/WaterfallChart";
+import HorizontalBarChart from "@/components/report-charts/HorizontalBarChart";
+import ProgressRing from "@/components/report-charts/ProgressRing";
+
+import ReportSidebar from "@/components/navigation/ReportSidebar";
+import SectionCard from "@/components/report-dashboard/SectionCard";
+import StatCard from "@/components/report-dashboard/StatCard";
+import InfoTile from "@/components/report-dashboard/InfoTile";
+import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
+import Disclosure from "@/components/report-dashboard/Disclosure";
+
+// ── Brand colours ────────────────────────────────────────────────────────────
 const PRIMARY = "#15587B";
-const ACCENT  = "#34808A";
+const ACCENT = "#34808A";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Score zone helpers (shared logic, unchanged from the prior page) ────────
 const scoreColor = (s) => {
-    if (s <= 30)  return "#ef4444";
-    if (s <= 50)  return "#f97316";
-    if (s <= 65)  return "#eab308";
-    if (s <= 80)  return ACCENT;
+    if (s <= 30) return "#ef4444";
+    if (s <= 50) return "#f97316";
+    if (s <= 65) return "#eab308";
+    if (s <= 80) return ACCENT;
     return "#22c55e";
 };
 
 const scoreZone = (s) => {
-    if (s <= 30)  return { bg: "bg-red-50",    border: "border-red-200",    text: "text-red-700",    label: "Critical"   };
-    if (s <= 50)  return { bg: "bg-amber-50",  border: "border-amber-200",  text: "text-amber-700",  label: "At Risk"    };
-    if (s <= 65)  return { bg: "bg-yellow-50", border: "border-yellow-200", text: "text-yellow-700", label: "Developing" };
-    if (s <= 80)  return { bg: "bg-teal-50",   border: "border-teal-200",   text: "text-teal-700",   label: "Managed"    };
-    return              { bg: "bg-green-50",   border: "border-green-200",  text: "text-green-700",  label: "Optimized"  };
+    if (s <= 30) return { badge: "bg-red-100 text-red-700", label: "Critical" };
+    if (s <= 50) return { badge: "bg-amber-100 text-amber-700", label: "At Risk" };
+    if (s <= 65) return { badge: "bg-yellow-100 text-yellow-700", label: "Developing" };
+    if (s <= 80) return { badge: "bg-teal-100 text-teal-700", label: "Managed" };
+    return { badge: "bg-green-100 text-green-700", label: "Optimized" };
+};
+
+const RISK_CONFIG = {
+    Critical: { bg: "bg-red-100", text: "text-red-700", dot: "bg-red-500" },
+    High: { bg: "bg-red-50", text: "text-red-600", dot: "bg-red-400" },
+    Medium: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" },
+    Low: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-500" },
 };
 
 // A blueprint is "filled" if at least one Step 1 field is present
@@ -56,503 +82,536 @@ const hasMeaningfulBlueprint = (bp) => {
     return !!(bp.companyName || bp.industry || bp.employees);
 };
 
-// ── Step labels ───────────────────────────────────────────────────────────────
-const STEP_LABELS = ["Cover", "Executive Summary", "Key Metrics", "Score Breakdown", "Category Scores"];
+// ── Raw-field display helpers (Additional Context sections read directly ────
+// from the blueprint document, not the scoring engine — inventory context,
+// not scored signals) ─────────────────────────────────────────────────────
+const yn = (v) => (v === "Yes" ? "Yes" : v === "No" ? "No" : v || "—");
 
-// ── Step dot (pagination indicator) ──────────────────────────────────────────
-const StepDot = ({ num, current, onClick }) => {
-    const active   = num === current;
-    const complete = num < current;
-    return (
-        <button
-            type="button"
-            onClick={() => onClick(num)}
-            aria-label={`Go to step ${num}: ${STEP_LABELS[num - 1]}`}
-            className={[
-                "flex items-center justify-center rounded-full text-xs font-bold transition-all",
-                "w-7 h-7 border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
-                active   ? "bg-[#15587B] border-[#15587B] text-white shadow-md" :
-                complete ? "bg-[#34808A] border-[#34808A] text-white" :
-                           "bg-white border-gray-300 text-gray-400 hover:border-[#34808A] hover:text-[#34808A]",
-            ].join(" ")}
-        >
-            {complete ? "✓" : num}
-        </button>
-    );
+const fmtControl = (ctrl) => {
+    if (!ctrl || !ctrl.choice) return "Not configured";
+    if (ctrl.choice === "Yes") return ctrl.vendor ? `Yes — ${ctrl.vendor}` : "Yes";
+    return "No";
 };
 
+const fmtList = (arr) => (Array.isArray(arr) && arr.length ? arr.join(", ") : "—");
+
+const APP_CATEGORY_LABELS = {
+    productivity: "Productivity",
+    finance: "Finance",
+    hrit: "HR / IT",
+    payroll: "Payroll",
+    additional: "Additional",
+};
+
+const getCategoryLabel = (key, customCategories) => {
+    if (APP_CATEGORY_LABELS[key]) return APP_CATEGORY_LABELS[key];
+    const custom = customCategories?.find((c) => c.key === key);
+    return custom?.title || key;
+};
+
+// ── Report navigation sections (shared by sidebar + anchors) ────────────────
+const SECTIONS = [
+    { id: "overview", label: "Report Home", Icon: FiHome },
+    { id: "organization", label: "Organization", Icon: FiBriefcase },
+    { id: "infrastructure", label: "Infrastructure", Icon: FiServer },
+    { id: "security", label: "Security", Icon: FiShield },
+    { id: "business-operations", label: "Business Operations", Icon: FiTrendingUp },
+    { id: "business-workflows", label: "Business Workflows", Icon: FiGitBranch },
+    { id: "applications", label: "Technology Stack", Icon: FiGrid },
+    { id: "assessment-data", label: "Assessment Data", Icon: FiFileText },
+];
+
 // ════════════════════════════════════════════════════════════════════════════
-// STEP 1 — Cover
+// Section: Overview
 // ════════════════════════════════════════════════════════════════════════════
-const StepCover = ({ report, companyName, assessmentDate }) => {
-    const { score, maturity } = report;
+const OverviewSection = ({ report, companyName, assessmentDate }) => {
+    const { score, maturity, metrics } = report;
+    const zone = scoreZone(score);
 
     return (
-        <div className="max-w-2xl mx-auto space-y-5 py-4">
-
-            {/* ── Main report card ───────────────────────────────────────────── */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                {/* Gradient top bar */}
-                <div className="h-1.5 w-full bg-gradient-to-r from-[#34808A] to-[#15587B]" />
-
-                {/* Title block */}
-                <div className="px-8 pt-8 pb-4 text-center space-y-1.5">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                        IT Security Assessment
-                    </p>
-                    <h1 className="text-2xl font-extrabold text-[#15587B] leading-tight">
-                        Security Score
-                    </h1>
-                    {companyName && (
-                        <p className="text-base font-semibold text-gray-700">{companyName}</p>
-                    )}
-                    <p className="text-sm text-gray-400">{assessmentDate}</p>
-                </div>
-
-                {/* Speedometer gauge — hero element */}
-                <div className="flex flex-col items-center px-6 pb-4">
-                    <GaugeChart score={score} size={260} />
-                </div>
-
-                {/* Maturity level badge */}
-                <div className="px-8 pb-8 flex justify-center">
+        <SectionCard
+            id="overview"
+            eyebrow="Current State Report"
+            title={companyName ? `${companyName} — Security Score` : "Security Score"}
+            description={`Generated ${assessmentDate}. A snapshot assessment based on self-reported data, calculated from a fixed, published methodology.`}
+        >
+            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 items-center">
+                <div className="flex flex-col items-center gap-3 mx-auto">
+                    <GaugeChart score={score} size={220} />
                     <span
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white shadow-sm"
-                        style={{ backgroundColor: maturity.color }}
+                        className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold ${zone.badge}`}
                     >
-                        <span className="opacity-70">IT Maturity Level {maturity.level}</span>
-                        <span className="opacity-70">-</span>
-                        <span className="bold">{maturity.name}</span>
+                        IT Maturity Level {maturity.level} — {maturity.name}
                     </span>
                 </div>
-            </div>
 
-            {/* ── Confidentiality notice ─────────────────────────────────────── */}
-            <div className="bg-gray-50 border border-gray-200 rounded-xl px-6 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
-                    Confidentiality Notice
-                </p>
-                <p className="text-xs text-gray-500 leading-relaxed">
-                    This report contains infrastructure and security information for the named organisation.
-                    It is generated automatically from the Current State Assessment and is intended solely
-                    for the named contact and their assigned IT advisor. It must not be shared with third
-                    parties without written consent.
-                </p>
-            </div>
-
-            {/* ── Disclaimer ─────────────────────────────────────────────────── */}
-            <p className="text-[11px] text-gray-400 leading-relaxed max-w-lg mx-auto text-center px-4">
-                This report is a snapshot assessment based on self-reported data. The Security Score and
-                IT Maturity Level are calculated using a fixed, published methodology — they are not
-                equivalent to the{" "}
-                <strong className="text-gray-600">Assessment with Remediation Plan</strong>, which
-                requires advisor review and is delivered as a paid engagement following your consultation.
-            </p>
-        </div>
-    );
-};
-
-// ════════════════════════════════════════════════════════════════════════════
-// STEP 2 — Executive Summary
-// ════════════════════════════════════════════════════════════════════════════
-const StepExecutive = ({ report, companyName }) => {
-    const { score, maturity, strengths, criticalRisks } = report;
-
-    const executiveNarrative = () => {
-        const org = companyName || "Your organisation";
-        if (score <= 30)
-            return `${org} is operating with critical security gaps across multiple domains. The assessment reveals an absence of foundational controls — the current posture presents an unacceptably high risk of breach and extended operational disruption.`;
-        if (score <= 50)
-            return `${org} has some baseline controls in place, but significant gaps remain in critical areas including identity protection, endpoint detection, and resilience. A targeted attack would likely succeed with the current control set.`;
-        if (score <= 65)
-            return `${org} has deployed several important security controls and is developing its security posture. Key gaps remain that need to be addressed to reach a defensible baseline across all domains.`;
-        if (score <= 80)
-            return `${org} has a well-managed security posture with comprehensive controls in place across most domains. Continued investment in advanced monitoring and testing will further strengthen the defence.`;
-        return `${org} demonstrates an optimised security posture with advanced controls deployed across all domains. The focus should be on continuous improvement and third-party validation to maintain this level.`;
-    };
-
-    return (
-        <div className="space-y-6">
-            {/* Score + maturity hero */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="h-1.5 w-full bg-gradient-to-r from-[#34808A] to-[#15587B]" />
-                <div className="p-6 flex flex-col sm:flex-row items-center gap-6">
-                    <div className="flex-shrink-0">
-                        <GaugeChart score={score} size={200} />
-                    </div>
-                    <div className="flex-1 min-w-0 space-y-3">
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">IT Maturity Level</p>
-                            <span
-                                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-white"
-                                style={{ backgroundColor: maturity.color }}
-                            >
-                                Level {maturity.level} — {maturity.name}
-                            </span>
-                        </div>
-                        <p className="text-sm text-gray-600 leading-relaxed">{executiveNarrative()}</p>
-                        <p className="text-xs text-gray-400 italic">{maturity.riskProfile}</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Strengths + Critical Risks */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="h-5 w-1 bg-green-500 rounded-full" />
-                        <h3 className="text-xs font-bold uppercase tracking-wide text-gray-700">Top Strengths</h3>
-                    </div>
-                    {strengths.length === 0 ? (
-                        <p className="text-xs text-gray-400">No categories scored above 60/100.</p>
-                    ) : (
-                        <ul className="space-y-3">
-                            {strengths.map((s, i) => (
-                                <li key={i} className="flex items-start gap-2.5">
-                                    <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg className="w-2.5 h-2.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-700">{s.label}</p>
-                                        <p className="text-[11px] text-gray-500 leading-snug">{s.description}</p>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="h-5 w-1 bg-red-500 rounded-full" />
-                        <h3 className="text-xs font-bold uppercase tracking-wide text-gray-700">Critical Risks</h3>
-                    </div>
-                    {criticalRisks.length === 0 ? (
-                        <p className="text-xs text-gray-400">No critical penalties triggered — strong posture.</p>
-                    ) : (
-                        <ul className="space-y-3">
-                            {criticalRisks.map((r, i) => (
-                                <li key={i} className="flex items-start gap-2.5">
-                                    <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg className="w-2.5 h-2.5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-red-700">{r.label}</p>
-                                        <p className="text-[11px] text-gray-500 leading-snug">{r.description}</p>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            </div>
-
-            {/* Advisor next step */}
-            <div className="bg-[#15587B]/5 border border-[#15587B]/15 rounded-2xl p-5">
-                <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#15587B]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg className="w-4 h-4 text-[#15587B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h4 className="text-sm font-bold text-[#15587B] mb-1">Your Advisor Follows Up</h4>
-                        <p className="text-xs text-gray-600 leading-relaxed">
-                            This report is a formulaic snapshot — it scores your answers against a fixed published
-                            methodology. Your advisor will use it as the foundation for your{" "}
-                            <strong className="text-gray-800">Assessment with Remediation Plan</strong>, which includes
-                            contextual gap analysis, business-specific prioritisation, and a remediation roadmap
-                            anchored to a specific standard or framework. That is the paid engagement and is not automated.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// ════════════════════════════════════════════════════════════════════════════
-// STEP 3 — Key Metrics
-// ════════════════════════════════════════════════════════════════════════════
-const RISK_CONFIG = {
-    Critical: { bg: "bg-red-100",   text: "text-red-700",   dot: "bg-red-500"   },
-    High:     { bg: "bg-red-50",    text: "text-red-600",   dot: "bg-red-400"   },
-    Medium:   { bg: "bg-amber-50",  text: "text-amber-700", dot: "bg-amber-400" },
-    Low:      { bg: "bg-green-50",  text: "text-green-700", dot: "bg-green-500" },
-};
-
-const RiskPill = ({ label, risk }) => {
-    const cfg = RISK_CONFIG[risk] || RISK_CONFIG.Medium;
-    return (
-        <div className={`flex items-center justify-between rounded-xl px-4 py-3 ${cfg.bg}`}>
-            <span className="text-xs font-semibold text-gray-700">{label}</span>
-            <div className={`flex items-center gap-1.5 text-xs font-bold ${cfg.text}`}>
-                <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-                {risk}
-            </div>
-        </div>
-    );
-};
-
-const KpiCard = ({ label, value, sub, color, large = false }) => (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex flex-col gap-1.5">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</p>
-        <p className="font-extrabold leading-none" style={{ fontSize: large ? 40 : 32, color: color || "#111827" }}>
-            {value}
-        </p>
-        {sub && <p className="text-xs text-gray-400">{sub}</p>}
-    </div>
-);
-
-const StepMetrics = ({ report }) => {
-    const { score, maturity, metrics, risks } = report;
-
-    return (
-        <div className="space-y-6">
-            <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Key Performance Indicators</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <KpiCard
-                        label="Security Score"
-                        value={score}
-                        sub="/ 100"
-                        color={scoreColor(score)}
-                        large
-                    />
-                    <KpiCard
-                        label="IT Maturity Level"
-                        value={`L${maturity.level}`}
-                        sub={maturity.name}
-                        color={maturity.color}
-                        large
-                    />
-                    <KpiCard
+                    <StatCard label="Security Score" value={score} sub="out of 100" color={scoreColor(score)} large Icon={FiShield} />
+                    <StatCard label="Maturity Level" value={`L${maturity.level}`} sub={maturity.name} color={maturity.color} large Icon={FiTrendingUp} />
+                    <StatCard
                         label="Critical Findings"
                         value={metrics.criticalFindingsCount}
                         sub="penalties ≥ 7 pts"
                         color={metrics.criticalFindingsCount > 0 ? "#dc2626" : "#16a34a"}
+                        Icon={FiAlertTriangle}
                     />
-                    <KpiCard
+                    <StatCard
                         label="Controls Missing"
                         value={`${metrics.controlsMissingCount}/16`}
                         sub="tech controls absent"
                         color={metrics.controlsMissingCount > 8 ? "#dc2626" : metrics.controlsMissingCount > 4 ? "#d97706" : "#16a34a"}
+                        Icon={FiShield}
                     />
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex flex-col items-start gap-2">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">App MFA Coverage</p>
-                        <ProgressRing value={metrics.appMfaCoverage} size={60} strokeWidth={6} color={metrics.appMfaCoverage !== null && metrics.appMfaCoverage >= 80 ? "#16a34a" : "#d97706"} />
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col items-center justify-center gap-1">
+                        <ProgressRing value={metrics.appMfaCoverage} size={56} strokeWidth={6} color={metrics.appMfaCoverage !== null && metrics.appMfaCoverage >= 80 ? "#16a34a" : "#d97706"} />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">App MFA Coverage</span>
                     </div>
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex flex-col items-start gap-2">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">App Backup Coverage</p>
-                        <ProgressRing value={metrics.appBackupCoverage} size={60} strokeWidth={6} color={metrics.appBackupCoverage !== null && metrics.appBackupCoverage >= 80 ? "#16a34a" : "#d97706"} />
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col items-center justify-center gap-1">
+                        <ProgressRing value={metrics.appBackupCoverage} size={56} strokeWidth={6} color={metrics.appBackupCoverage !== null && metrics.appBackupCoverage >= 80 ? "#16a34a" : "#d97706"} />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">App Backup Coverage</span>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Risk Summary</p>
-                <div className="space-y-2">
-                    <RiskPill label="Cyber Risk"      risk={risks.cyber}      />
-                    <RiskPill label="Downtime Risk"   risk={risks.downtime}   />
-                    <RiskPill label="Compliance Risk" risk={risks.compliance} />
-                </div>
-                <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">
-                    Risk levels are derived mechanically from assessment signals. Precise risk quantification and
-                    business-specific context are part of the{" "}
-                    <strong className="text-gray-600">Assessment with Remediation Plan</strong>.
+            <div className="mt-6 bg-[#15587B]/5 border border-[#15587B]/15 rounded-xl px-5 py-4">
+                <p className="text-xs text-gray-600 leading-relaxed">
+                    This report is a formulaic snapshot — it scores your answers against a fixed published methodology.
+                    It is not equivalent to the{" "}
+                    <strong className="text-gray-800">Assessment with Remediation Plan</strong>, which requires advisor
+                    review and is delivered as a paid engagement following your consultation.
                 </p>
             </div>
+        </SectionCard>
+    );
+};
 
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                <div className="flex items-center gap-2 mb-3">
-                    <div className="h-5 w-1 rounded-full" style={{ backgroundColor: maturity.color }} />
-                    <h3 className="text-xs font-bold uppercase tracking-wide text-gray-700">
-                        Level {maturity.level} — {maturity.name}
-                    </h3>
-                </div>
-                <p className="text-xs text-gray-600 mb-3 leading-relaxed">{maturity.description}</p>
-                <ul className="space-y-1.5">
-                    {maturity.characteristics.map((c, i) => (
-                        <li key={i} className="flex items-start gap-2 text-xs text-gray-500">
-                            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0" />
-                            {c}
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Executive Summary strengths/risks (rendered inside Security)
+// ════════════════════════════════════════════════════════════════════════════
+const StrengthsAndRisks = ({ strengths, criticalRisks }) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
+            <div className="flex items-center gap-2 mb-4">
+                <div className="h-5 w-1 bg-green-500 rounded-full" />
+                <h3 className="text-xs font-bold uppercase tracking-wide text-gray-700">Top Strengths</h3>
+            </div>
+            {strengths.length === 0 ? (
+                <p className="text-xs text-gray-400">No categories scored above 60/100.</p>
+            ) : (
+                <ul className="space-y-3">
+                    {strengths.map((s, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                            <FiCheckCircle size={14} className="text-green-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <p className="text-xs font-semibold text-gray-700">{s.label}</p>
+                                <p className="text-[11px] text-gray-500 leading-snug">{s.description}</p>
+                            </div>
                         </li>
                     ))}
                 </ul>
-            </div>
-        </div>
-    );
-};
-
-// ════════════════════════════════════════════════════════════════════════════
-// STEP 4 — Score Breakdown
-// ════════════════════════════════════════════════════════════════════════════
-const StepBreakdown = ({ report }) => {
-    const { waterfall, categories, triggeredPenalties, appliedCap } = report;
-    return (
-        <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center gap-2 mb-1">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
-                    <h3 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Score Deduction Waterfall</h3>
-                </div>
-                <p className="text-xs text-gray-400 mb-5 ml-3">
-                    Starting from the weighted composite, each triggered penalty is applied to produce the final score.
-                </p>
-                <WaterfallChart waterfall={waterfall} />
-                {appliedCap !== null && (
-                    <p className="text-[11px] text-amber-600 mt-3 border-l-2 border-amber-300 pl-3">
-                        Score cap applied: one or more critical controls are absent. The cap prevents the score from
-                        misrepresenting the organisation&apos;s actual risk exposure.
-                    </p>
-                )}
-            </div>
-
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center gap-2 mb-1">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
-                    <h3 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Security Category Radar</h3>
-                </div>
-                <p className="text-xs text-gray-400 mb-4 ml-3">
-                    Twelve security domains — the shape of the polygon reveals overall posture balance.
-                </p>
-                <CategoryRadar categories={categories} />
-            </div>
-
-            {triggeredPenalties.length > 0 && (
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                    <div className="flex items-center gap-2 mb-3">
-                        <div className="h-5 w-1 bg-red-500 rounded-full" />
-                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide">
-                            Penalties Applied ({triggeredPenalties.length})
-                        </h3>
-                    </div>
-                    <div className="space-y-2">
-                        {triggeredPenalties.map((p, i) => (
-                            <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-                                <span className="text-xs text-gray-600">{p.label}</span>
-                                <span className="text-xs font-bold text-red-600">−{p.value} pts</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             )}
         </div>
-    );
-};
 
-// ════════════════════════════════════════════════════════════════════════════
-// STEP 5 — Category Scores
-// ════════════════════════════════════════════════════════════════════════════
-const StepCategories = ({ report }) => {
-    const { categories } = report;
-
-    const getZone = (s) => {
-        if (s <= 30)  return { label: "Critical",   color: "#ef4444", badge: "bg-red-100 text-red-700"       };
-        if (s <= 50)  return { label: "At Risk",    color: "#f97316", badge: "bg-amber-100 text-amber-700"   };
-        if (s <= 65)  return { label: "Developing", color: "#eab308", badge: "bg-yellow-100 text-yellow-700" };
-        if (s <= 80)  return { label: "Managed",    color: ACCENT,    badge: "bg-teal-100 text-teal-700"     };
-        return              { label: "Optimized",   color: "#22c55e", badge: "bg-green-100 text-green-700"   };
-    };
-
-    return (
-        <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center gap-2 mb-1">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
-                    <h3 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Category Scores</h3>
-                </div>
-                <p className="text-xs text-gray-400 mb-5 ml-3">
-                    Raw score per category (0–100), sorted by weight. Each bar shows the current score and the gap to 100.
-                </p>
-                <HorizontalBarChart categories={categories} />
+        <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
+            <div className="flex items-center gap-2 mb-4">
+                <div className="h-5 w-1 bg-red-500 rounded-full" />
+                <h3 className="text-xs font-bold uppercase tracking-wide text-gray-700">Critical Risks</h3>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {categories.map((c) => {
-                    const zone = getZone(c.rawScore);
-                    return (
-                        <div key={c.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                                <p className="text-xs font-semibold text-gray-700 leading-tight">{c.name}</p>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${zone.badge}`}>
-                                    {zone.label}
-                                </span>
+            {criticalRisks.length === 0 ? (
+                <p className="text-xs text-gray-400">No critical penalties triggered — strong posture.</p>
+            ) : (
+                <ul className="space-y-3">
+                    {criticalRisks.map((r, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                            <FiAlertTriangle size={14} className="text-red-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <p className="text-xs font-semibold text-red-700">{r.label}</p>
+                                <p className="text-[11px] text-gray-500 leading-snug">{r.description}</p>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full rounded-full transition-all duration-700"
-                                        style={{ width: `${c.rawScore}%`, backgroundColor: zone.color }}
-                                    />
-                                </div>
-                                <span className="text-xs font-bold text-gray-700 w-10 text-right flex-shrink-0">
-                                    {c.rawScore}/100
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between mt-1.5">
-                                <span className="text-[10px] text-gray-400">Weight: {Math.round(c.weight * 100)}%</span>
-                                <span className="text-[10px] text-gray-400">Contribution: +{c.contribution}</span>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                <p className="text-[11px] text-gray-500 leading-relaxed">
-                    <strong className="text-gray-600">Scoring methodology:</strong> Each category scores 0–100 based on
-                    specific controls and configurations. Categories are weighted and summed to produce a composite,
-                    then critical-control penalties and caps are applied. Full methodology is documented in the
-                    IT Blueprint scoring architecture reference.
-                </p>
-            </div>
-        </div>
-    );
-};
-
-// ════════════════════════════════════════════════════════════════════════════
-// Fixed footer navigation bar
-// ════════════════════════════════════════════════════════════════════════════
-const NavBar = ({ step, total, setStep }) => (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-gray-200 shadow-lg">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-            <button
-                type="button"
-                onClick={() => setStep((s) => Math.max(1, s - 1))}
-                disabled={step === 1}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-[#15587B] disabled:opacity-30 disabled:cursor-not-allowed transition rounded-lg hover:bg-gray-50"
-            >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                Previous
-            </button>
-
-            <div className="flex items-center gap-1.5">
-                {Array.from({ length: total }, (_, i) => i + 1).map((n) => (
-                    <StepDot key={n} num={n} current={step} onClick={setStep} />
-                ))}
-            </div>
-
-            <button
-                type="button"
-                onClick={() => setStep((s) => Math.min(total, s + 1))}
-                disabled={step === total}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#15587B] hover:text-[#0f4460] disabled:opacity-30 disabled:cursor-not-allowed transition rounded-lg hover:bg-blue-50"
-            >
-                Next
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     </div>
 );
+
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Organization
+// ════════════════════════════════════════════════════════════════════════════
+const OrganizationSection = ({ blueprint }) => {
+    const bp = blueprint || {};
+    return (
+        <SectionCard
+            id="organization"
+            eyebrow="Company Profile"
+            title="Organization Overview"
+            description="Who the organization is and how it operates, as reported in Step 1 of the assessment."
+            Icon={FiBriefcase}
+        >
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <InfoTile label="Company Name" value={bp.companyName} />
+                <InfoTile label="Industry" value={bp.otherIndustry || bp.industry} />
+                <InfoTile label="Employees" value={bp.employees} />
+                <InfoTile label="Remote Workforce" value={typeof bp.remotePercentage === "number" ? `${bp.remotePercentage}%` : "—"} />
+                <InfoTile label="Contractors" value={typeof bp.contractorPercentage === "number" ? `${bp.contractorPercentage}%` : "—"} />
+                <InfoTile label="Deployment Model" value={bp.deploymentModel} />
+                <InfoTile label="Internal IT / MSP" value={bp.itManagement} />
+                <InfoTile label="MSP Relationship" value={bp.mspRelationship} />
+                <InfoTile label="Primary Customer Type" value={bp.primaryCustomerType} />
+                <InfoTile label="Geographic Reach" value={bp.geographicReach} />
+                <InfoTile label="Number of Locations" value={bp.numberOfLocations} />
+                <InfoTile label="Main Location" value={bp.mainLocation} />
+            </div>
+        </SectionCard>
+    );
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Infrastructure
+// ════════════════════════════════════════════════════════════════════════════
+const InfrastructureSection = ({ blueprint }) => {
+    const bp = blueprint || {};
+    return (
+        <SectionCard
+            id="infrastructure"
+            eyebrow="Facilities & Network"
+            title="Infrastructure Overview"
+            description="Facilities, network topology, and server environment, as reported in Steps 2–3 of the assessment."
+            Icon={FiServer}
+        >
+            <div className="space-y-5">
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Facilities</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <InfoTile label="Physical Offices" value={bp.physicalOffices} />
+                        <InfoTile label="Data Centers" value={yn(bp.hasDataCenters)} />
+                        <InfoTile label="On-Prem DC" value={yn(bp.hasOnPremDC)} />
+                        <InfoTile label="Cloud Infrastructure" value={yn(bp.hasCloudInfra)} />
+                        <InfoTile label="Generator" value={yn(bp.hasGenerator)} />
+                        <InfoTile label="UPS" value={yn(bp.hasUPS)} />
+                    </div>
+                </div>
+
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Network</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <InfoTile label="WAN 1" value={fmtControl(bp.WAN1)} />
+                        <InfoTile label="WAN 2" value={fmtControl(bp.WAN2)} />
+                        <InfoTile label="Switching" value={fmtControl(bp.switchingVendor)} />
+                        <InfoTile label="Routing" value={fmtControl(bp.routingVendor)} />
+                        <InfoTile label="Wireless" value={fmtControl(bp.wirelessVendor)} />
+                        <InfoTile label="HA Routing" value={yn(bp.haRouting)} />
+                        <InfoTile label="Wireless Auth" value={bp.wirelessAuth} />
+                        <InfoTile label="Guest Wireless" value={yn(bp.guestWireless)} />
+                    </div>
+                </div>
+
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Servers &amp; Desktops</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <InfoTile label="Windows Servers" value={yn(bp.windowsServers)} />
+                        <InfoTile label="Windows Posture" value={fmtList(bp.windowsOptions)} />
+                        <InfoTile label="Linux Servers" value={yn(bp.linuxServers)} />
+                        <InfoTile label="Linux Posture" value={fmtList(bp.linuxOptions)} />
+                        <InfoTile label="Desktop Posture" value={fmtList(bp.desktopOptions)} />
+                        <InfoTile label="Virtualization" value={fmtControl(bp.virtualizationVendor)} />
+                        <InfoTile label="Bare Metal" value={fmtControl(bp.baremetalVendor)} />
+                        <InfoTile label="Cloud Vendor" value={fmtControl(bp.cloudVendor)} />
+                    </div>
+                </div>
+            </div>
+        </SectionCard>
+    );
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Security
+// ════════════════════════════════════════════════════════════════════════════
+const SecuritySection = ({ report }) => {
+    const { categories, waterfall, triggeredPenalties, appliedCap, strengths, criticalRisks, risks, maturity } = report;
+
+    return (
+        <SectionCard
+            id="security"
+            eyebrow="Assessment Results"
+            title="Security Overview"
+            description="Twelve weighted security domains — the radar shape reveals overall posture balance; bars show individual category scores."
+            Icon={FiShield}
+        >
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <CategoryRadar categories={categories} />
+                    </div>
+                    <div>
+                        <HorizontalBarChart categories={categories} />
+                    </div>
+                </div>
+
+                <StrengthsAndRisks strengths={strengths} criticalRisks={criticalRisks} />
+
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Risk Summary</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {["cyber", "downtime", "compliance"].map((k) => {
+                            const cfg = RISK_CONFIG[risks[k]] || RISK_CONFIG.Medium;
+                            const labels = { cyber: "Cyber Risk", downtime: "Downtime Risk", compliance: "Compliance Risk" };
+                            return (
+                                <div key={k} className={`flex items-center justify-between rounded-xl px-4 py-3 ${cfg.bg}`}>
+                                    <span className="text-xs font-semibold text-gray-700">{labels[k]}</span>
+                                    <div className={`flex items-center gap-1.5 text-xs font-bold ${cfg.text}`}>
+                                        <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+                                        {risks[k]}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">
+                        Risk levels are derived mechanically from assessment signals. Precise risk quantification and
+                        business-specific context are part of the{" "}
+                        <strong className="text-gray-600">Assessment with Remediation Plan</strong>.
+                    </p>
+                </div>
+
+                <Disclosure label={`Score Deduction Waterfall${appliedCap !== null ? " (cap applied)" : ""}`}>
+                    <WaterfallChart waterfall={waterfall} />
+                    {appliedCap !== null && (
+                        <p className="text-[11px] text-amber-600 mt-3 border-l-2 border-amber-300 pl-3">
+                            Score cap applied: one or more critical controls are absent. The cap prevents the score
+                            from misrepresenting the organisation&apos;s actual risk exposure.
+                        </p>
+                    )}
+                    {triggeredPenalties.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
+                                Penalties Applied ({triggeredPenalties.length})
+                            </p>
+                            <div className="space-y-1.5">
+                                {triggeredPenalties.map((p, i) => (
+                                    <div key={i} className="flex items-center justify-between py-1 border-b border-gray-50 last:border-0">
+                                        <span className="text-xs text-gray-600">{p.label}</span>
+                                        <span className="text-xs font-bold text-red-600">−{p.value} pts</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </Disclosure>
+
+                <Disclosure label={`IT Maturity Characteristics — Level ${maturity.level}`}>
+                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">{maturity.description}</p>
+                    <ul className="space-y-1.5">
+                        {maturity.characteristics.map((c, i) => (
+                            <li key={i} className="flex items-start gap-2 text-xs text-gray-500">
+                                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0" />
+                                {c}
+                            </li>
+                        ))}
+                    </ul>
+                </Disclosure>
+            </div>
+        </SectionCard>
+    );
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Business Operations
+// ════════════════════════════════════════════════════════════════════════════
+const BusinessOperationsSection = ({ blueprint }) => {
+    const bp = blueprint || {};
+    const hasChips = Array.isArray(bp.operationalChallenges) && bp.operationalChallenges.length > 0;
+
+    return (
+        <SectionCard
+            id="business-operations"
+            eyebrow="Business Context"
+            title="Business Operations"
+            description="Business context, criticality, and operational challenges, as reported in Step 6 of the assessment."
+            Icon={FiTrendingUp}
+        >
+            <div className="space-y-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <InfoTile label="Primary Business Function" value={bp.primaryBusinessFunction} />
+                    <InfoTile label="Main Products / Services" value={bp.mainProductsServices} />
+                    <InfoTile label="Critical Business Function" value={bp.criticalBusinessFunction} />
+                    <InfoTile label="Systems Requiring 24x7" value={bp.systemsRequiring24x7} />
+                    <InfoTile label="Highest Business Priority" value={bp.highestBusinessPriority} />
+                    <InfoTile label="Number of Locations" value={bp.numberOfLocations} />
+                    <InfoTile label="Primary Customer Type" value={bp.primaryCustomerType} />
+                    <InfoTile label="Geographic Reach" value={bp.geographicReach} />
+                </div>
+
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Operational Challenges</p>
+                    {hasChips ? (
+                        <div className="flex flex-wrap gap-2">
+                            {bp.operationalChallenges.map((c, i) => (
+                                <span key={i} className="px-3 py-1 rounded-full bg-[#15587B]/8 text-[#15587B] text-xs font-semibold">
+                                    {c}
+                                </span>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-gray-400">No operational challenges recorded.</p>
+                    )}
+                </div>
+            </div>
+        </SectionCard>
+    );
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Business Workflows
+// ════════════════════════════════════════════════════════════════════════════
+const BusinessWorkflowsSection = () => (
+    <SectionCard
+        id="business-workflows"
+        eyebrow="Coming Soon"
+        title="Business Workflows"
+        description="How work, identity, and access move through the organization — captured separately from the application inventory above."
+        Icon={FiGitBranch}
+    >
+        <EmptyStateNotice
+            Icon={FiGitBranch}
+            title="Not yet collected"
+            description="Business Workflows (data flow, provisioning, offboarding, and critical dependencies) is a planned assessment step that does not exist in the current 7-step Current State Assessment. This section will populate automatically once that step is added — no data is fabricated here."
+        />
+    </SectionCard>
+);
+
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Applications / Technology Stack
+// ════════════════════════════════════════════════════════════════════════════
+const ApplicationsSection = ({ blueprint, report }) => {
+    const bp = blueprint || {};
+    const applications = bp.applications && typeof bp.applications === "object" ? bp.applications : {};
+    const categoryEntries = Object.entries(applications).filter(([, v]) => Array.isArray(v));
+    const totalApps = categoryEntries.reduce((sum, [, arr]) => sum + arr.length, 0);
+
+    return (
+        <SectionCard
+            id="applications"
+            eyebrow="Application Portfolio"
+            title="Technology Stack"
+            description="Applications recorded across all categories, plus MFA and backup coverage across the portfolio."
+            Icon={FiGrid}
+        >
+            {totalApps === 0 ? (
+                <EmptyStateNotice
+                    Icon={FiGrid}
+                    title="No applications recorded yet"
+                    description="Add applications in Step 7 of the Current State Assessment to populate this section."
+                />
+            ) : (
+                <div className="space-y-5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {categoryEntries.map(([key, arr]) => (
+                            <InfoTile key={key} label={getCategoryLabel(key, bp.customCategories)} value={`${arr.length} app${arr.length === 1 ? "" : "s"}`} />
+                        ))}
+                        <InfoTile label="Total Applications" value={totalApps} />
+                        <InfoTile label="PII-Handling Apps" value={report.signals.piiAppsCount} />
+                        <InfoTile label="HIPAA-Regulated Apps" value={report.signals.hipaaAppsCount} />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 max-w-sm">
+                        <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 flex flex-col items-center gap-1.5">
+                            <ProgressRing value={report.metrics.appMfaCoverage} size={64} strokeWidth={7} color={ACCENT} />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">MFA Coverage</span>
+                        </div>
+                        <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 flex flex-col items-center gap-1.5">
+                            <ProgressRing value={report.metrics.appBackupCoverage} size={64} strokeWidth={7} color={PRIMARY} />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">Backup Coverage</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </SectionCard>
+    );
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Assessment Data (full category table + methodology + data gaps)
+// ════════════════════════════════════════════════════════════════════════════
+const AssessmentDataSection = ({ report }) => {
+    const { categories, dataGaps } = report;
+
+    const getZone = (s) => {
+        if (s <= 30) return { label: "Critical", color: "#ef4444", badge: "bg-red-100 text-red-700" };
+        if (s <= 50) return { label: "At Risk", color: "#f97316", badge: "bg-amber-100 text-amber-700" };
+        if (s <= 65) return { label: "Developing", color: "#eab308", badge: "bg-yellow-100 text-yellow-700" };
+        if (s <= 80) return { label: "Managed", color: ACCENT, badge: "bg-teal-100 text-teal-700" };
+        return { label: "Optimized", color: "#22c55e", badge: "bg-green-100 text-green-700" };
+    };
+
+    return (
+        <SectionCard
+            id="assessment-data"
+            eyebrow="Current State Summary"
+            title="Assessment Data"
+            description="The complete 12-category score table underlying the composite Security Score, plus known data-availability gaps."
+            Icon={FiFileText}
+        >
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {categories.map((c) => {
+                        const zone = getZone(c.rawScore);
+                        return (
+                            <div key={c.id} className="bg-gray-50 rounded-xl border border-gray-100 p-4">
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                    <p className="text-xs font-semibold text-gray-700 leading-tight">{c.name}</p>
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${zone.badge}`}>
+                                        {zone.label}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full rounded-full transition-all duration-700"
+                                            style={{ width: `${c.rawScore}%`, backgroundColor: zone.color }}
+                                        />
+                                    </div>
+                                    <span className="text-xs font-bold text-gray-700 w-10 text-right flex-shrink-0">
+                                        {c.rawScore}/100
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between mt-1.5">
+                                    <span className="text-[10px] text-gray-400">Weight: {Math.round(c.weight * 100)}%</span>
+                                    <span className="text-[10px] text-gray-400">Contribution: +{c.contribution}</span>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <Disclosure label={`Data Availability Notes (${dataGaps.length})`}>
+                    <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+                        These signals are not captured by the current 7-step assessment, so the scoring engine cannot
+                        use them. They are listed here for transparency.
+                    </p>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+                        {dataGaps.map((gap, i) => (
+                            <li key={i} className="flex items-start gap-2 text-xs text-gray-500">
+                                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0" />
+                                {gap}
+                            </li>
+                        ))}
+                    </ul>
+                </Disclosure>
+
+                <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+                    <p className="text-[11px] text-gray-500 leading-relaxed">
+                        <strong className="text-gray-600">Scoring methodology:</strong> Each category scores 0–100
+                        based on specific controls and configurations. Categories are weighted and summed to produce
+                        a composite, then critical-control penalties and caps are applied. Full methodology is
+                        documented in the IT Blueprint scoring architecture reference.
+                    </p>
+                </div>
+            </div>
+        </SectionCard>
+    );
+};
 
 // ════════════════════════════════════════════════════════════════════════════
 // Main page component
@@ -560,14 +619,17 @@ const NavBar = ({ step, total, setStep }) => (
 export default function AssessmentReport() {
     const router = useRouter();
 
-    const [step,           setStep]           = useState(1);
-    const [report,         setReport]         = useState(null);
-    const [loading,        setLoading]        = useState(true);
-    const [error,          setError]          = useState(null);
-    const [companyName,    setCompanyName]    = useState("");
+    const [blueprint, setBlueprint] = useState(null);
+    const [report, setReport] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [companyName, setCompanyName] = useState("");
     const [assessmentDate, setAssessmentDate] = useState("");
-
-    const TOTAL_STEPS = 5;
+    const [sidebarExpanded, setSidebarExpanded] = useState(() => {
+        if (typeof window === "undefined") return true;
+        const stored = localStorage.getItem("reportSidebarExpanded");
+        return stored !== null ? stored === "true" : true;
+    });
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -587,24 +649,23 @@ export default function AssessmentReport() {
                     return;
                 }
 
-                const data = generateReport(bp);
-                setReport(data);
+                setBlueprint(bp);
+                setReport(generateReport(bp));
 
                 if (bp.companyName) setCompanyName(bp.companyName);
                 else {
-                    const stored = localStorage.getItem("userCompanyName");
-                    if (stored) setCompanyName(stored);
+                    const storedName = localStorage.getItem("userCompanyName");
+                    if (storedName) setCompanyName(storedName);
                 }
 
                 // Always show today's date — the report is generated now
                 setAssessmentDate(
                     new Date().toLocaleDateString("en-US", {
                         year: "numeric", month: "long", day: "numeric",
-                    })
+                    }),
                 );
             })
             .catch((err) => {
-                // 404 = no blueprint yet — send to the form
                 if (err?.response?.status === 404) {
                     router.push("/blueprint-form");
                 } else {
@@ -613,6 +674,13 @@ export default function AssessmentReport() {
             })
             .finally(() => setLoading(false));
     }, [router]);
+
+    const toggleSidebar = () => {
+        setSidebarExpanded((v) => {
+            localStorage.setItem("reportSidebarExpanded", String(!v));
+            return !v;
+        });
+    };
 
     // ── Loading ───────────────────────────────────────────────────────────────
     if (loading) {
@@ -645,59 +713,66 @@ export default function AssessmentReport() {
     }
 
     // ── Render ────────────────────────────────────────────────────────────────
-    const stepProps = { report, companyName, assessmentDate };
-
     return (
         <div className="min-h-screen bg-[#F3F4F6] font-sans">
-
-            {/* ── Sticky top header ──────────────────────────────────────────── */}
+            {/* ── Sticky compact header ──────────────────────────────────────── */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-                    <button
-                        type="button"
-                        onClick={() => router.push("/assessment-complete")}
-                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition flex-shrink-0"
-                    >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Back
-                    </button>
+                <div className={[sidebarExpanded ? "md:ml-64" : "md:ml-24", "transition-[margin] duration-300"].join(" ")}>
+                    <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+                        <button
+                            type="button"
+                            onClick={() => router.push("/assessment-complete")}
+                            className="md:hidden flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition flex-shrink-0"
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Back
+                        </button>
 
-                    <div className="flex-shrink-0 text-center">
-                        <p className="text-xs font-bold text-[#15587B]">Current State Report</p>
-                        {companyName && <p className="text-[10px] text-gray-400">{companyName}</p>}
-                    </div>
+                        <div>
+                            <p className="text-xs font-bold text-[#15587B]">Current State Report</p>
+                            {companyName && <p className="text-[10px] text-gray-400">{companyName}</p>}
+                        </div>
 
-                    <div className="flex-shrink-0 text-right">
-                        <p className="text-[10px] text-gray-400 font-medium">
-                            {step} / {TOTAL_STEPS}
-                        </p>
-                        <p className="text-[10px] text-gray-400">{STEP_LABELS[step - 1]}</p>
+                        <button
+                            type="button"
+                            onClick={() => router.push("/blueprint-form")}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#15587B] rounded-full hover:bg-[#0f4460] transition flex-shrink-0"
+                        >
+                            Edit Assessment
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* ── Scrollable content (pb-28 avoids fixed footer overlap) ──────── */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-28">
-                {/* Step label row */}
-                <div className="flex items-center gap-2 mb-6">
-                    <div className="w-6 h-6 rounded-full bg-[#15587B] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                        {step}
-                    </div>
-                    <h2 className="text-lg font-bold text-gray-800">{STEP_LABELS[step - 1]}</h2>
+            <ReportSidebar
+                sections={SECTIONS}
+                expanded={sidebarExpanded}
+                onToggleExpanded={toggleSidebar}
+                onEditAssessment={() => router.push("/blueprint-form")}
+                onBack={() => router.push("/assessment-complete")}
+            />
+
+            {/* ── Scrollable content ───────────────────────────────────────────
+                Left margin tracks the sidebar's current width (collapsed
+                icon rail vs. expanded labeled panel) so content is never
+                hidden behind it. Inner max-w-6xl/mx-auto/px-6 matches the
+                container convention used by every other protected page
+                (blueprint-summary, all-blueprints, assessment-complete). */}
+            <main className={[sidebarExpanded ? "md:ml-64" : "md:ml-24", "transition-[margin] duration-300"].join(" ")}>
+                <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+
+                <OverviewSection report={report} companyName={companyName} assessmentDate={assessmentDate} />
+                <OrganizationSection blueprint={blueprint} />
+                <InfrastructureSection blueprint={blueprint} />
+                <SecuritySection report={report} />
+                <BusinessOperationsSection blueprint={blueprint} />
+                <BusinessWorkflowsSection />
+                <ApplicationsSection blueprint={blueprint} report={report} />
+                <AssessmentDataSection report={report} />
                 </div>
-
-                {/* Active step */}
-                {step === 1 && <StepCover {...stepProps} />}
-                {step === 2 && <StepExecutive {...stepProps} />}
-                {step === 3 && <StepMetrics {...stepProps} />}
-                {step === 4 && <StepBreakdown {...stepProps} />}
-                {step === 5 && <StepCategories {...stepProps} />}
-            </div>
-
-            {/* ── Fixed bottom nav ────────────────────────────────────────────── */}
-            <NavBar step={step} total={TOTAL_STEPS} setStep={setStep} />
+            </main>
         </div>
     );
 }
