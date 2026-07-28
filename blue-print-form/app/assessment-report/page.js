@@ -35,7 +35,6 @@ import {
 import { blueprintAPI } from "@/utils/api";
 import { generateReport } from "@/lib/report/index.js";
 
-import GaugeChart from "@/components/report-charts/GaugeChart";
 import CategoryRadar from "@/components/report-charts/CategoryRadar";
 import WaterfallChart from "@/components/report-charts/WaterfallChart";
 import HorizontalBarChart from "@/components/report-charts/HorizontalBarChart";
@@ -43,31 +42,14 @@ import ProgressRing from "@/components/report-charts/ProgressRing";
 
 import ReportSidebar from "@/components/navigation/ReportSidebar";
 import SectionCard from "@/components/report-dashboard/SectionCard";
-import StatCard from "@/components/report-dashboard/StatCard";
 import InfoTile from "@/components/report-dashboard/InfoTile";
 import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
 import Disclosure from "@/components/report-dashboard/Disclosure";
+import SecurityScoreCard from "@/components/report-dashboard/SecurityScoreCard";
 
 // ── Brand colours ────────────────────────────────────────────────────────────
 const PRIMARY = "#15587B";
 const ACCENT = "#34808A";
-
-// ── Score zone helpers (shared logic, unchanged from the prior page) ────────
-const scoreColor = (s) => {
-    if (s <= 30) return "#ef4444";
-    if (s <= 50) return "#f97316";
-    if (s <= 65) return "#eab308";
-    if (s <= 80) return ACCENT;
-    return "#22c55e";
-};
-
-const scoreZone = (s) => {
-    if (s <= 30) return { badge: "bg-red-100 text-red-700", label: "Critical" };
-    if (s <= 50) return { badge: "bg-amber-100 text-amber-700", label: "At Risk" };
-    if (s <= 65) return { badge: "bg-yellow-100 text-yellow-700", label: "Developing" };
-    if (s <= 80) return { badge: "bg-teal-100 text-teal-700", label: "Managed" };
-    return { badge: "bg-green-100 text-green-700", label: "Optimized" };
-};
 
 const RISK_CONFIG = {
     Critical: { bg: "bg-red-100", text: "text-red-700", dot: "bg-red-500" },
@@ -124,66 +106,16 @@ const SECTIONS = [
 // ════════════════════════════════════════════════════════════════════════════
 // Section: Overview
 // ════════════════════════════════════════════════════════════════════════════
-const OverviewSection = ({ report, companyName, assessmentDate }) => {
-    const { score, maturity, metrics } = report;
-    const zone = scoreZone(score);
-
-    return (
-        <SectionCard
-            id="overview"
-            eyebrow="Current State Report"
-            title={companyName ? `${companyName} — Security Score` : "Security Score"}
-            description={`Generated ${assessmentDate}. A snapshot assessment based on self-reported data, calculated from a fixed, published methodology.`}
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 items-center">
-                <div className="flex flex-col items-center gap-3 mx-auto">
-                    <GaugeChart score={score} size={220} />
-                    <span
-                        className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold ${zone.badge}`}
-                    >
-                        IT Maturity Level {maturity.level} — {maturity.name}
-                    </span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <StatCard label="Security Score" value={score} sub="out of 100" color={scoreColor(score)} large Icon={FiShield} />
-                    <StatCard label="Maturity Level" value={`L${maturity.level}`} sub={maturity.name} color={maturity.color} large Icon={FiTrendingUp} />
-                    <StatCard
-                        label="Critical Findings"
-                        value={metrics.criticalFindingsCount}
-                        sub="penalties ≥ 7 pts"
-                        color={metrics.criticalFindingsCount > 0 ? "#dc2626" : "#16a34a"}
-                        Icon={FiAlertTriangle}
-                    />
-                    <StatCard
-                        label="Controls Missing"
-                        value={`${metrics.controlsMissingCount}/16`}
-                        sub="tech controls absent"
-                        color={metrics.controlsMissingCount > 8 ? "#dc2626" : metrics.controlsMissingCount > 4 ? "#d97706" : "#16a34a"}
-                        Icon={FiShield}
-                    />
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col items-center justify-center gap-1">
-                        <ProgressRing value={metrics.appMfaCoverage} size={56} strokeWidth={6} color={metrics.appMfaCoverage !== null && metrics.appMfaCoverage >= 80 ? "#16a34a" : "#d97706"} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">App MFA Coverage</span>
-                    </div>
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col items-center justify-center gap-1">
-                        <ProgressRing value={metrics.appBackupCoverage} size={56} strokeWidth={6} color={metrics.appBackupCoverage !== null && metrics.appBackupCoverage >= 80 ? "#16a34a" : "#d97706"} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">App Backup Coverage</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="mt-6 bg-[#15587B]/5 border border-[#15587B]/15 rounded-xl px-5 py-4">
-                <p className="text-xs text-gray-600 leading-relaxed">
-                    This report is a formulaic snapshot — it scores your answers against a fixed published methodology.
-                    It is not equivalent to the{" "}
-                    <strong className="text-gray-800">Assessment with Remediation Plan</strong>, which requires advisor
-                    review and is delivered as a paid engagement following your consultation.
-                </p>
-            </div>
-        </SectionCard>
-    );
-};
+const OverviewSection = ({ report, companyName, assessmentDate }) => (
+    <SectionCard
+        id="overview"
+        eyebrow="Current State Report"
+        title={companyName ? `${companyName} — Security Score` : "Security Score"}
+        description={`Generated ${assessmentDate}. A snapshot assessment based on self-reported data, calculated from a fixed, published methodology.`}
+    >
+        <SecurityScoreCard report={report} />
+    </SectionCard>
+);
 
 // ════════════════════════════════════════════════════════════════════════════
 // Section: Executive Summary strengths/risks (rendered inside Security)

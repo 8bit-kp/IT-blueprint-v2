@@ -2,7 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FiShield } from "react-icons/fi";
 import EngagementTimeline from "@/components/engagement/EngagementTimeline";
+import SecurityScoreCard from "@/components/report-dashboard/SecurityScoreCard";
+import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
+import { blueprintAPI } from "@/utils/api";
+import { generateReport } from "@/lib/report/index.js";
+
+// A blueprint is "filled" if at least one Step 1 field is present — same
+// heuristic used by /assessment-report before calling generateReport().
+const hasMeaningfulBlueprint = (bp) => {
+    if (!bp || typeof bp !== "object") return false;
+    return !!(bp.companyName || bp.industry || bp.employees);
+};
 
 // ── Module-scope helper components ─────────────────────────────────────────
 // Defined at module scope per coding-conventions.md — never inside render body.
@@ -62,14 +74,30 @@ const AdvisorAction = ({ text }) => (
 
 export default function AssessmentComplete() {
     const router = useRouter();
-    const [companyName, setCompanyName] = useState("");
+    const [companyName] = useState(() => {
+        if (typeof window === "undefined") return "";
+        return localStorage.getItem("userCompanyName") || "";
+    });
+    const [report, setReport] = useState(null);
+    const [reportLoading, setReportLoading] = useState(true);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
         const username = localStorage.getItem("username");
         if (!username) { router.push("/auth"); return; }
-        const stored = localStorage.getItem("userCompanyName");
-        if (stored) setCompanyName(stored);
+
+        // Reuses the same generateReport() entry point as /assessment-report —
+        // no score math lives here, only the fetch + render.
+        blueprintAPI
+            .getBlueprint()
+            .then((res) => {
+                const bp = res?.data?.blueprint || res?.data || {};
+                if (hasMeaningfulBlueprint(bp)) setReport(generateReport(bp));
+            })
+            .catch(() => {
+                // Non-fatal — the completion page still renders without a score.
+            })
+            .finally(() => setReportLoading(false));
     }, [router]);
 
     return (
@@ -134,7 +162,100 @@ export default function AssessmentComplete() {
                     </div>
                 </div>
 
-                {/* ── Section 2: Consulting journey + Advisor review ──── */}
+                {/* ── Section 2: Security Score ─────────────────────────
+                    The visual focal point of the page — reuses the exact
+                    SecurityScoreCard rendered on /assessment-report (same
+                    generateReport() output, no re-derived logic). */}
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
+                        Your Security Score
+                    </p>
+                    <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] rounded-2xl p-px shadow-md">
+                        <div className="bg-white rounded-[calc(1rem-1px)] p-6">
+                            {reportLoading ? (
+                                <div className="flex flex-col items-center justify-center gap-3 py-10">
+                                    <div className="w-8 h-8 border-4 border-[#34808A] border-t-transparent rounded-full animate-spin" />
+                                    <p className="text-xs text-gray-400">Calculating your Security Score…</p>
+                                </div>
+                            ) : report ? (
+                                <>
+                                    <SecurityScoreCard report={report} />
+                                    <div className="mt-6 flex justify-center">
+                                        <button
+                                            type="button"
+                                            onClick={() => router.push("/assessment-report")}
+                                            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-xl shadow-sm transition"
+                                        >
+                                            View Full Assessment Report
+                                            <ChevronIcon />
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <EmptyStateNotice
+                                    Icon={FiShield}
+                                    title="Security Score not available yet"
+                                    description="Your score will appear here once your Current State Assessment data is available."
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Section 3: Report access (unchanged actions, new position) ── */}
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
+                        Access Your Current State Report
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Report downloads */}
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-start gap-4 hover:border-[#34808A]/40 transition">
+                            <div className="w-10 h-10 rounded-lg bg-[#34808A]/10 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-5 h-5 text-[#34808A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-800 mb-0.5">Download Your Report</p>
+                                <p className="text-xs text-gray-400 mb-3">Access all PDF sections of your Current State Report.</p>
+                                <button
+                                    type="button"
+                                    onClick={() => router.push("/all-blueprints")}
+                                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-lg shadow-sm transition"
+                                >
+                                    View Report
+                                    <ChevronIcon />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Summary review */}
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-start gap-4 hover:border-[#34808A]/40 transition">
+                            <div className="w-10 h-10 rounded-lg bg-[#15587B]/10 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-5 h-5 text-[#15587B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
+                                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-800 mb-0.5">Review Your Assessment</p>
+                                <p className="text-xs text-gray-400 mb-3">Review the data you submitted and make any corrections.</p>
+                                <button
+                                    type="button"
+                                    onClick={() => router.push("/blueprint-summary")}
+                                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#15587B] bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+                                >
+                                    View Summary
+                                    <ChevronIcon />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Section 4/5: Consulting journey + Advisor review ─── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                     {/* Engagement timeline */}
@@ -183,88 +304,6 @@ export default function AssessmentComplete() {
                                         <strong>Assessment with Remediation Plan</strong> — your paid engagement. This includes gap analysis, risk assessment, and a prioritised roadmap anchored to a specific standard or framework.
                                     </p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Section 3: Report access ─────────────────────────── */}
-                <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
-                        Access Your Current State Report
-                    </p>
-
-                    {/* Primary CTA: interactive report with Security Score */}
-                    <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] rounded-2xl p-px mb-4 shadow-md">
-                        <div className="bg-white rounded-[calc(1rem-1px)] p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#15587B] to-[#34808A] flex items-center justify-center flex-shrink-0">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <p className="text-sm font-bold text-gray-800">View Your Assessment Report</p>
-                                    <span className="text-[10px] font-bold px-2 py-0.5 bg-[#34808A]/10 text-[#34808A] rounded-full uppercase tracking-wider">New</span>
-                                </div>
-                                <p className="text-xs text-gray-500 mb-3 leading-relaxed">
-                                    Your Security Score, IT Maturity Level, category breakdown, strengths, and critical risks — generated automatically from your assessment.
-                                </p>
-                                <button
-                                    type="button"
-                                    onClick={() => router.push("/assessment-report")}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-xl shadow-sm transition"
-                                >
-                                    View Assessment Report
-                                    <ChevronIcon />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Report downloads */}
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-start gap-4 hover:border-[#34808A]/40 transition">
-                            <div className="w-10 h-10 rounded-lg bg-[#34808A]/10 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-5 h-5 text-[#34808A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
-                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 mb-0.5">Download Your Report</p>
-                                <p className="text-xs text-gray-400 mb-3">Access all PDF sections of your Current State Report.</p>
-                                <button
-                                    type="button"
-                                    onClick={() => router.push("/all-blueprints")}
-                                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-lg shadow-sm transition"
-                                >
-                                    View Report
-                                    <ChevronIcon />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Summary review */}
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-start gap-4 hover:border-[#34808A]/40 transition">
-                            <div className="w-10 h-10 rounded-lg bg-[#15587B]/10 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-5 h-5 text-[#15587B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
-                                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 mb-0.5">Review Your Assessment</p>
-                                <p className="text-xs text-gray-400 mb-3">Review the data you submitted and make any corrections.</p>
-                                <button
-                                    type="button"
-                                    onClick={() => router.push("/blueprint-summary")}
-                                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#15587B] bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                                >
-                                    View Summary
-                                    <ChevronIcon />
-                                </button>
                             </div>
                         </div>
                     </div>
