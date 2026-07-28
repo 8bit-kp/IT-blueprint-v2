@@ -1,22 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useState } from "react";
+import { notify } from "@/lib/notify";
 import { FiLogOut, FiUser, FiLogIn } from "react-icons/fi";
 import { authAPI } from "@/utils/api";
+import { useLocalStorageValue } from "@/lib/hooks/useLocalStorageValue";
 
 function Navbar() {
-  const [username, setUsername] = useState(null);
-
-  useEffect(() => {
-    // Username is stored in localStorage only for display purposes.
-    // The actual authentication token lives in an HTTP-only cookie.
-    const storedUser = localStorage.getItem("username");
-    if (storedUser) {
-      setUsername(storedUser);
-    }
-  }, []);
+  // Username is stored in localStorage only for display purposes.
+  // The actual authentication token lives in an HTTP-only cookie.
+  const username = useLocalStorageValue("username");
+  // Local override for the brief window between clicking Logout and the
+  // hard navigation below — useLocalStorageValue won't reflect a same-tab
+  // localStorage.removeItem() on its own (it has no subscription source),
+  // so this gives instant visual feedback without needing setState-in-effect.
+  const [loggedOut, setLoggedOut] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -31,9 +30,10 @@ function Navbar() {
     localStorage.removeItem("username");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userCompanyName");
-    setUsername(null);
+    localStorage.removeItem("userCreatedAt");
+    setLoggedOut(true);
 
-    toast.success("Logged out successfully 👋");
+    notify.success("Logged out successfully");
 
     setTimeout(() => {
       window.location.href = "/";
@@ -61,7 +61,7 @@ function Navbar() {
 
         {/* User / Auth Section */}
         <div className="flex items-center gap-4">
-          {username ? (
+          {username && !loggedOut ? (
             <>
               {/* User Badge */}
               <div className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-blue-50/50 border border-blue-100 rounded-full">

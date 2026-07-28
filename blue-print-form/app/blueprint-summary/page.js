@@ -3,10 +3,11 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { blueprintAPI } from "@/utils/api";
+import { notify } from "@/lib/notify";
 import {
-    FiBriefcase, FiServer, FiShield, FiGrid, FiFileText, FiHome, FiEdit, FiActivity
+    FiBriefcase, FiServer, FiShield, FiGrid, FiActivity
 } from "react-icons/fi";
-import SummarySidebarNav from "@/components/navigation/SummarySidebarNav";
+import AppShell from "@/components/navigation/AppShell";
 import { parseControlData } from "@/lib/reports/shared/parseControlData";
 import { resolveCategoryTitle } from "@/lib/reports/shared/labels";
 import AdvisorHandoffBanner from "@/components/engagement/AdvisorHandoffBanner";
@@ -106,10 +107,16 @@ const BlueprintSummary = () => {
                 if (res.data && Object.keys(res.data).length > 0) {
                     setFormData(res.data);
                 } else {
+                    notify.warning("Complete your assessment first", {
+                        description: "Your Assessment Summary is available once your Current State Assessment has data to show.",
+                    });
                     setError(true);
                 }
             } catch (err) {
                 console.error("Error fetching summary:", err);
+                notify.error("Unable to load your assessment summary", {
+                    description: "Please try again, or complete your Current State Assessment if you haven't yet.",
+                });
                 setError(true);
             } finally {
                 setLoading(false);
@@ -176,78 +183,28 @@ const BlueprintSummary = () => {
     // ── Main render ────────────────────────────────────────────────────────
 
     return (
-        <div className="min-h-screen bg-[#F3F4F6]">
-
-            {/* ── Sticky Top Header ──────────────────────────────────────── */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-                <div className="max-w-full px-4 py-3 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-[#15587B] p-2 rounded-lg text-white">
-                            <FiFileText className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold text-gray-800 leading-none">Assessment Summary</h1>
-                            <p className="text-xs text-gray-500 mt-0.5">
-                                Current State Report —{" "}
-                                <span className="font-semibold text-[#34808A]">{formData.companyName || "—"}</span>
-                            </p>
-                        </div>
+        <AppShell
+            title="Assessment Summary"
+            subtitle={`Current State Report — ${formData.companyName || "—"}`}
+            sections={SUMMARY_SECTIONS}
+            contentClassName="max-w-6xl mx-auto px-6 space-y-12 pb-20"
+        >
+                    {/* Mobile: horizontal section pills — AppSidebar is desktop-only */}
+                    <div className="md:hidden flex gap-2 pb-3 overflow-x-auto no-scrollbar">
+                        {SUMMARY_SECTIONS.map(({ id, label }) => (
+                            <button
+                                key={id}
+                                onClick={() => scrollToSection(id)}
+                                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                                    activeSection === id
+                                        ? "bg-[#15587B] text-white"
+                                        : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => router.push("/")}
-                            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                        >
-                            <FiHome size={15} /> <span className="hidden sm:inline">Home</span>
-                        </button>
-                        <button
-                            onClick={() => router.push("/blueprint-form")}
-                            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                        >
-                            <FiEdit size={15} /> <span className="hidden sm:inline">Edit Data</span>
-                        </button>
-                        <button
-                            onClick={() => router.push("/all-blueprints")}
-                            className="px-4 py-2 text-sm font-bold text-white bg-[#935010] hover:bg-[#7a3d0d] rounded-lg shadow-sm transition flex items-center gap-2"
-                        >
-                            <FiGrid size={15} />
-                            <span className="hidden sm:inline">All Reports</span>
-                            <span className="sm:hidden">Reports</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Mobile: horizontal section pills */}
-                <div className="md:hidden flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
-                    {SUMMARY_SECTIONS.map(({ id, label }) => (
-                        <button
-                            key={id}
-                            onClick={() => scrollToSection(id)}
-                            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                                activeSection === id
-                                    ? "bg-[#15587B] text-white"
-                                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                            }`}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* ── Body: Sidebar + Sections ────────────────────────────────── */}
-            <div className="flex">
-
-                {/* Sidebar — desktop only */}
-                <SummarySidebarNav
-                    sections={SUMMARY_SECTIONS}
-                    activeSection={activeSection}
-                    onSectionClick={scrollToSection}
-                />
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                    <div className="max-w-5xl mx-auto px-4 py-8 space-y-12 pb-20">
 
                         {/* ── Handoff Banner ────────────────────────────── */}
                         <AdvisorHandoffBanner
@@ -259,7 +216,7 @@ const BlueprintSummary = () => {
                         <section
                             id="company"
                             ref={(el) => { sectionRefs.current["company"] = el; }}
-                            className="scroll-mt-20 space-y-6"
+                            className="scroll-mt-24 space-y-6"
                         >
                             <SectionHeader label="Company & Governance" />
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -347,7 +304,7 @@ const BlueprintSummary = () => {
                         <section
                             id="infrastructure"
                             ref={(el) => { sectionRefs.current["infrastructure"] = el; }}
-                            className="scroll-mt-20"
+                            className="scroll-mt-24"
                         >
                             <SectionHeader label="Network & Infrastructure" />
                             <SectionCard title="Network & Infrastructure">
@@ -415,7 +372,7 @@ const BlueprintSummary = () => {
                         <section
                             id="security"
                             ref={(el) => { sectionRefs.current["security"] = el; }}
-                            className="scroll-mt-20"
+                            className="scroll-mt-24"
                         >
                             <SectionHeader label="Security Technical Controls" />
                             <SectionCard title="Security Technical Controls">
@@ -456,7 +413,7 @@ const BlueprintSummary = () => {
                         <section
                             id="operations"
                             ref={(el) => { sectionRefs.current["operations"] = el; }}
-                            className="scroll-mt-20 space-y-6"
+                            className="scroll-mt-24 space-y-6"
                         >
                             <SectionHeader label="Business Operations" />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -500,7 +457,7 @@ const BlueprintSummary = () => {
                         <section
                             id="applications"
                             ref={(el) => { sectionRefs.current["applications"] = el; }}
-                            className="scroll-mt-20 space-y-6"
+                            className="scroll-mt-24 space-y-6"
                         >
                             <SectionHeader label="Application Portfolio" />
                             {Object.entries(formData.applications || {}).map(([category, apps]) => {
@@ -547,10 +504,7 @@ const BlueprintSummary = () => {
                             })}
                         </section>
 
-                    </div>
-                </div>
-            </div>
-        </div>
+        </AppShell>
     );
 };
 

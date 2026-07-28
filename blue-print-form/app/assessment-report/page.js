@@ -7,9 +7,10 @@
  *
  * Replaces the previous 5-step paginated flow (Cover / Executive Summary /
  * Key Metrics / Score Breakdown / Category Scores) with one continuous
- * scroll organized into anchored sections, navigable via the floating
- * ReportSidebar. No scoring or maturity logic changed — generateReport()
- * output is rendered as-is; only presentation and navigation changed.
+ * scroll organized into anchored sections, navigable via the app-wide
+ * AppShell/AppSidebar (scroll mode). No scoring or maturity logic changed —
+ * generateReport() output is rendered as-is; only presentation and
+ * navigation changed.
  *
  * Sections:
  *   Overview            — score gauge, maturity badge, headline KPI row
@@ -34,13 +35,14 @@ import {
 } from "react-icons/fi";
 import { blueprintAPI } from "@/utils/api";
 import { generateReport } from "@/lib/report/index.js";
+import { notify } from "@/lib/notify";
 
 import CategoryRadar from "@/components/report-charts/CategoryRadar";
 import WaterfallChart from "@/components/report-charts/WaterfallChart";
 import HorizontalBarChart from "@/components/report-charts/HorizontalBarChart";
 import ProgressRing from "@/components/report-charts/ProgressRing";
 
-import ReportSidebar from "@/components/navigation/ReportSidebar";
+import AppShell from "@/components/navigation/AppShell";
 import SectionCard from "@/components/report-dashboard/SectionCard";
 import InfoTile from "@/components/report-dashboard/InfoTile";
 import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
@@ -557,11 +559,6 @@ export default function AssessmentReport() {
     const [error, setError] = useState(null);
     const [companyName, setCompanyName] = useState("");
     const [assessmentDate, setAssessmentDate] = useState("");
-    const [sidebarExpanded, setSidebarExpanded] = useState(() => {
-        if (typeof window === "undefined") return true;
-        const stored = localStorage.getItem("reportSidebarExpanded");
-        return stored !== null ? stored === "true" : true;
-    });
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -577,6 +574,9 @@ export default function AssessmentReport() {
 
                 // Form completion guard — redirect if no meaningful data exists
                 if (!hasMeaningfulBlueprint(bp)) {
+                    notify.warning("Complete your assessment first", {
+                        description: "Your Security Score is generated once your Current State Assessment is complete.",
+                    });
                     router.push("/blueprint-form");
                     return;
                 }
@@ -599,6 +599,9 @@ export default function AssessmentReport() {
             })
             .catch((err) => {
                 if (err?.response?.status === 404) {
+                    notify.warning("Complete your assessment first", {
+                        description: "Your Security Score is generated once your Current State Assessment is complete.",
+                    });
                     router.push("/blueprint-form");
                 } else {
                     setError("Unable to load your assessment data. Please try again.");
@@ -606,13 +609,6 @@ export default function AssessmentReport() {
             })
             .finally(() => setLoading(false));
     }, [router]);
-
-    const toggleSidebar = () => {
-        setSidebarExpanded((v) => {
-            localStorage.setItem("reportSidebarExpanded", String(!v));
-            return !v;
-        });
-    };
 
     // ── Loading ───────────────────────────────────────────────────────────────
     if (loading) {
@@ -646,65 +642,20 @@ export default function AssessmentReport() {
 
     // ── Render ────────────────────────────────────────────────────────────────
     return (
-        <div className="min-h-screen bg-[#F3F4F6] font-sans">
-            {/* ── Sticky compact header ──────────────────────────────────────── */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-                <div className={[sidebarExpanded ? "md:ml-64" : "md:ml-24", "transition-[margin] duration-300"].join(" ")}>
-                    <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-                        <button
-                            type="button"
-                            onClick={() => router.push("/assessment-complete")}
-                            className="md:hidden flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition flex-shrink-0"
-                        >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Back
-                        </button>
-
-                        <div>
-                            <p className="text-xs font-bold text-[#15587B]">Current State Report</p>
-                            {companyName && <p className="text-[10px] text-gray-400">{companyName}</p>}
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={() => router.push("/blueprint-form")}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#15587B] rounded-full hover:bg-[#0f4460] transition flex-shrink-0"
-                        >
-                            Edit Assessment
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <ReportSidebar
-                sections={SECTIONS}
-                expanded={sidebarExpanded}
-                onToggleExpanded={toggleSidebar}
-                onEditAssessment={() => router.push("/blueprint-form")}
-                onBack={() => router.push("/assessment-complete")}
-            />
-
-            {/* ── Scrollable content ───────────────────────────────────────────
-                Left margin tracks the sidebar's current width (collapsed
-                icon rail vs. expanded labeled panel) so content is never
-                hidden behind it. Inner max-w-6xl/mx-auto/px-6 matches the
-                container convention used by every other protected page
-                (blueprint-summary, all-blueprints, assessment-complete). */}
-            <main className={[sidebarExpanded ? "md:ml-64" : "md:ml-24", "transition-[margin] duration-300"].join(" ")}>
-                <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-
-                <OverviewSection report={report} companyName={companyName} assessmentDate={assessmentDate} />
-                <OrganizationSection blueprint={blueprint} />
-                <InfrastructureSection blueprint={blueprint} />
-                <SecuritySection report={report} />
-                <BusinessOperationsSection blueprint={blueprint} />
-                <BusinessWorkflowsSection />
-                <ApplicationsSection blueprint={blueprint} report={report} />
-                <AssessmentDataSection report={report} />
-                </div>
-            </main>
-        </div>
+        <AppShell
+            title="Current State Report"
+            subtitle={companyName}
+            sections={SECTIONS}
+            contentClassName="max-w-6xl mx-auto px-6 pb-8 space-y-6"
+        >
+            <OverviewSection report={report} companyName={companyName} assessmentDate={assessmentDate} />
+            <OrganizationSection blueprint={blueprint} />
+            <InfrastructureSection blueprint={blueprint} />
+            <SecuritySection report={report} />
+            <BusinessOperationsSection blueprint={blueprint} />
+            <BusinessWorkflowsSection />
+            <ApplicationsSection blueprint={blueprint} report={report} />
+            <AssessmentDataSection report={report} />
+        </AppShell>
     );
 }

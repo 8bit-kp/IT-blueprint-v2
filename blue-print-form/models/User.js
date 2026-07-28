@@ -8,6 +8,6 @@ const userSchema = new mongoose.Schema({
     // tokenVersion enables server-side token revocation.
     // Increment this value to invalidate all previously issued JWTs for this user.
     tokenVersion: { type: Number, default: 0 },
-});
+}, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model("User", userSchema);

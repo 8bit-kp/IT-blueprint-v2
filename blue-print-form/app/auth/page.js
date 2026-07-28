@@ -3,7 +3,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { notify } from "@/lib/notify";
 import { FiUser, FiMail, FiLock, FiBriefcase, FiArrowLeft, FiCheck } from "react-icons/fi";
 
 // Reusable InputField component
@@ -102,9 +102,10 @@ const Auth = () => {
                 localStorage.setItem("username", res.data.username);
                 if (res.data.email) localStorage.setItem("userEmail", res.data.email);
                 if (res.data.companyName) localStorage.setItem("userCompanyName", res.data.companyName);
+                if (res.data.createdAt) localStorage.setItem("userCreatedAt", res.data.createdAt);
             }
 
-            toast.success(
+            notify.success(
                 isLogin ? "Login successful!" : "Registration successful! Please login."
             );
 
@@ -115,7 +116,7 @@ const Auth = () => {
                 error.response?.data?.message ||
                 error.response?.data?.error ||
                 "Something went wrong";
-            toast.error(errMsg);
+            notify.error(errMsg);
         } finally {
             setLoading(false);
         }

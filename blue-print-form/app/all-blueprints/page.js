@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FiBarChart2, FiGrid, FiLayers, FiDownloadCloud } from "react-icons/fi";
 import { blueprintAPI } from "@/utils/api";
+import { notify } from "@/lib/notify";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import BlueprintDocument from "@/components/coverpages/BlueprintDocument";
 import SecurityDocument from "@/components/coverpages/SecurityDocument";
@@ -14,6 +16,14 @@ import SecurityDonutGrid from "@/components/dashboard-visuals/SecurityDonutGrid"
 import ApplicationDonutGrid from "@/components/dashboard-visuals/ApplicationDonutGrid";
 import AdvisorHandoffBanner from "@/components/engagement/AdvisorHandoffBanner";
 import StatusCard from "@/components/engagement/StatusCard";
+import AppShell from "@/components/navigation/AppShell";
+
+const REPORT_SECTIONS = [
+    { id: "security-visuals", label: "Security Visuals", Icon: FiBarChart2 },
+    { id: "application-visuals", label: "App Visuals", Icon: FiGrid },
+    { id: "report-sections", label: "Report Sections", Icon: FiLayers },
+    { id: "download-all", label: "Download All", Icon: FiDownloadCloud },
+];
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -207,10 +217,16 @@ const AllBlueprintsPage = () => {
                 if (res.data && Object.keys(res.data).length > 0) {
                     setFormData(res.data);
                 } else {
+                    notify.warning("Complete your assessment first", {
+                        description: "Your Current State Report is available once your Current State Assessment has data to show.",
+                    });
                     setError(true);
                 }
             } catch (err) {
                 console.error("Error fetching blueprint:", err);
+                notify.error("Unable to load your report", {
+                    description: "Please try again, or complete your Current State Assessment if you haven't yet.",
+                });
                 setError(true);
             } finally {
                 setLoading(false);
@@ -292,62 +308,14 @@ const AllBlueprintsPage = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#f7f8fa] pb-24">
-
-            {/* ── HEADER ─────────────────────────────────────────────────── */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
-                <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-                    {/* Left: brand mark + title */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#15587B] to-[#34808A] flex items-center justify-center flex-shrink-0">
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 className="text-base font-semibold text-gray-800 leading-none">Current State Report</h1>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                                {formData.companyName}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Right: nav actions */}
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => router.push("/")}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-150"
-                        >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            Home
-                        </button>
-                        <div className="w-px h-4 bg-gray-200" />
-                        <button
-                            onClick={() => router.push("/blueprint-form")}
-                            className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-150"
-                        >
-                            Edit Data
-                        </button>
-                        <div className="w-px h-4 bg-gray-200" />
-                        <button
-                            onClick={() => router.push("/blueprint-summary")}
-                            className="px-3 py-1.5 text-xs font-medium text-[#15587B] hover:bg-[#15587B]/8 rounded-lg transition-all duration-150"
-                            style={{ "--tw-hover-bg": "rgba(21,88,123,0.08)" }}
-                        >
-                            View Summary
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
-            <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-
+        <AppShell
+            title="Current State Report"
+            subtitle={formData.companyName}
+            sections={REPORT_SECTIONS}
+            contentClassName="max-w-6xl mx-auto px-6 pb-8 space-y-8"
+        >
                 {/* ── SECURITY VISUALS SECTION ─────────────────────────── */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div id="security-visuals" className="scroll-mt-24 bg-white rounded-xl border border-gray-200 overflow-hidden">
                     {/* Collapsible header */}
                     <button
                         onClick={() => setVisualsCollapsed(v => !v)}
@@ -417,7 +385,7 @@ const AllBlueprintsPage = () => {
                 </div>
 
                 {/* ── APPLICATION VISUALS SECTION ──────────────────────── */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div id="application-visuals" className="scroll-mt-24 bg-white rounded-xl border border-gray-200 overflow-hidden">
                     {/* Collapsible header */}
                     <button
                         onClick={() => setAppsCollapsed(v => !v)}
@@ -495,7 +463,7 @@ const AllBlueprintsPage = () => {
                 />
 
                 {/* ── SECTION LABEL ─────────────────────────────────────── */}
-                <div>
+                <div id="report-sections" className="scroll-mt-24">
                     <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
                         Report Sections
                     </p>
@@ -520,7 +488,7 @@ const AllBlueprintsPage = () => {
                 </div>
 
                 {/* ── DOWNLOAD ALL ──────────────────────────────────────── */}
-                <div className="border-t border-gray-200 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div id="download-all" className="scroll-mt-24 border-t border-gray-200 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
                         <p className="text-sm font-semibold text-gray-700">Complete Current State Report</p>
                         <p className="text-xs text-gray-400 mt-0.5">All report sections compiled into a single PDF file</p>
@@ -546,8 +514,7 @@ const AllBlueprintsPage = () => {
                         </PDFDownloadLink>
                     )}
                 </div>
-            </div>
-        </div>
+        </AppShell>
     );
 };
 

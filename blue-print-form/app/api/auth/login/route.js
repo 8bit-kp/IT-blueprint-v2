@@ -83,6 +83,7 @@ export async function POST(request) {
             username: user.username,
             email: user.email || "",
             companyName: user.companyName || "",
+            createdAt: user.createdAt || null,
             blueprint: blueprintData,
         });
 

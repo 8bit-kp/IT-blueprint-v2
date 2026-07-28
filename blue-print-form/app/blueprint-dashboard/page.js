@@ -2,10 +2,12 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { FiFileText, FiShield, FiActivity, FiDollarSign, FiSettings, FiSave } from "react-icons/fi";
 import { blueprintAPI } from "@/utils/api";
+import { notify } from "@/lib/notify";
 
 // Import Dashboard Components
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import AppShell from "@/components/navigation/AppShell";
 import SaveMessage from "@/components/dashboard/SaveMessage";
 import LoadingSpinner from "@/components/dashboard/LoadingSpinner";
 import CurrentStateDashboard from "@/components/dashboard/CurrentStateDashboard";
@@ -13,6 +15,16 @@ import SecurityDashboard from "@/components/dashboard/SecurityDashboard";
 import OperationalDashboard from "@/components/dashboard/OperationalDashboard";
 import FinancialDashboard from "@/components/dashboard/FinancialDashboard";
 import AdministrationDashboard from "@/components/dashboard/AdministrationDashboard";
+
+// Contextual "This Page" nav — lets the user switch dashboard type in place
+// instead of going back to /all-blueprints and opening a new tab.
+const DASHBOARD_TYPES = [
+    { id: "Current-State-Blueprint", label: "Current State", Icon: FiFileText },
+    { id: "Security-Blueprint", label: "Security", Icon: FiShield },
+    { id: "Operational-Blueprint", label: "Operational", Icon: FiActivity },
+    { id: "Financial-Blueprint", label: "Financial", Icon: FiDollarSign },
+    { id: "Administration-Blueprint", label: "Administration", Icon: FiSettings },
+];
 
 const BlueprintDashboardContent = () => {
     const router = useRouter();
@@ -42,10 +54,16 @@ const BlueprintDashboardContent = () => {
                 if (res.data && Object.keys(res.data).length > 0) {
                     setFormData(res.data);
                 } else {
+                    notify.warning("Complete your assessment first", {
+                        description: "Dashboards are available once your Current State Assessment has data to show.",
+                    });
                     router.push("/blueprint-form");
                 }
             } catch (err) {
                 console.error("Error fetching blueprint:", err);
+                notify.error("Unable to load your dashboard", {
+                    description: "Please try again, or complete your Current State Assessment if you haven't yet.",
+                });
                 router.push("/blueprint-form");
             } finally {
                 setLoading(false);
@@ -130,23 +148,22 @@ const BlueprintDashboardContent = () => {
         }
     };
 
+    const title = blueprintType?.replace(/-/g, " ").replace("Blueprint", "Dashboard") || "Dashboard";
+
     return (
-        <div className="min-h-screen bg-[#F3F4F6]">
-            {/* Header Component */}
-            <DashboardHeader
-                blueprintType={blueprintType}
-                companyName={formData.companyName}
-                onSave={handleSave}
-                saving={saving}
-            />
-
-            {/* Save Message Component */}
+        <AppShell
+            title={title}
+            subtitle={formData.companyName}
+            sections={DASHBOARD_TYPES}
+            navMode="action"
+            activeId={blueprintType}
+            onSelect={(id) => router.push(`/blueprint-dashboard?type=${id}`)}
+            actions={[{ label: saving ? "Saving..." : "Save Changes", onClick: handleSave, loading: saving, Icon: FiSave }]}
+            contentClassName="max-w-6xl mx-auto px-6 pb-6"
+        >
             <SaveMessage message={message} />
-
-            <div className="max-w-7xl mx-auto py-6 px-6">
-                {renderDashboard()}
-            </div>
-        </div>
+            {renderDashboard()}
+        </AppShell>
     );
 };
 

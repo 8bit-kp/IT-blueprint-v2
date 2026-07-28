@@ -2,12 +2,22 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiShield } from "react-icons/fi";
+import { FiCheckCircle, FiShield, FiDownload, FiMap, FiUsers } from "react-icons/fi";
 import EngagementTimeline from "@/components/engagement/EngagementTimeline";
 import SecurityScoreCard from "@/components/report-dashboard/SecurityScoreCard";
 import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
+import AppShell from "@/components/navigation/AppShell";
 import { blueprintAPI } from "@/utils/api";
 import { generateReport } from "@/lib/report/index.js";
+import { useLocalStorageValue } from "@/lib/hooks/useLocalStorageValue";
+
+const SECTIONS = [
+    { id: "complete", label: "Complete", Icon: FiCheckCircle },
+    { id: "security-score", label: "Security Score", Icon: FiShield },
+    { id: "report-actions", label: "Report Actions", Icon: FiDownload },
+    { id: "consulting-journey", label: "Consulting Journey", Icon: FiMap },
+    { id: "advisor-info", label: "Advisor Info", Icon: FiUsers },
+];
 
 // A blueprint is "filled" if at least one Step 1 field is present — same
 // heuristic used by /assessment-report before calling generateReport().
@@ -34,12 +44,6 @@ const ClockIcon = () => (
 const ChevronIcon = () => (
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-    </svg>
-);
-
-const HomeIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
     </svg>
 );
 
@@ -74,10 +78,7 @@ const AdvisorAction = ({ text }) => (
 
 export default function AssessmentComplete() {
     const router = useRouter();
-    const [companyName] = useState(() => {
-        if (typeof window === "undefined") return "";
-        return localStorage.getItem("userCompanyName") || "";
-    });
+    const companyName = useLocalStorageValue("userCompanyName");
     const [report, setReport] = useState(null);
     const [reportLoading, setReportLoading] = useState(true);
 
@@ -101,40 +102,14 @@ export default function AssessmentComplete() {
     }, [router]);
 
     return (
-        <div className="min-h-screen bg-[#F3F4F6] font-sans">
-
-            {/* ── Sticky top header ─────────────────────────────────────── */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-                <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#15587B] to-[#34808A] flex items-center justify-center flex-shrink-0">
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 className="text-sm font-semibold text-gray-800 leading-none">Assessment Complete</h1>
-                            {companyName && (
-                                <p className="text-xs text-gray-400 mt-0.5">{companyName}</p>
-                            )}
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => router.push("/")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                    >
-                        <HomeIcon />
-                        Home
-                    </button>
-                </div>
-            </div>
-
-            {/* ── Main content ─────────────────────────────────────────── */}
-            <div className="max-w-5xl mx-auto px-6 py-10 space-y-8 pb-24">
-
+        <AppShell
+            title="Assessment Complete"
+            subtitle={companyName}
+            sections={SECTIONS}
+            contentClassName="max-w-5xl mx-auto px-6 space-y-8 pb-24"
+        >
                 {/* ── Section 1: Completion hero ──────────────────────── */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div id="complete" className="scroll-mt-24 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                     {/* Top accent bar */}
                     <div className="h-1.5 w-full bg-gradient-to-r from-[#34808A] to-[#15587B]" />
                     <div className="px-8 py-10 flex flex-col items-center text-center">
@@ -166,7 +141,7 @@ export default function AssessmentComplete() {
                     The visual focal point of the page — reuses the exact
                     SecurityScoreCard rendered on /assessment-report (same
                     generateReport() output, no re-derived logic). */}
-                <div>
+                <div id="security-score" className="scroll-mt-24">
                     <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
                         Your Security Score
                     </p>
@@ -203,7 +178,7 @@ export default function AssessmentComplete() {
                 </div>
 
                 {/* ── Section 3: Report access (unchanged actions, new position) ── */}
-                <div>
+                <div id="report-actions" className="scroll-mt-24">
                     <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
                         Access Your Current State Report
                     </p>
@@ -259,7 +234,7 @@ export default function AssessmentComplete() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                     {/* Engagement timeline */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                    <div id="consulting-journey" className="scroll-mt-24 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <div className="flex items-center gap-2 mb-5">
                             <div className="h-5 w-1 bg-[#34808A] rounded-full" />
                             <h3 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Your Consulting Journey</h3>
@@ -268,7 +243,7 @@ export default function AssessmentComplete() {
                     </div>
 
                     {/* Advisor review + upcoming deliverable */}
-                    <div className="space-y-4">
+                    <div id="advisor-info" className="scroll-mt-24 space-y-4">
                         {/* What advisor does next */}
                         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                             <div className="flex items-center gap-2 mb-4">
@@ -308,8 +283,6 @@ export default function AssessmentComplete() {
                         </div>
                     </div>
                 </div>
-
-            </div>
-        </div>
+        </AppShell>
     );
 }

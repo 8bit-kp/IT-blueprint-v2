@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
       <body suppressHydrationWarning>
         <FormProvider>
           {children}
-          <Toaster position="top-right" />
+          <Toaster position="top-right" gutter={10} />
         </FormProvider>
       </body>
     </html>

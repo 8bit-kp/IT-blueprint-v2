@@ -1,5 +1,5 @@
 import axios from 'axios';
-import toast from 'react-hot-toast';
+import { notify } from '@/lib/notify';
 
 // Create axios instance with default config.
 // Authentication is now handled via HTTP-only cookies set by /api/auth/login.
@@ -26,7 +26,7 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
-          toast.error('Session expired. Please login again.');
+          notify.error('Session expired', { description: 'Please login again to continue.' });
           // Clear the display username stored for the Navbar — the auth cookie
           // will have been expired by the server or will be rejected on next request.
           if (typeof window !== 'undefined') {
@@ -37,26 +37,26 @@ api.interceptors.response.use(
           }, 1500);
           break;
         case 403:
-          toast.error('You do not have permission to perform this action.');
+          notify.error('You do not have permission to perform this action.');
           break;
         case 404:
-          toast.error('Resource not found.');
+          notify.error('Resource not found.');
           break;
         case 429:
-          toast.error(error.response.data?.message || 'Too many requests. Please wait and try again.');
+          notify.warning(error.response.data?.message || 'Too many requests. Please wait and try again.');
           break;
         case 500:
-          toast.error('Server error. Please try again later.');
+          notify.error('Server error. Please try again later.');
           break;
         default:
           if (error.response.data?.message) {
-            toast.error(error.response.data.message);
+            notify.error(error.response.data.message);
           }
       }
     } else if (error.code === 'ECONNABORTED') {
-      toast.error('Request timeout. Please check your connection.');
+      notify.error('Request timeout. Please check your connection.');
     } else if (error.message === 'Network Error') {
-      toast.error('Network error. Please check your connection.');
+      notify.error('Network error. Please check your connection.');
     }
 
     return Promise.reject(error);
