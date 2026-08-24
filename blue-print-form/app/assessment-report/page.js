@@ -32,9 +32,11 @@ import { useRouter } from "next/navigation";
 import {
     FiHome, FiBriefcase, FiServer, FiShield, FiTrendingUp,
     FiGitBranch, FiGrid, FiFileText, FiCheckCircle, FiAlertTriangle,
+    FiLayers, FiInfo,
 } from "react-icons/fi";
 import { blueprintAPI } from "@/utils/api";
 import { generateReport } from "@/lib/report/index.js";
+import { getRiskLevel } from "@/lib/report/application-score";
 import { notify } from "@/lib/notify";
 
 import CategoryRadar from "@/components/report-charts/CategoryRadar";
@@ -48,6 +50,7 @@ import InfoTile from "@/components/report-dashboard/InfoTile";
 import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
 import Disclosure from "@/components/report-dashboard/Disclosure";
 import SecurityScoreCard from "@/components/report-dashboard/SecurityScoreCard";
+import ApplicationSecurityScoreCard from "@/components/report-dashboard/ApplicationSecurityScoreCard";
 
 // ── Brand colours ────────────────────────────────────────────────────────────
 const PRIMARY = "#15587B";
@@ -99,6 +102,7 @@ const SECTIONS = [
     { id: "organization", label: "Organization", Icon: FiBriefcase },
     { id: "infrastructure", label: "Infrastructure", Icon: FiServer },
     { id: "security", label: "Security", Icon: FiShield },
+    { id: "application-security", label: "Application Security", Icon: FiLayers },
     { id: "business-operations", label: "Business Operations", Icon: FiTrendingUp },
     { id: "business-workflows", label: "Business Workflows", Icon: FiGitBranch },
     { id: "applications", label: "Technology Stack", Icon: FiGrid },
@@ -116,6 +120,15 @@ const OverviewSection = ({ report, companyName, assessmentDate }) => (
         description={`Generated ${assessmentDate}. A snapshot assessment based on self-reported data, calculated from a fixed, published methodology.`}
     >
         <SecurityScoreCard report={report} />
+
+        <div className="mt-8 pt-8 border-t border-gray-100">
+            <h3 className="text-sm font-bold text-gray-800 mb-1">Application Security Score</h3>
+            <p className="text-xs text-gray-400 mb-5 max-w-xl leading-relaxed">
+                An independent companion score scoped to the Application Portfolio (Step 7), calculated from its own
+                fixed methodology. Related to, but never merged into, the Security Score above.
+            </p>
+            <ApplicationSecurityScoreCard report={report} />
+        </div>
     </SectionCard>
 );
 
@@ -345,6 +358,219 @@ const SecuritySection = ({ report }) => {
                         ))}
                     </ul>
                 </Disclosure>
+            </div>
+        </SectionCard>
+    );
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// Section: Application Security (deep dive on report.applicationSecurityScore)
+// ════════════════════════════════════════════════════════════════════════════
+// Everything here reads from report.applicationSecurityScore /
+// report.applicationScoreHypotheticals, both already fully computed by
+// generateReport(). This section renders; it never calculates — the only
+// arithmetic below (sorting by riskScore, summing incomplete-app counts) is
+// a plain UI-layer read/derive over already-computed fields, the same kind
+// of local derivation AssessmentDataSection/ApplicationsSection already do
+// elsewhere on this page.
+
+const HYPOTHETICAL_VERB_PHRASE = {
+    mfaEnabled: "Enabling MFA",
+    backedUp: "Enabling backups",
+    byodAccess: "Restricting BYOD access",
+    sensitiveInformation: "Reducing sensitive-information exposure",
+};
+
+const IncompleteDataTag = () => (
+    <span
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500 border border-dashed border-gray-300"
+        title="One or more fields on this application were left unanswered — this is not a confirmed weakness."
+    >
+        <FiInfo size={10} />
+        Not fully assessed
+    </span>
+);
+
+const RiskLevelBadge = ({ level }) => {
+    const cfg = RISK_CONFIG[level] || RISK_CONFIG.Medium;
+    return (
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${cfg.bg} ${cfg.text}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+            {level}
+        </span>
+    );
+};
+
+const ApplicationSecuritySection = ({ report }) => {
+    const appScore = report.applicationSecurityScore;
+    const hypotheticals = report.applicationScoreHypotheticals || [];
+
+    if (!appScore || appScore.overallScore === null) {
+        return (
+            <SectionCard
+                id="application-security"
+                eyebrow="Application Portfolio"
+                title="Application Security"
+                description="An independent score scoped to the Application Portfolio Assessment (Step 7)."
+                Icon={FiLayers}
+            >
+                <EmptyStateNotice
+                    Icon={FiLayers}
+                    title="Application Security Score: Not yet assessed"
+                    description="Complete the Application Portfolio section (Step 7 of the Current State Assessment) to see this score."
+                />
+            </SectionCard>
+        );
+    }
+
+    const { sections, topRiskDrivers } = appScore;
+
+    // Section breakdown: worst-first by risk, so the section dragging the
+    // score down most is immediately visible rather than reading top-to-bottom.
+    const sectionsByRisk = [...sections].sort((a, b) => b.sectionRisk - a.sectionRisk);
+
+    // Application table: single flat table across all sections, sorted
+    // worst-first — a portfolio can span several sections, and a per-section
+    // sub-table would bury a single high-risk app inside whichever section
+    // happens to render last. One sortable-by-eye list keeps it visible.
+    const allApps = sections
+        .flatMap((s) => s.applications.map((a) => ({ ...a, sectionName: s.sectionName })))
+        .sort((a, b) => b.riskScore - a.riskScore);
+
+    const incompleteCount = allApps.filter((a) => a.hasIncompleteData).length;
+
+    return (
+        <SectionCard
+            id="application-security"
+            eyebrow="Application Portfolio"
+            title="Application Security"
+            description="A deeper look at the Application Security Score: what's driving it, which sections and applications carry the most risk, and what fixing the top issues would do to the score."
+            Icon={FiLayers}
+        >
+            <div className="space-y-6">
+                {/* ── Top Risk Drivers ────────────────────────────────────────── */}
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Top Risk Drivers</p>
+                    {topRiskDrivers.length === 0 ? (
+                        <p className="text-xs text-gray-400">No significant risk drivers identified.</p>
+                    ) : (
+                        <ul className="space-y-2">
+                            {topRiskDrivers.map((d, i) => (
+                                <li key={d.factor} className="flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <span className="w-5 h-5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                                            {i + 1}
+                                        </span>
+                                        <span className="text-xs font-medium text-gray-700">{d.description}</span>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-gray-400 flex-shrink-0">
+                                        {d.affectedApplicationCount} app{d.affectedApplicationCount === 1 ? "" : "s"}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                {/* ── Improvement Hypotheticals (factual, module-recomputed) ──── */}
+                {hypotheticals.length > 0 && (
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                            If the Top Issues Were Fixed
+                        </p>
+                        <ul className="space-y-1.5">
+                            {hypotheticals.map((h) => (
+                                <li key={h.factor} className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
+                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#34808A] flex-shrink-0" />
+                                    <span>
+                                        {HYPOTHETICAL_VERB_PHRASE[h.factor] || "Fixing this factor"} on the{" "}
+                                        {h.affectedApplicationCount} flagged application{h.affectedApplicationCount === 1 ? "" : "s"} would
+                                        raise the Application Security Score to approximately{" "}
+                                        <strong className="text-gray-800">{h.hypotheticalScore}</strong> (currently {h.currentScore}).
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {/* ── Section Breakdown ────────────────────────────────────────── */}
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Section Breakdown</p>
+                    <div className="space-y-2.5">
+                        {sectionsByRisk.map((s) => {
+                            const level = getRiskLevel(Math.round(s.sectionRisk));
+                            const cfg = RISK_CONFIG[level] || RISK_CONFIG.Medium;
+                            return (
+                                <div key={s.sectionId} className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                                    <div className="flex items-center justify-between mb-2 gap-3">
+                                        <span className="text-xs font-semibold text-gray-700 truncate">{s.sectionName}</span>
+                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                            <span className="text-[10px] text-gray-400">{Math.round(s.normalizedWeight * 100)}% weight</span>
+                                            <RiskLevelBadge level={level} />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full ${cfg.dot}`}
+                                                style={{ width: `${Math.min(100, Math.round(s.sectionRisk))}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-700 w-16 text-right flex-shrink-0">
+                                            Risk {Math.round(s.sectionRisk)}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* ── Incomplete data note (portfolio level) ───────────────────── */}
+                {incompleteCount > 0 && (
+                    <div className="flex items-start gap-2.5 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                        <FiInfo size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-gray-500 leading-relaxed">
+                            {incompleteCount} application{incompleteCount === 1 ? " has" : "s have"} unanswered fields — complete
+                            them in Step 7 for a more accurate score.
+                        </p>
+                    </div>
+                )}
+
+                {/* ── Application Breakdown Table ──────────────────────────────── */}
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                        Applications ({allApps.length}), highest risk first
+                    </p>
+                    <div className="overflow-x-auto border border-gray-100 rounded-xl">
+                        <table className="w-full text-xs min-w-[520px]">
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-100">
+                                    <th className="text-left font-bold uppercase tracking-wide text-gray-400 text-[10px] px-4 py-2.5">Provider Name</th>
+                                    <th className="text-left font-bold uppercase tracking-wide text-gray-400 text-[10px] px-4 py-2.5">Section</th>
+                                    <th className="text-left font-bold uppercase tracking-wide text-gray-400 text-[10px] px-4 py-2.5">Risk Score</th>
+                                    <th className="text-left font-bold uppercase tracking-wide text-gray-400 text-[10px] px-4 py-2.5">Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {allApps.map((a) => (
+                                    <tr key={a.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors">
+                                        <td className="px-4 py-2.5 font-medium text-gray-700">
+                                            <div className="flex items-center gap-2">
+                                                <span className="truncate max-w-[160px]">{a.name || "Unnamed application"}</span>
+                                                {a.hasIncompleteData && <IncompleteDataTag />}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-2.5 text-gray-500">{a.sectionName}</td>
+                                        <td className="px-4 py-2.5 font-bold text-gray-700">{a.riskScore}/100</td>
+                                        <td className="px-4 py-2.5"><RiskLevelBadge level={a.riskLevel} /></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </SectionCard>
     );
@@ -652,6 +878,7 @@ export default function AssessmentReport() {
             <OrganizationSection blueprint={blueprint} />
             <InfrastructureSection blueprint={blueprint} />
             <SecuritySection report={report} />
+            <ApplicationSecuritySection report={report} />
             <BusinessOperationsSection blueprint={blueprint} />
             <BusinessWorkflowsSection />
             <ApplicationsSection blueprint={blueprint} report={report} />

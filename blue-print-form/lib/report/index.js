@@ -12,6 +12,10 @@
  * pass audience: "advisor" and gate restricted sections inside each consumer.
  * See docs/report-scoring-architecture.md § Advisor Panel Extension Point.
  *
+ * `applicationSecurityScore` is a fully independent companion score (see
+ * lib/report/application-score/ and docs/application-security-score-methodology.md)
+ * computed alongside, never merged into, the main score/categories/waterfall.
+ *
  * Design: pure function — same input always produces same output. No I/O.
  */
 
@@ -19,6 +23,7 @@ import { extractSignals }                                        from "./signals
 import { scoreAllCategories }                                    from "./categories.js";
 import { computeScore, computeMetrics, deriveRiskSummary, deriveStrengthsAndRisks } from "./scoring.js";
 import { getMaturityLevel }                                      from "./maturity.js";
+import { mapAssessmentToPortfolioInput, calculatePortfolioRisk, computeImprovementHypotheticals } from "./application-score/index.js";
 
 // Known signals that are absent from the assessment today.
 // Listed here so report consumers can surface gaps to the user.
@@ -74,6 +79,20 @@ export function generateReport(blueprintData, options = {}) {
     // ── Strengths and critical risks ──────────────────────────────────────
     const { strengths, criticalRisks } = deriveStrengthsAndRisks(categories, triggeredPenalties);
 
+    // ── Application Security Score (independent companion score) ──────────
+    // See docs/application-security-score-methodology.md. Computed from the
+    // same Step 7 data already read by extractSignals() above, via its own
+    // adapter — never mixed into the main score's signals/categories/etc.
+    const { sections: appSections, applicationsBySection } = mapAssessmentToPortfolioInput(blueprintData);
+    const applicationSecurityScore = calculatePortfolioRisk(appSections, applicationsBySection);
+
+    // Factual "what would improve this" recomputation — calls the same
+    // scoring function a second time per driver with that factor fixed.
+    // See lib/report/application-score/hypotheticals.js. Not a recommendation.
+    const applicationScoreHypotheticals = computeImprovementHypotheticals(
+        appSections, applicationsBySection, applicationSecurityScore.topRiskDrivers,
+    );
+
     // ── Assemble report object ────────────────────────────────────────────
     return {
         // ── Extension point ────────────────────────────────────────────────
@@ -111,6 +130,16 @@ export function generateReport(blueprintData, options = {}) {
 
         // ── Risk summary ───────────────────────────────────────────────────
         risks,
+
+        // ── Application Security Score (independent companion score) ───────
+        // A PortfolioScoreResult from lib/report/application-score. Not yet
+        // rendered by any UI — see docs/application-security-score-methodology.md.
+        applicationSecurityScore,
+
+        // ── Application Security Score improvement hypotheticals ───────────
+        // Array aligned to applicationSecurityScore.topRiskDrivers order;
+        // each entry's hypotheticalScore is a real recomputation, not an estimate.
+        applicationScoreHypotheticals,
 
         // ── Signals (available for advisor consumption; not surfaced in customer UI) ──
         signals,
