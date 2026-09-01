@@ -397,7 +397,7 @@ const AppGroup = ({ title, category, apps, allApplications, updateFormData, isCu
                 />
             )}
 
-            <div className="mb-8">
+            <div id={`app-cat-${category}`} className="mb-8 scroll-mt-24">
                 <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
                     <div className="flex items-center gap-2">
                         <h3 className="text-lg font-bold text-[#15587B]">{title}</h3>

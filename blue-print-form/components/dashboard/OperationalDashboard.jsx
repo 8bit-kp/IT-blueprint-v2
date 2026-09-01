@@ -30,6 +30,7 @@ const OperationalDashboard = ({ formData, updateField }) => {
         { label: "Cloud Infrastructure", key: "hasCloudInfra" },
         { label: "Generator", key: "hasGenerator" },
         { label: "UPS", key: "hasUPS" },
+        { label: "Solar Power", key: "hasSolarPower" },
     ];
 
     const updateVendorField = (key, field, value) => {

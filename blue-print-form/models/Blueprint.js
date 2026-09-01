@@ -44,6 +44,7 @@ const blueprintSchema = new mongoose.Schema({
     hasCloudInfra: String,
     hasGenerator: String,
     hasUPS: String,
+    hasSolarPower: String,
 
     // Step 3: Network & Server Infrastructure
     mainLocation: String,

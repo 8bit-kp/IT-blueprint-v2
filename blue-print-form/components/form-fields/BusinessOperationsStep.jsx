@@ -94,7 +94,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
     return (
         <>
             {/* ── Section 1: Business Context ─────────────────────────────── */}
-            <Card title="Business Context" className="max-w-5xl mx-auto">
+            <Card id="section-business-context" title="Business Context" className="max-w-5xl mx-auto scroll-mt-24">
                 <p className="text-xs text-gray-400 mb-6">
                     This section helps your Consltek advisor understand your organisation's operating model before
                     the consultation. All fields are optional.
@@ -172,7 +172,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
             </Card>
 
             {/* ── Section 2: Business Criticality ─────────────────────────── */}
-            <Card title="Business Criticality" className="max-w-5xl mx-auto mt-6">
+            <Card id="section-business-criticality" title="Business Criticality" className="max-w-5xl mx-auto mt-6 scroll-mt-24">
                 <p className="text-xs text-gray-400 mb-6">
                     Helps your advisor prioritise findings and focus the consultation on what matters most.
                     All fields are optional.

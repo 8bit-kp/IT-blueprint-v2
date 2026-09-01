@@ -330,13 +330,15 @@ const transformFormData = (inputData) => {
     };
   });
 
-  // 3. Manually add Facilities (UPS/Generator) which are likely still simple fields from Step 2
+  // 3. Manually add Facilities (UPS/Generator/Solar) which are likely still simple fields from Step 2
   const upsVal = inputData.hasUPS === "Yes" ? "In Place" : "No Solution";
   const genVal = inputData.hasGenerator === "Yes" ? "In Place" : "No Solution";
+  const solarVal = inputData.hasSolarPower === "Yes" ? "In Place" : "No Solution";
 
   const staticInfraRows = [
     { function: "UPS", provider: upsVal, priority: "Critical", offering: "On-premise" },
-    { function: "Generator", provider: genVal, priority: "Critical", offering: "On-premise" }
+    { function: "Generator", provider: genVal, priority: "Critical", offering: "On-premise" },
+    { function: "Solar Power", provider: solarVal, priority: "Low", offering: "On-premise" }
   ];
 
   const infraRows = [...dynamicInfraRows, ...staticInfraRows];

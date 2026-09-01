@@ -26,6 +26,7 @@ export const FormProvider = ({ children }) => {
     hasCloudInfra: "Yes",
     hasGenerator: "Yes",
     hasUPS: "Yes",
+    hasSolarPower: "Yes",
     // Governance & Admin Controls defaults
     securityCommittee: "Yes",
     securityPolicy: "Yes",
@@ -107,6 +108,7 @@ export const FormProvider = ({ children }) => {
       hasCloudInfra: "Yes",
       hasGenerator: "Yes",
       hasUPS: "Yes",
+      hasSolarPower: "Yes",
       // Governance & Admin Controls defaults
       securityCommittee: "Yes",
       securityPolicy: "Yes",

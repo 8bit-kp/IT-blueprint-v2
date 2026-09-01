@@ -159,6 +159,7 @@ export const blueprintSchema = z
         hasCloudInfra: z.string().optional(),
         hasGenerator: z.string().optional(),
         hasUPS: z.string().optional(),
+        hasSolarPower: z.string().optional(),
 
         // ---------------------------------------------------------------
         // Step 3 — Network & Server Infrastructure

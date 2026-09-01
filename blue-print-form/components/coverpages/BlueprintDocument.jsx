@@ -230,6 +230,7 @@ const ExecutiveSummary = ({ companyName = "—", data = {}, dateStr = "" }) => {
   const powerParts = [
     data.hasUPS === "Yes" ? "UPS" : null,
     data.hasGenerator === "Yes" ? "Generator" : null,
+    data.hasSolarPower === "Yes" ? "Solar" : null,
   ].filter(Boolean);
   const powerStr = powerParts.length ? powerParts.join(", ") : "None recorded";
 

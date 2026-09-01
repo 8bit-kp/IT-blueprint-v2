@@ -26,6 +26,7 @@ const InfrastructureStep = memo(({ formData, setField }) => (
         <div className="space-y-1 md:border-l-2 md:border-gray-300 md:pl-8">
           <YesNo label="Onsite Generator?" value={formData.hasGenerator} onChange={(v) => setField("hasGenerator", v)} />
           <YesNo label="UPS Systems?" value={formData.hasUPS} onChange={(v) => setField("hasUPS", v)} />
+          <YesNo label="Solar Power?" value={formData.hasSolarPower} onChange={(v) => setField("hasSolarPower", v)} />
         </div>
       </div>
     </div>

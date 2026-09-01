@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { blueprintAPI } from "@/utils/api";
 import { notify } from "@/lib/notify";
 import {
-    FiBriefcase, FiServer, FiShield, FiGrid, FiActivity
+    FiBriefcase, FiServer, FiShield, FiGrid, FiActivity, FiEdit2
 } from "react-icons/fi";
 import AppShell from "@/components/navigation/AppShell";
 import { parseControlData } from "@/lib/reports/shared/parseControlData";
 import { resolveCategoryTitle } from "@/lib/reports/shared/labels";
 import AdvisorHandoffBanner from "@/components/engagement/AdvisorHandoffBanner";
+import { useForm } from "@/context/FormContext";
 
 // ── Section registry ───────────────────────────────────────────────────────
 // Each entry maps to a <section id="..."> element in the page body.
@@ -24,11 +25,24 @@ const SUMMARY_SECTIONS = [
 
 // ── Shared UI components ───────────────────────────────────────────────────
 
-const SectionCard = ({ title, children, className = "" }) => (
+const SectionCard = ({ title, children, className = "", onEdit }) => (
     <div className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col ${className}`}>
-        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-            <div className="h-4 w-1 bg-[#34808A] rounded-full" />
-            <h2 className="font-bold text-[#15587B] text-sm uppercase tracking-wider">{title}</h2>
+        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+                <div className="h-4 w-1 bg-[#34808A] rounded-full" />
+                <h2 className="font-bold text-[#15587B] text-sm uppercase tracking-wider">{title}</h2>
+            </div>
+            {onEdit && (
+                <button
+                    type="button"
+                    onClick={onEdit}
+                    aria-label={`Edit ${title}`}
+                    className="flex items-center gap-1 text-xs font-semibold text-[#34808A] hover:text-[#15587B] hover:bg-[#34808A]/10 px-2 py-1 rounded-md transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#34808A] focus-visible:ring-offset-1"
+                >
+                    <FiEdit2 className="w-3.5 h-3.5" aria-hidden="true" />
+                    Edit
+                </button>
+            )}
         </div>
         <div className="p-5 flex-1">{children}</div>
     </div>
@@ -84,6 +98,7 @@ const Badge = ({ text, type = "neutral" }) => {
 
 const BlueprintSummary = () => {
     const router = useRouter();
+    const { setStep } = useForm();
     const [formData, setFormData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -156,6 +171,30 @@ const BlueprintSummary = () => {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, []);
 
+    // Sends the user to the exact assessment step (and, where applicable, the
+    // exact section within that step) that owns a given Summary card's data.
+    // Reuses the wizard's existing shared FormContext step state directly
+    // (the same setStep() the wizard's own step navigation already calls) so
+    // the destination is correct even if Next.js's router reuses an
+    // already-mounted /blueprint-form instance instead of remounting it (in
+    // which case blueprint-form/page.js's mount-only localStorage-restore
+    // effect would not re-run). localStorage.blueprintFormStep is also kept
+    // in sync for the hard-reload-restore case. sectionId (optional) is a DOM
+    // id inside that step, consumed by blueprint-form/page.js's
+    // scroll-to-section effect.
+    const handleEdit = useCallback((step, sectionId) => {
+        setStep(step);
+        if (typeof window !== "undefined") {
+            localStorage.setItem("blueprintFormStep", String(step));
+            if (sectionId) {
+                sessionStorage.setItem("blueprintFormScrollTarget", sectionId);
+            } else {
+                sessionStorage.removeItem("blueprintFormScrollTarget");
+            }
+        }
+        router.push("/blueprint-form");
+    }, [router, setStep]);
+
     // ── Loading / error states ─────────────────────────────────────────────
 
     if (loading) {
@@ -222,7 +261,7 @@ const BlueprintSummary = () => {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                                 {/* Company Profile */}
-                                <SectionCard title="Company Profile">
+                                <SectionCard title="Company Profile" onEdit={() => handleEdit(1)}>
                                     <div className="space-y-1">
                                         <DetailRow label="Company" value={formData.companyName} />
                                         <DetailRow label="Contact" value={formData.contactName} optional />
@@ -252,7 +291,7 @@ const BlueprintSummary = () => {
                                 </SectionCard>
 
                                 {/* Facilities & Power */}
-                                <SectionCard title="Facilities & Power">
+                                <SectionCard title="Facilities & Power" onEdit={() => handleEdit(2)}>
                                     <div className="grid grid-cols-2 gap-4 mb-4">
                                         <div className="bg-blue-50 rounded p-3 text-center">
                                             <div className="text-xs text-blue-600 font-bold uppercase">Offices</div>
@@ -269,6 +308,7 @@ const BlueprintSummary = () => {
                                             ["Cloud Infra",  formData.hasCloudInfra],
                                             ["Generators",   formData.hasGenerator],
                                             ["UPS Systems",  formData.hasUPS],
+                                            ["Solar Power",  formData.hasSolarPower],
                                         ].map(([l, v]) => (
                                             <div key={l} className="flex justify-between items-center text-sm">
                                                 <span className="text-gray-600">{l}</span>
@@ -279,7 +319,7 @@ const BlueprintSummary = () => {
                                 </SectionCard>
 
                                 {/* Governance */}
-                                <SectionCard title="Governance & Compliance">
+                                <SectionCard title="Governance & Compliance" onEdit={() => handleEdit(4)}>
                                     <div className="grid grid-cols-1 gap-y-2">
                                         {[
                                             ["Steering Committee", formData.securityCommittee],
@@ -307,7 +347,7 @@ const BlueprintSummary = () => {
                             className="scroll-mt-24"
                         >
                             <SectionHeader label="Network & Infrastructure" />
-                            <SectionCard title="Network & Infrastructure">
+                            <SectionCard title="Network & Infrastructure" onEdit={() => handleEdit(3)}>
                                 <div className="flex flex-col gap-8">
 
                                     {/* Servers & Config */}
@@ -375,7 +415,7 @@ const BlueprintSummary = () => {
                             className="scroll-mt-24"
                         >
                             <SectionHeader label="Security Technical Controls" />
-                            <SectionCard title="Security Technical Controls">
+                            <SectionCard title="Security Technical Controls" onEdit={() => handleEdit(5)}>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm text-left">
                                         <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
@@ -419,7 +459,7 @@ const BlueprintSummary = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                                 {/* Business Context */}
-                                <SectionCard title="Business Context">
+                                <SectionCard title="Business Context" onEdit={() => handleEdit(6, "section-business-context")}>
                                     <div className="space-y-1">
                                         <DetailRow label="Primary Function"   value={formData.primaryBusinessFunction}   optional />
                                         <DetailRow label="Products / Services" value={formData.mainProductsServices}     optional />
@@ -430,7 +470,7 @@ const BlueprintSummary = () => {
                                 </SectionCard>
 
                                 {/* Business Criticality */}
-                                <SectionCard title="Business Criticality">
+                                <SectionCard title="Business Criticality" onEdit={() => handleEdit(6, "section-business-criticality")}>
                                     <div className="space-y-1">
                                         <DetailRow label="Critical Function"   value={formData.criticalBusinessFunction} optional />
                                         <DetailRow label="24/7 Systems"        value={formData.systemsRequiring24x7}     optional />
@@ -464,7 +504,11 @@ const BlueprintSummary = () => {
                                 if (!apps || apps.length === 0) return null;
                                 const catTitle = resolveCategoryTitle(category, formData.customCategories);
                                 return (
-                                    <SectionCard key={category} title={`${catTitle} Applications`}>
+                                    <SectionCard
+                                        key={category}
+                                        title={`${catTitle} Applications`}
+                                        onEdit={() => handleEdit(7, `app-cat-${category}`)}
+                                    >
                                         <div className="overflow-x-auto">
                                             <table className="w-full text-sm">
                                                 <thead className="text-xs text-gray-400 uppercase border-b border-gray-100 text-left">

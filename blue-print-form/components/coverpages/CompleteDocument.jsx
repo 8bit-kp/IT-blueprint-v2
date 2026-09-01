@@ -394,6 +394,7 @@ const CompleteDocument = ({ companyName, preparedDate, formData }) => {
                         { label: "Cloud Infrastructure", key: "hasCloudInfra" },
                         { label: "Generator", key: "hasGenerator" },
                         { label: "UPS", key: "hasUPS" },
+                        { label: "Solar Power", key: "hasSolarPower" },
                     ].map((item, idx) => (
                         <View key={idx} style={styles.tableRow}>
                             <Text style={[styles.tableCell, { width: "50%" }]}>{item.label}</Text>

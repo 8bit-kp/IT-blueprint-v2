@@ -142,6 +142,19 @@ export default function BlueprintForm() {
         localStorage.setItem("blueprintFormStep", step.toString());
     }, [step]);
 
+    // Scroll to a specific section after arriving via a Summary "Edit" link.
+    // Set by blueprint-summary/page.js in sessionStorage.blueprintFormScrollTarget
+    // (a DOM id inside the target step) alongside localStorage.blueprintFormStep.
+    useEffect(() => {
+        if (typeof window === "undefined" || loadingData) return;
+        const targetId = sessionStorage.getItem("blueprintFormScrollTarget");
+        if (!targetId) return;
+        sessionStorage.removeItem("blueprintFormScrollTarget");
+        requestAnimationFrame(() => {
+            document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+    }, [step, loadingData]);
+
     // Initial Fetch
     useEffect(() => {
         if (typeof window === "undefined") return;

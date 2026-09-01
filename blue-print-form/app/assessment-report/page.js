@@ -237,6 +237,7 @@ const InfrastructureSection = ({ blueprint }) => {
                         <InfoTile label="Cloud Infrastructure" value={yn(bp.hasCloudInfra)} />
                         <InfoTile label="Generator" value={yn(bp.hasGenerator)} />
                         <InfoTile label="UPS" value={yn(bp.hasUPS)} />
+                        <InfoTile label="Solar Power" value={yn(bp.hasSolarPower)} />
                     </div>
                 </div>
 

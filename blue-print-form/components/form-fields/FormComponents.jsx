@@ -84,8 +84,8 @@ const CustomVendorModal = ({ existingVendors, onConfirm, onCancel }) => {
 };
 
 
-export const Card = ({ title, children, className = "" }) => (
-    <div className={`bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden ${className}`}>
+export const Card = ({ id, title, children, className = "" }) => (
+    <div id={id} className={`bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden ${className}`}>
         {title && (
             <div className="bg-gray-50/80 px-4 py-3 border-b border-gray-100 flex items-center gap-2">
                 <div className="w-1 h-4 bg-[#34808A] rounded-full"></div>
