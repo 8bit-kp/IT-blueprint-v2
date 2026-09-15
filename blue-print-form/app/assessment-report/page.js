@@ -541,7 +541,7 @@ const ApplicationSecuritySection = ({ report }) => {
 
                 {/* ── Application Breakdown Table ──────────────────────────────── */}
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                    <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#15587B] bg-[#15587B]/8 border border-[#15587B]/15 rounded-full px-3 py-1 mb-3">
                         Applications ({allApps.length}), highest risk first
                     </p>
                     <div className="overflow-x-auto border border-gray-100 rounded-xl">
