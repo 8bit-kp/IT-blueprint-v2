@@ -4,9 +4,10 @@
  * TopBar — the one page-header bar used on every authenticated page.
  * Rendered nested inside AppShell's content column, so it never needs to
  * know the sidebar's width itself — it just fills the column it's given.
- * Styled as a floating rounded card (same visual language as AppSidebar —
- * bg-white/95 backdrop-blur, rounded-3xl, shadow-xl, border, top-4 gap)
- * rather than a flush edge-to-edge bar.
+ * Styled as a flat, sharp-cornered panel (same visual language as
+ * AppSidebar — solid bg-white, border, shadow-sm, top-6/24px gap) so the
+ * sidebar, top bar, and page content read as one consistent grid rather
+ * than a stack of independently-floating rounded cards.
  *
  * Deliberately minimal: title + optional subtitle (usually the company
  * name), plus an optional small set of page-specific FUNCTIONAL actions
@@ -46,9 +47,13 @@ const ActionButton = ({ label, onClick, variant = "primary", Icon, loading, disa
 );
 
 const TopBar = ({ title, subtitle, actions = [] }) => (
-    <div className="sticky top-4 z-30 mx-4 md:mx-0 mb-6">
-        <div className="max-w-6xl mx-auto">
-            <div className="bg-white/95 backdrop-blur border border-gray-200 shadow-xl rounded-3xl px-6 py-3 flex items-center justify-between gap-4">
+    <div className="sticky top-8 z-30">
+        {/* px-6 here matches the px-6 every page's contentClassName applies inside
+            its own max-w-6xl mx-auto wrapper below — without it this box spans
+            edge-to-edge of the container while the content underneath is inset
+            24px on each side, so the two never line up. */}
+        <div className="max-w-6xl mx-auto px-6">
+            <div className="bg-white border border-gray-200 shadow-sm px-6 py-3 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                     <h1 className="text-sm font-bold text-[#15587B] leading-none truncate">{title}</h1>
                     {subtitle && <p className="text-xs text-gray-400 mt-0.5 truncate">{subtitle}</p>}

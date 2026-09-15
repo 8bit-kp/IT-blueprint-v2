@@ -7,13 +7,13 @@
  * content to fill the space.
  */
 const EmptyStateNotice = ({ Icon, title, description }) => (
-    <div className="border border-dashed border-gray-300 rounded-xl px-6 py-8 flex flex-col items-center text-center gap-3">
+    <div className="border border-dashed border-[#34808A]/30 bg-[#15587B]/[0.03] rounded-xl px-6 py-8 flex flex-col items-center text-center gap-3">
         {Icon && (
-            <div className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center">
-                <Icon size={18} className="text-gray-400" />
+            <div className="w-11 h-11 rounded-full bg-[#15587B]/8 flex items-center justify-center">
+                <Icon size={18} className="text-[#34808A]" />
             </div>
         )}
-        <p className="text-sm font-semibold text-gray-600">{title}</p>
+        <p className="text-sm font-semibold text-gray-700">{title}</p>
         {description && (
             <p className="text-xs text-gray-400 max-w-md leading-relaxed">{description}</p>
         )}

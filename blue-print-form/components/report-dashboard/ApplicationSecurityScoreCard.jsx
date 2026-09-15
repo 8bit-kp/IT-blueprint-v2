@@ -51,7 +51,7 @@ const ApplicationSecurityScoreCard = ({ report }) => {
         return (
             <EmptyStateNotice
                 Icon={FiLayers}
-                title="Application Security Score: Not yet assessed"
+                title="Application and data security: Not yet assessed"
                 description="Complete the Application Portfolio section (Step 7 of the Current State Assessment) to see this score."
             />
         );

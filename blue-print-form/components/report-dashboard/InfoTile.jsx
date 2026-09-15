@@ -7,11 +7,15 @@
  * visually stable regardless of how much the customer filled in.
  */
 const InfoTile = ({ label, value }) => {
-    const display = value === null || value === undefined || value === "" ? "—" : value;
+    const isEmpty = value === null || value === undefined || value === "";
+    const display = isEmpty ? "Not reported" : value;
     return (
-        <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+        <div className="group bg-white border border-gray-200 hover:border-[#34808A]/40 shadow-sm hover:shadow-md rounded-xl px-4 py-3 transition-all duration-200 relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#34808A]/0 group-hover:bg-[#34808A] transition-colors duration-200" />
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{label}</p>
-            <p className="text-sm font-semibold text-gray-700 leading-snug">{display}</p>
+            <p className={`text-sm leading-snug ${isEmpty ? "font-medium text-gray-400 italic" : "font-semibold text-gray-800"}`}>
+                {display}
+            </p>
         </div>
     );
 };

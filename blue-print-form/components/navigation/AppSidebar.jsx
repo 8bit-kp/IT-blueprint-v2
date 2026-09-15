@@ -110,8 +110,8 @@ const AppSidebar = ({
         <aside
             className={[
                 "hidden md:flex flex-col",
-                "fixed left-4 top-4 bottom-4 z-40",
-                "bg-white/95 backdrop-blur border border-gray-200 shadow-xl rounded-3xl",
+                "fixed left-8 top-8 bottom-8 z-40",
+                "bg-white border border-gray-200 shadow-sm",
                 "transition-all duration-300 ease-in-out",
                 expanded ? "w-60" : "w-16",
             ].join(" ")}

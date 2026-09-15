@@ -85,7 +85,14 @@ const AppShell = ({
                 sidebarFooter={sidebarFooter}
             />
 
-            <div className={[expanded ? "md:ml-72" : "md:ml-24", "transition-[margin] duration-300"].join(" ")}>
+            {/* 304px = 32px sidebar inset + 240px (w-60) sidebar width + 32px gap — not a
+                step on Tailwind's default spacing scale (which jumps 72 -> 80), so this
+                uses an explicit pixel value rather than a silently-no-op `ml-76`. */}
+            {/* flex + gap-8 (not TopBar's own margin) creates the space between the
+                top bar and the content below — gap is immune to margin-collapsing
+                edge cases around `position: sticky` elements that a plain mb-8
+                on TopBar itself was not reliably producing. */}
+            <div className={[expanded ? "md:ml-[304px]" : "md:ml-32", "flex flex-col gap-8", "transition-[margin] duration-300"].join(" ")}>
                 {title && <TopBar title={title} subtitle={subtitle} actions={actions} />}
                 <div className={contentClassName}>{children}</div>
             </div>
@@ -93,12 +100,14 @@ const AppShell = ({
             {bottomBar && (
                 <div
                     className={[
-                        "fixed bottom-4 left-4 right-4 z-30 transition-[left] duration-300",
-                        expanded ? "md:left-72" : "md:left-24",
+                        "fixed bottom-8 left-8 right-8 z-30 transition-[left] duration-300",
+                        expanded ? "md:left-[304px]" : "md:left-32",
                     ].join(" ")}
                 >
-                    <div className="max-w-6xl mx-auto">
-                        <div className="bg-white/95 backdrop-blur border border-gray-200 shadow-xl rounded-3xl overflow-hidden">
+                    {/* px-6 matches TopBar's own inset so the bottom bar's left/right edges
+                        line up exactly with the top bar and the page content between them. */}
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className="bg-white border border-gray-200 shadow-sm overflow-hidden">
                             {bottomBar}
                         </div>
                     </div>

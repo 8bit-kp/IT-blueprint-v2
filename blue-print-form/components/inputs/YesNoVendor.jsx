@@ -11,7 +11,7 @@ const YesNoVendor = ({ label, value, vendorValue, onChoice, onVendor }) => (
         <select
           value={vendorValue || ""}
           onChange={(e) => onVendor(e.target.value)}
-          className="border p-2 rounded"
+          className="border border-gray-300 bg-white text-gray-900 p-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A]"
         >
           <option value="">Select vendor</option>
           {vendors.map((v) => (

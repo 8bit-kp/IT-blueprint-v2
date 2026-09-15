@@ -121,8 +121,8 @@ const OverviewSection = ({ report, companyName, assessmentDate }) => (
     >
         <SecurityScoreCard report={report} />
 
-        <div className="mt-8 pt-8 border-t border-gray-100">
-            <h3 className="text-sm font-bold text-gray-800 mb-1">Application Security Score</h3>
+        <div className="mt-6 pt-6 border-t border-gray-100">
+            <h3 className="text-sm font-bold text-gray-800 mb-1">Application and data security</h3>
             <p className="text-xs text-gray-400 mb-5 max-w-xl leading-relaxed">
                 An independent companion score scoped to the Application Portfolio (Step 7), calculated from its own
                 fixed methodology. Related to, but never merged into, the Security Score above.
@@ -417,7 +417,7 @@ const ApplicationSecuritySection = ({ report }) => {
             >
                 <EmptyStateNotice
                     Icon={FiLayers}
-                    title="Application Security Score: Not yet assessed"
+                    title="Application and data security: Not yet assessed"
                     description="Complete the Application Portfolio section (Step 7 of the Current State Assessment) to see this score."
                 />
             </SectionCard>
@@ -445,7 +445,7 @@ const ApplicationSecuritySection = ({ report }) => {
             id="application-security"
             eyebrow="Application Portfolio"
             title="Application Security"
-            description="A deeper look at the Application Security Score: what's driving it, which sections and applications carry the most risk, and what fixing the top issues would do to the score."
+            description="A deeper look at application and data security: what's driving it, which sections and applications carry the most risk, and what fixing the top issues would do to the score."
             Icon={FiLayers}
         >
             <div className="space-y-6">
@@ -486,7 +486,7 @@ const ApplicationSecuritySection = ({ report }) => {
                                     <span>
                                         {HYPOTHETICAL_VERB_PHRASE[h.factor] || "Fixing this factor"} on the{" "}
                                         {h.affectedApplicationCount} flagged application{h.affectedApplicationCount === 1 ? "" : "s"} would
-                                        raise the Application Security Score to approximately{" "}
+                                        raise the application and data security score to approximately{" "}
                                         <strong className="text-gray-800">{h.hypotheticalScore}</strong> (currently {h.currentScore}).
                                     </span>
                                 </li>

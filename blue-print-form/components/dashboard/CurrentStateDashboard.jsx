@@ -155,13 +155,13 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                         value={app.name || ""}
                         onChange={(e) => updateAppField(category, index, "name", e.target.value)}
                         placeholder="Application name..."
-                        className="px-3 py-3 text-xs text-gray-800 font-medium placeholder-gray-400 border-r border-gray-200 focus:outline-none focus:bg-blue-50 min-w-0"
+                        className="px-3 py-3 text-xs text-gray-800 font-medium placeholder-gray-400 border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] focus:bg-blue-50 min-w-0"
                     />
                     {/* Business Priority */}
                     <select
                         value={app.businessPriority || "Low"}
                         onChange={(e) => updateAppField(category, index, "businessPriority", e.target.value)}
-                        className={`px-1 py-3 text-xs border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessPriority)}`}
+                        className={`px-1 py-3 text-xs border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-semibold ${getPriorityChipClass(app.businessPriority)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -172,7 +172,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.offering || "SaaS"}
                         onChange={(e) => updateAppField(category, index, "offering", e.target.value)}
-                        className="px-1 py-3 text-xs text-gray-700 border-r border-gray-200 focus:outline-none font-medium"
+                        className="px-1 py-3 text-xs text-gray-700 border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-medium"
                     >
                         <option value="SaaS">SaaS</option>
                         <option value="On-premise">On-prem</option>
@@ -222,7 +222,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.sensitivity || "Low"}
                         onChange={(e) => updateAppField(category, index, "sensitivity", e.target.value)}
-                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.sensitivity)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-semibold ${getPriorityChipClass(app.sensitivity)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -234,7 +234,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.businessSensitivity || "Low"}
                         onChange={(e) => updateAppField(category, index, "businessSensitivity", e.target.value)}
-                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessSensitivity)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-semibold ${getPriorityChipClass(app.businessSensitivity)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -246,7 +246,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.businessConfidentiality || "Low"}
                         onChange={(e) => updateAppField(category, index, "businessConfidentiality", e.target.value)}
-                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.businessConfidentiality)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-semibold ${getPriorityChipClass(app.businessConfidentiality)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -258,7 +258,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.personallyIdentifiableInfo || "Low"}
                         onChange={(e) => updateAppField(category, index, "personallyIdentifiableInfo", e.target.value)}
-                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.personallyIdentifiableInfo)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-semibold ${getPriorityChipClass(app.personallyIdentifiableInfo)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -270,7 +270,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                     <select
                         value={app.hipaaRegulated || "Low"}
                         onChange={(e) => updateAppField(category, index, "hipaaRegulated", e.target.value)}
-                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(app.hipaaRegulated)}`}
+                        className={`px-1 py-3 text-[10px] border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-semibold ${getPriorityChipClass(app.hipaaRegulated)}`}
                     >
                         <option value="Low">Low</option>
                         <option value="Medium">Med</option>
@@ -302,7 +302,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 <select
                     value={value.vendor || ""}
                     onChange={(e) => updateTechnicalControl(control.key, "vendor", e.target.value)}
-                    className="col-span-3 px-4 py-3 text-sm text-gray-800 border-r border-gray-200 focus:outline-none focus:bg-blue-50"
+                    className="col-span-3 px-4 py-3 text-sm text-gray-800 border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] focus:bg-blue-50"
                 >
                     <option value="">Select Provider...</option>
                     {getVendors(control.key).map((v) => (
@@ -312,7 +312,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 <select
                     value={value.businessPriority || "Medium"}
                     onChange={(e) => updateTechnicalControl(control.key, "businessPriority", e.target.value)}
-                    className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(value.businessPriority)}`}
+                    className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-semibold ${getPriorityChipClass(value.businessPriority)}`}
                 >
                     <option value="Critical">Critical</option>
                     <option value="High">High</option>
@@ -322,7 +322,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 <select
                     value={value.offering || "SaaS"}
                     onChange={(e) => updateTechnicalControl(control.key, "offering", e.target.value)}
-                    className="col-span-4 px-3 py-3 text-sm text-gray-700 focus:outline-none focus:bg-blue-50 font-medium"
+                    className="col-span-4 px-3 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] focus:bg-blue-50 font-medium"
                 >
                     <option value="SaaS">SaaS</option>
                     <option value="On-premise">On-premise</option>
@@ -341,7 +341,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 <select
                     value={value.vendor || ""}
                     onChange={(e) => updateInfraField(item.key, "vendor", e.target.value)}
-                    className="col-span-3 px-4 py-3 text-sm text-gray-800 border-r border-gray-200 focus:outline-none focus:bg-blue-50"
+                    className="col-span-3 px-4 py-3 text-sm text-gray-800 border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] focus:bg-blue-50"
                 >
                     <option value="">Select Provider...</option>
                     {getVendors(item.key).map((v) => (
@@ -351,7 +351,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 <select
                     value={value.businessPriority || "Medium"}
                     onChange={(e) => updateInfraField(item.key, "businessPriority", e.target.value)}
-                    className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none font-semibold ${getPriorityChipClass(value.businessPriority)}`}
+                    className={`col-span-2 px-3 py-3 text-sm border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] font-semibold ${getPriorityChipClass(value.businessPriority)}`}
                 >
                     <option value="Critical">Critical</option>
                     <option value="High">High</option>
@@ -361,7 +361,7 @@ const CurrentStateDashboard = ({ formData, updateField }) => {
                 <select
                     value={value.offering || "SaaS"}
                     onChange={(e) => updateInfraField(item.key, "offering", e.target.value)}
-                    className="col-span-4 px-3 py-3 text-sm text-gray-700 focus:outline-none focus:bg-blue-50 font-medium"
+                    className="col-span-4 px-3 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#34808A] focus:bg-blue-50 font-medium"
                 >
                     <option value="SaaS">SaaS</option>
                     <option value="On-premise">On-premise</option>
