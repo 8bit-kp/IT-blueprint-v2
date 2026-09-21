@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* Scoped design tokens for the /blueprint-summary UI redesign prototype.
+   Everything inside is namespaced under `.nui` and affects no existing page.
+   See docs/ui-redesign.md — remove this one line to revert the experiment. */
+@import "../styles/new-ui/tokens.css";
 
 :root {
   --background: #ffffff;

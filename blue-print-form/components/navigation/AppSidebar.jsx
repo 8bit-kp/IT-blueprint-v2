@@ -109,19 +109,20 @@ const AppSidebar = ({
     return (
         <aside
             className={[
+                "nui",
                 "hidden md:flex flex-col",
                 "fixed left-8 top-8 bottom-8 z-40",
-                "bg-white border border-gray-200 shadow-sm",
+                "bg-[var(--nui-surface)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-2)] rounded-[var(--nui-r-lg)] overflow-hidden",
                 "transition-all duration-300 ease-in-out",
                 expanded ? "w-60" : "w-16",
             ].join(" ")}
         >
             {/* ── Brand + collapse toggle ──────────────────────────────────── */}
-            <div className={`flex items-center ${expanded ? "justify-between px-4" : "justify-center"} py-4 border-b border-gray-100 flex-shrink-0`}>
+            <div className={`flex items-center ${expanded ? "justify-between px-4" : "justify-center"} py-4 border-b border-[var(--nui-line-soft)] flex-shrink-0`}>
                 {expanded ? (
                     <img src="/conslteklogo.png" alt="Consltek" className="h-6 w-auto object-contain" />
                 ) : (
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#15587B] to-[#34808A] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="w-8 h-8 rounded-[var(--nui-r-sm)] bg-[var(--nui-brand)] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                         C
                     </div>
                 )}
@@ -131,8 +132,8 @@ const AppSidebar = ({
                     title={expanded ? "Collapse sidebar" : "Expand sidebar"}
                     aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
                     className={[
-                        "w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-[#15587B] hover:bg-gray-100 transition-colors flex-shrink-0",
-                        expanded ? "" : "absolute -right-2 top-3 bg-white border border-gray-200 shadow-sm",
+                        "w-7 h-7 flex items-center justify-center rounded-full text-[var(--nui-text-3)] hover:text-[var(--nui-brand)] hover:bg-[var(--nui-surface-sunk)] transition-colors flex-shrink-0 focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1",
+                        expanded ? "" : "absolute -right-2 top-3 bg-[var(--nui-surface)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-1)]",
                     ].join(" ")}
                 >
                     {expanded ? <FiChevronLeft size={14} /> : <FiChevronRight size={12} />}
@@ -151,15 +152,16 @@ const AppSidebar = ({
                             title={expanded ? undefined : label}
                             aria-current={isActive ? "page" : undefined}
                             className={[
-                                "flex items-center gap-3 w-full rounded-xl px-2 py-2.5 text-left transition-all duration-150",
+                                "flex items-center gap-3 w-full rounded-[var(--nui-r-sm)] px-2 py-2.5 text-left transition-all duration-150",
+                                "focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1",
                                 isActive
-                                    ? "bg-[#15587B]/8 text-[#15587B]"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-[#15587B]",
+                                    ? "bg-[var(--nui-accent-tint)] text-[var(--nui-brand)]"
+                                    : "text-[var(--nui-text-3)] hover:bg-[var(--nui-surface-sunk)] hover:text-[var(--nui-brand)]",
                             ].join(" ")}
                         >
-                            <span className={["flex-shrink-0 w-1 rounded-full transition-all duration-200", isActive ? "h-6 bg-[#34808A]" : "h-4 bg-transparent"].join(" ")} />
-                            <Icon size={15} className={`flex-shrink-0 transition-colors ${isActive ? "text-[#15587B]" : "text-gray-400"}`} />
-                            {expanded && <span className={`text-xs font-semibold truncate ${isActive ? "text-[#15587B]" : ""}`}>{label}</span>}
+                            <span className={["flex-shrink-0 w-1 rounded-full transition-all duration-200", isActive ? "h-6 bg-[var(--nui-accent)]" : "h-4 bg-transparent"].join(" ")} />
+                            <Icon size={15} className={`flex-shrink-0 transition-colors ${isActive ? "text-[var(--nui-brand)]" : "text-[var(--nui-text-3)]"}`} />
+                            {expanded && <span className={`text-xs font-semibold truncate ${isActive ? "text-[var(--nui-brand)]" : ""}`}>{label}</span>}
                         </button>
                     );
                 })}
@@ -168,9 +170,9 @@ const AppSidebar = ({
             {/* ── Contextual "This Page" navigation (per-page, optional) ───── */}
             {sections.length > 0 && (
                 <>
-                    <div className="border-t border-gray-100 mx-3" />
+                    <div className="border-t border-[var(--nui-line-soft)] mx-3" />
                     <div className={`flex items-center ${expanded ? "px-4" : "justify-center"} pt-3 pb-1 flex-shrink-0`}>
-                        {expanded && <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">This Page</span>}
+                        {expanded && <span className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)]">This Page</span>}
                     </div>
                     <nav className="flex-1 overflow-y-auto py-1 px-2 space-y-0.5" aria-label="Page sections">
                         {sections.map(({ id, label, Icon, state }) => {
@@ -184,17 +186,18 @@ const AppSidebar = ({
                                     title={expanded ? undefined : label}
                                     aria-current={isActive ? "true" : undefined}
                                     className={[
-                                        "flex items-center gap-3 w-full rounded-xl px-2 py-2.5 text-left transition-all duration-150",
+                                        "flex items-center gap-3 w-full rounded-[var(--nui-r-sm)] px-2 py-2.5 text-left transition-all duration-150",
+                                        "focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1",
                                         isActive
-                                            ? "bg-[#15587B]/8 text-[#15587B]"
-                                            : "text-gray-500 hover:bg-gray-50 hover:text-[#15587B]",
+                                            ? "bg-[var(--nui-accent-tint)] text-[var(--nui-brand)]"
+                                            : "text-[var(--nui-text-3)] hover:bg-[var(--nui-surface-sunk)] hover:text-[var(--nui-brand)]",
                                     ].join(" ")}
                                 >
-                                    <span className={["flex-shrink-0 w-1 rounded-full transition-all duration-200", isActive ? "h-6 bg-[#34808A]" : "h-4 bg-transparent"].join(" ")} />
+                                    <span className={["flex-shrink-0 w-1 rounded-full transition-all duration-200", isActive ? "h-6 bg-[var(--nui-accent)]" : "h-4 bg-transparent"].join(" ")} />
                                     <span
                                         className={[
                                             "flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all",
-                                            isDone ? "bg-[#34808A] text-white" : isActive ? "bg-[#15587B] text-white" : "bg-gray-100 text-gray-400",
+                                            isDone ? "bg-[var(--nui-accent)] text-white" : isActive ? "bg-[var(--nui-brand)] text-white" : "bg-[var(--nui-surface-sunk)] text-[var(--nui-text-3)]",
                                         ].join(" ")}
                                     >
                                         {isDone ? <FiCheck size={11} strokeWidth={3} /> : Icon ? <Icon size={12} /> : null}
@@ -204,7 +207,7 @@ const AppSidebar = ({
                             );
                         })}
                     </nav>
-                    {expanded && sidebarFooter && <div className="px-4 py-3 border-t border-gray-100 flex-shrink-0">{sidebarFooter}</div>}
+                    {expanded && sidebarFooter && <div className="px-4 py-3 border-t border-[var(--nui-line-soft)] flex-shrink-0">{sidebarFooter}</div>}
                 </>
             )}
 
@@ -217,35 +220,36 @@ const AppSidebar = ({
                 brand-new account that hasn't completed Step 1). Clicking the
                 identity block opens /profile — the user's account +
                 assessment-progress page. */}
-            <div className="flex-shrink-0 border-t border-gray-100 p-3">
+            <div className="flex-shrink-0 border-t border-[var(--nui-line-soft)] p-3">
                 {(username || companyName) && (
                     <button
                         type="button"
                         onClick={() => router.push("/profile")}
                         title="View your profile"
                         className={[
-                            "flex items-center gap-2.5 py-1 mb-2 w-full rounded-lg text-left hover:bg-gray-50 transition-colors",
+                            "flex items-center gap-2.5 py-1 mb-2 w-full rounded-[var(--nui-r-sm)] text-left hover:bg-[var(--nui-surface-sunk)] transition-colors",
+                            "focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1",
                             expanded ? "px-1" : "justify-center",
                         ].join(" ")}
                     >
-                        <div className="w-9 h-9 rounded-full bg-[#15587B] text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-[var(--nui-brand)] text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
                             {(companyName || username)?.[0]?.toUpperCase() || <FiUser size={14} />}
                         </div>
                         {expanded && (
                             <div className="min-w-0">
                                 {companyName ? (
                                     <>
-                                        <p className="truncate text-sm font-bold text-gray-800">
+                                        <p className="truncate text-sm font-bold text-[var(--nui-text)]">
                                             {companyName}
                                         </p>
                                         {username && (
-                                            <p className="truncate text-[10px] text-gray-400">
+                                            <p className="truncate text-[10px] text-[var(--nui-text-3)]">
                                                 @{username}
                                             </p>
                                         )}
                                     </>
                                 ) : (
-                                    <p className="truncate text-sm font-bold text-gray-800">
+                                    <p className="truncate text-sm font-bold text-[var(--nui-text)]">
                                         @{username}
                                     </p>
                                 )}
@@ -257,7 +261,7 @@ const AppSidebar = ({
                     type="button"
                     onClick={handleLogout}
                     title={expanded ? undefined : "Logout"}
-                    className="flex items-center gap-3 w-full rounded-xl px-2 py-2.5 text-left text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    className="flex items-center gap-3 w-full rounded-[var(--nui-r-sm)] px-2 py-2.5 text-left text-[var(--nui-text-3)] hover:bg-[var(--nui-risk-bg)] hover:text-[var(--nui-risk)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1"
                 >
                     <FiLogOut size={15} className="flex-shrink-0 ml-1" />
                     {expanded && <span className="text-xs font-semibold">Logout</span>}

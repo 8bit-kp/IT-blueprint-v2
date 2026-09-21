@@ -17,6 +17,7 @@ import ApplicationDonutGrid from "@/components/dashboard-visuals/ApplicationDonu
 import AdvisorHandoffBanner from "@/components/engagement/AdvisorHandoffBanner";
 import StatusCard from "@/components/engagement/StatusCard";
 import AppShell from "@/components/navigation/AppShell";
+import { NuiCanvas, NuiReveal, NuiHero, NuiSection } from "@/components/ui/new";
 
 const REPORT_SECTIONS = [
     { id: "security-visuals", label: "Security Visuals", Icon: FiBarChart2 },
@@ -101,8 +102,10 @@ const BlueprintCard = ({
     const iconTxt = accentColor?.text   || "#15587B";
 
     return (
-        <div className="group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">
-            {/* Accent top bar — unique per card */}
+        <div className="group bg-[var(--nui-surface)] rounded-[var(--nui-r)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-1)] hover:shadow-[var(--nui-shadow-3)] hover:-translate-y-0.5 transition-all duration-[var(--nui-dur)] overflow-hidden flex flex-col">
+            {/* Accent top bar — unique per document type, intentionally not a
+                brand-teal token (see docs/ui-redesign.md — fixed per-type colour
+                coding, same rule as score-zone palettes). */}
             <div
                 className="h-1 w-full"
                 style={{ background: `linear-gradient(to right, ${bar}, ${barTo})` }}
@@ -114,14 +117,14 @@ const BlueprintCard = ({
                     <div className="flex items-center gap-3.5">
                         {/* Icon badge */}
                         <div
-                            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                            className="flex-shrink-0 w-10 h-10 rounded-[var(--nui-r-sm)] flex items-center justify-center shadow-[var(--nui-shadow-1)]"
                             style={{ backgroundColor: iconBg, color: iconTxt }}
                         >
                             {icon}
                         </div>
                         <div>
-                            <h3 className="text-sm font-semibold text-gray-800 leading-tight">{title}</h3>
-                            <p className="text-xs text-gray-400 mt-0.5 leading-snug">{description}</p>
+                            <h3 className="text-sm font-semibold text-[var(--nui-text)] leading-tight">{title}</h3>
+                            <p className="text-xs text-[var(--nui-text-3)] mt-0.5 leading-snug">{description}</p>
                         </div>
                     </div>
                     {tag && (
@@ -135,7 +138,7 @@ const BlueprintCard = ({
                 </div>
 
                 {/* Divider + status */}
-                <div className="border-t border-gray-100 pt-3 mb-3 flex items-center justify-between">
+                <div className="border-t border-[var(--nui-line-soft)] pt-3 mb-3 flex items-center justify-between">
                     <StatusCard
                         status={reportStatus}
                         label={
@@ -153,14 +156,14 @@ const BlueprintCard = ({
                         {/* View Dashboard */}
                         <button
                             onClick={() => window.open(`/blueprint-dashboard?type=${fileName}`, "_blank")}
-                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-lg transition-all duration-150"
+                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-[var(--nui-r-sm)] transition-all duration-150"
                             style={{
                                 color: bar,
-                                backgroundColor: "#f9fafb",
-                                borderColor: "#e5e7eb",
+                                backgroundColor: "var(--nui-surface-sunk)",
+                                borderColor: "var(--nui-line)",
                             }}
                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = iconBg; e.currentTarget.style.borderColor = bar + "55"; }}
-                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "#f9fafb"; e.currentTarget.style.borderColor = "#e5e7eb"; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "var(--nui-surface-sunk)"; e.currentTarget.style.borderColor = "var(--nui-line)"; }}
                         >
                             <IconDashboard />
                             View Dashboard
@@ -171,7 +174,7 @@ const BlueprintCard = ({
                             <PDFDownloadLink
                                 document={documentComponent}
                                 fileName={`${downloadName || fileName}-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white rounded-lg transition-all duration-150 shadow-sm"
+                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white rounded-[var(--nui-r-sm)] transition-all duration-150 shadow-[var(--nui-shadow-1)]"
                                 style={{ backgroundColor: bar }}
                                 onMouseEnter={e => { e.currentTarget.style.opacity = "0.88"; }}
                                 onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
@@ -237,19 +240,26 @@ const AllBlueprintsPage = () => {
 
     // ── Loading state ──────────────────────────────────────────────────────
     if (loading) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-3">
-            <div className="w-8 h-8 border-2 border-[#34808A] border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-gray-400 font-medium">Loading your report…</p>
+        <div className="nui relative min-h-screen">
+            <div aria-hidden="true" className="nui-bg pointer-events-none fixed inset-0" />
+            <div role="status" aria-live="polite" className="relative flex min-h-screen flex-col items-center justify-center px-6">
+                <span aria-hidden="true" className="mb-5 inline-block h-9 w-9 animate-spin rounded-full border-2 border-[var(--nui-line-strong)] border-t-[var(--nui-brand)]" />
+                <p className="nui-display text-[15px] font-semibold text-[var(--nui-text)]">Loading your report</p>
+                <p className="mt-1 text-[13px] text-[var(--nui-text-3)]">Assembling your Current State Report…</p>
+            </div>
         </div>
     );
 
     if (error || !formData) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-3">
-            <p className="text-sm font-semibold text-gray-600">No assessment data found.</p>
-            <button onClick={() => router.push("/blueprint-form")}
-                className="text-xs text-[#34808A] underline underline-offset-2">
-                Return to Assessment
-            </button>
+        <div className="nui relative min-h-screen">
+            <div aria-hidden="true" className="nui-bg pointer-events-none fixed inset-0" />
+            <div className="relative flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center">
+                <p className="text-sm font-semibold text-[var(--nui-text)]">No assessment data found.</p>
+                <button onClick={() => router.push("/blueprint-form")}
+                    className="text-xs text-[var(--nui-accent)] underline underline-offset-2 hover:text-[var(--nui-brand)]">
+                    Return to Assessment
+                </button>
+            </div>
         </div>
     );
 
@@ -309,211 +319,234 @@ const AllBlueprintsPage = () => {
 
     return (
         <AppShell
-            title="Current State Report"
-            subtitle={formData.companyName}
             sections={REPORT_SECTIONS}
-            contentClassName="max-w-6xl mx-auto px-6 pb-8 space-y-8"
+            contentClassName="px-4 pt-8 pb-24 sm:px-6 lg:px-8"
         >
-                {/* ── SECURITY VISUALS SECTION ─────────────────────────── */}
-                <div id="security-visuals" className="scroll-mt-24 bg-white rounded-xl border border-gray-200 overflow-hidden">
-                    {/* Collapsible header */}
-                    <button
-                        onClick={() => setVisualsCollapsed(v => !v)}
-                        className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors duration-150"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-[#15587B] to-[#34808A] flex items-center justify-center flex-shrink-0">
-                                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                        d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                        d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p className="text-sm font-semibold text-gray-800">Security Data Visualisation</p>
-                                <p className="text-xs text-gray-400 mt-0.5">
-                                    Live status of all security controls · Green = Yes · Red = No · Grey = Not configured
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                            {/* Legend pills — visible when collapsed */}
-                            {visualsCollapsed && (
-                                <div className="hidden sm:flex items-center gap-2">
-                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                                        <span className="w-2 h-2 rounded-full bg-green-400 inline-block" /> Yes
-                                    </span>
-                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                                        <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> No
-                                    </span>
-                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                                        <span className="w-2 h-2 rounded-full bg-gray-300 inline-block" /> N/A
+            <NuiCanvas>
+                <div className="mx-auto max-w-[1180px] space-y-14">
+
+                    {/* ── Hero ──────────────────────────────────────────── */}
+                    <NuiReveal>
+                        <NuiHero
+                            eyebrow="IT Blueprint · Current State Report"
+                            title={formData.companyName || "Current State Report"}
+                            context="Every report section generated from your Current State Assessment, ready to view as a live dashboard or download as a branded PDF."
+                        />
+                    </NuiReveal>
+
+                    {/* ── SECURITY VISUALS SECTION ─────────────────────────── */}
+                    <NuiReveal>
+                        <div id="security-visuals" className="scroll-mt-24 bg-[var(--nui-surface)] rounded-[var(--nui-r)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-1)] overflow-hidden">
+                            {/* Collapsible header */}
+                            <button
+                                onClick={() => setVisualsCollapsed(v => !v)}
+                                aria-expanded={!visualsCollapsed}
+                                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[var(--nui-surface-sunk)] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:-outline-offset-2"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-7 h-7 rounded-[var(--nui-r-xs)] bg-[var(--nui-brand)] flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-[var(--nui-text)]">Security Data Visualisation</p>
+                                        <p className="text-xs text-[var(--nui-text-3)] mt-0.5">
+                                            Live status of all security controls · Green = Yes · Red = No · Grey = Not configured
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 flex-shrink-0">
+                                    {/* Legend pills — visible when collapsed */}
+                                    {visualsCollapsed && (
+                                        <div className="hidden sm:flex items-center gap-2">
+                                            <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--nui-text-3)]">
+                                                <span className="w-2 h-2 rounded-full bg-[var(--nui-ok)] inline-block" /> Yes
+                                            </span>
+                                            <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--nui-text-3)]">
+                                                <span className="w-2 h-2 rounded-full bg-[var(--nui-risk)] inline-block" /> No
+                                            </span>
+                                            <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--nui-text-3)]">
+                                                <span className="w-2 h-2 rounded-full bg-[var(--nui-idle)] inline-block" /> N/A
+                                            </span>
+                                        </div>
+                                    )}
+                                    <span className="text-[var(--nui-text-3)]">
+                                        <IconChevron collapsed={visualsCollapsed} />
                                     </span>
                                 </div>
-                            )}
-                            <span className="text-gray-400">
-                                <IconChevron collapsed={visualsCollapsed} />
-                            </span>
-                        </div>
-                    </button>
+                            </button>
 
-                    {/* Content */}
-                    {!visualsCollapsed && (
-                        <>
-                            <div className="h-px bg-gray-100" />
-                            {/* Legend bar */}
-                            <div className="px-6 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-5 text-[11px] font-medium text-gray-500">
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
-                                    Yes — Implemented
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
-                                    No — Not Implemented
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
-                                    Not Configured
-                                </span>
-                            </div>
-                            <div className="px-6 py-6">
-                                <SecurityDonutGrid formData={formData} />
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* ── APPLICATION VISUALS SECTION ──────────────────────── */}
-                <div id="application-visuals" className="scroll-mt-24 bg-white rounded-xl border border-gray-200 overflow-hidden">
-                    {/* Collapsible header */}
-                    <button
-                        onClick={() => setAppsCollapsed(v => !v)}
-                        className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors duration-150"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-[#15587B] to-[#34808A] flex items-center justify-center flex-shrink-0">
-                                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                        d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p className="text-sm font-semibold text-gray-800">Application Data Visualisation</p>
-                                <p className="text-xs text-gray-400 mt-0.5">
-                                    All application portfolios · colour = business priority · Red = Critical · Orange = High · Blue = Medium
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                            {/* Legend pills — visible when collapsed */}
-                            {appsCollapsed && (
-                                <div className="hidden sm:flex items-center gap-2">
-                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                                        <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Critical
-                                    </span>
-                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                                        <span className="w-2 h-2 rounded-full bg-orange-400 inline-block" /> High
-                                    </span>
-                                    <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                                        <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" /> Medium
-                                    </span>
-                                </div>
-                            )}
-                            <span className="text-gray-400">
-                                <IconChevron collapsed={appsCollapsed} />
-                            </span>
-                        </div>
-                    </button>
-
-                    {/* Content */}
-                    {!appsCollapsed && (
-                        <>
-                            <div className="h-px bg-gray-100" />
-                            {/* Legend bar */}
-                            <div className="px-6 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-5 text-[11px] font-medium text-gray-500">
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
-                                    Critical
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block" />
-                                    High
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" />
-                                    Medium
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" />
-                                    Low
-                                </span>
-                            </div>
-                            <div className="px-6 py-6">
-                                <ApplicationDonutGrid formData={formData} />
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* ── ADVISOR HANDOFF BANNER ───────────────────────────── */}
-                <AdvisorHandoffBanner
-                    title="Your Current State Report has been generated"
-                    description="The sections below are your Current State Report — an automated inventory of your IT environment as documented in your assessment. A Consltek advisor will review this report and reach out to schedule a consultation. The full Assessment with Remediation Plan — including gap analysis, risk assessment, and prioritised remediation — is developed during that engagement."
-                />
-
-                {/* ── SECTION LABEL ─────────────────────────────────────── */}
-                <div id="report-sections" className="scroll-mt-24">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
-                        Report Sections
-                    </p>
-
-                    {/* ── CARDS GRID ─────────────────────────────────────── */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                        {blueprints.map((bp, idx) => (
-                            <BlueprintCard
-                                key={idx}
-                                title={bp.title}
-                                description={bp.description}
-                                tag={bp.tag}
-                                icon={bp.icon}
-                                documentComponent={bp.documentComponent}
-                                formData={formData}
-                                fileName={bp.fileName}
-                                downloadName={bp.downloadName}
-                                accentColor={bp.accentColor}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                {/* ── DOWNLOAD ALL ──────────────────────────────────────── */}
-                <div id="download-all" className="scroll-mt-24 border-t border-gray-200 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div>
-                        <p className="text-sm font-semibold text-gray-700">Complete Current State Report</p>
-                        <p className="text-xs text-gray-400 mt-0.5">All report sections compiled into a single PDF file</p>
-                    </div>
-                    {isClient && (
-                        <PDFDownloadLink
-                            document={
-                                <CompleteDocument
-                                    companyName={formData.companyName || "—"}
-                                    preparedDate={new Date()}
-                                    formData={formData}
-                                />
-                            }
-                            fileName={`Complete-Current-State-Report-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
-                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-lg shadow-sm transition-all duration-150 whitespace-nowrap"
-                        >
-                            {({ loading }) => (
+                            {/* Content */}
+                            {!visualsCollapsed && (
                                 <>
-                                    <IconDownload />
-                                    <span>{loading ? "Preparing…" : "Download Complete File"}</span>
+                                    <div className="h-px bg-[var(--nui-line-soft)]" />
+                                    {/* Legend bar */}
+                                    <div className="px-6 py-2.5 bg-[var(--nui-surface-sunk)] border-b border-[var(--nui-line-soft)] flex items-center gap-5 text-[11px] font-medium text-[var(--nui-text-2)]">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--nui-ok)] inline-block" />
+                                            Yes — Implemented
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--nui-risk)] inline-block" />
+                                            No — Not Implemented
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--nui-idle)] inline-block" />
+                                            Not Configured
+                                        </span>
+                                    </div>
+                                    <div className="px-6 py-6">
+                                        <SecurityDonutGrid formData={formData} />
+                                    </div>
                                 </>
                             )}
-                        </PDFDownloadLink>
-                    )}
+                        </div>
+                    </NuiReveal>
+
+                    {/* ── APPLICATION VISUALS SECTION ──────────────────────── */}
+                    <NuiReveal delay={60}>
+                        <div id="application-visuals" className="scroll-mt-24 bg-[var(--nui-surface)] rounded-[var(--nui-r)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-1)] overflow-hidden">
+                            {/* Collapsible header */}
+                            <button
+                                onClick={() => setAppsCollapsed(v => !v)}
+                                aria-expanded={!appsCollapsed}
+                                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[var(--nui-surface-sunk)] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:-outline-offset-2"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-7 h-7 rounded-[var(--nui-r-xs)] bg-[var(--nui-brand)] flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-[var(--nui-text)]">Application Data Visualisation</p>
+                                        <p className="text-xs text-[var(--nui-text-3)] mt-0.5">
+                                            All application portfolios · colour = business priority · Red = Critical · Orange = High · Blue = Medium
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 flex-shrink-0">
+                                    {/* Legend pills — visible when collapsed */}
+                                    {appsCollapsed && (
+                                        <div className="hidden sm:flex items-center gap-2">
+                                            <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--nui-text-3)]">
+                                                <span className="w-2 h-2 rounded-full bg-[var(--nui-risk)] inline-block" /> Critical
+                                            </span>
+                                            <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--nui-text-3)]">
+                                                <span className="w-2 h-2 rounded-full bg-[var(--nui-warn)] inline-block" /> High
+                                            </span>
+                                            <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--nui-text-3)]">
+                                                <span className="w-2 h-2 rounded-full bg-[var(--nui-info)] inline-block" /> Medium
+                                            </span>
+                                        </div>
+                                    )}
+                                    <span className="text-[var(--nui-text-3)]">
+                                        <IconChevron collapsed={appsCollapsed} />
+                                    </span>
+                                </div>
+                            </button>
+
+                            {/* Content */}
+                            {!appsCollapsed && (
+                                <>
+                                    <div className="h-px bg-[var(--nui-line-soft)]" />
+                                    {/* Legend bar */}
+                                    <div className="px-6 py-2.5 bg-[var(--nui-surface-sunk)] border-b border-[var(--nui-line-soft)] flex items-center gap-5 text-[11px] font-medium text-[var(--nui-text-2)]">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--nui-risk)] inline-block" />
+                                            Critical
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--nui-warn)] inline-block" />
+                                            High
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--nui-info)] inline-block" />
+                                            Medium
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--nui-idle)] inline-block" />
+                                            Low
+                                        </span>
+                                    </div>
+                                    <div className="px-6 py-6">
+                                        <ApplicationDonutGrid formData={formData} />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </NuiReveal>
+
+                    {/* ── ADVISOR HANDOFF BANNER ───────────────────────────── */}
+                    <NuiReveal delay={90}>
+                        <AdvisorHandoffBanner
+                            title="Your Current State Report has been generated"
+                            description="The sections below are your Current State Report — an automated inventory of your IT environment as documented in your assessment. A Consltek advisor will review this report and reach out to schedule a consultation. The full Assessment with Remediation Plan — including gap analysis, risk assessment, and prioritised remediation — is developed during that engagement."
+                        />
+                    </NuiReveal>
+
+                    {/* ── REPORT SECTIONS ───────────────────────────────────── */}
+                    <NuiSection
+                        id="report-sections"
+                        index="01"
+                        title="Report Sections"
+                        description="Each section below is its own focused PDF — view it as a live dashboard first, or download it directly."
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                            {blueprints.map((bp, idx) => (
+                                <NuiReveal key={idx} delay={Math.min(idx, 3) * 60}>
+                                    <BlueprintCard
+                                        title={bp.title}
+                                        description={bp.description}
+                                        tag={bp.tag}
+                                        icon={bp.icon}
+                                        documentComponent={bp.documentComponent}
+                                        formData={formData}
+                                        fileName={bp.fileName}
+                                        downloadName={bp.downloadName}
+                                        accentColor={bp.accentColor}
+                                    />
+                                </NuiReveal>
+                            ))}
+                        </div>
+                    </NuiSection>
+
+                    {/* ── DOWNLOAD ALL ──────────────────────────────────────── */}
+                    <NuiReveal>
+                        <div id="download-all" className="scroll-mt-24 border-t border-[var(--nui-line)] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div>
+                                <p className="text-sm font-semibold text-[var(--nui-text-2)]">Complete Current State Report</p>
+                                <p className="text-xs text-[var(--nui-text-3)] mt-0.5">All report sections compiled into a single PDF file</p>
+                            </div>
+                            {isClient && (
+                                <PDFDownloadLink
+                                    document={
+                                        <CompleteDocument
+                                            companyName={formData.companyName || "—"}
+                                            preparedDate={new Date()}
+                                            formData={formData}
+                                        />
+                                    }
+                                    fileName={`Complete-Current-State-Report-${(formData.companyName || "Company").replace(/\s+/g, "_")}.pdf`}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[var(--nui-brand)] hover:bg-[var(--nui-brand-hover)] rounded-[var(--nui-r-sm)] shadow-[var(--nui-shadow-1)] transition-colors duration-150 whitespace-nowrap"
+                                >
+                                    {({ loading }) => (
+                                        <>
+                                            <IconDownload />
+                                            <span>{loading ? "Preparing…" : "Download Complete File"}</span>
+                                        </>
+                                    )}
+                                </PDFDownloadLink>
+                            )}
+                        </div>
+                    </NuiReveal>
                 </div>
+            </NuiCanvas>
         </AppShell>
     );
 };

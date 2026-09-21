@@ -1,13 +1,16 @@
 "use client";
 
 /**
- * TopBar — the one page-header bar used on every authenticated page.
- * Rendered nested inside AppShell's content column, so it never needs to
- * know the sidebar's width itself — it just fills the column it's given.
- * Styled as a flat, sharp-cornered panel (same visual language as
- * AppSidebar — solid bg-white, border, shadow-sm, top-6/24px gap) so the
- * sidebar, top bar, and page content read as one consistent grid rather
- * than a stack of independently-floating rounded cards.
+ * TopBar — the one page-header bar used on every authenticated page that
+ * still needs one (most migrated pages now use a page-owned `NuiHero`
+ * instead — see docs/ui-redesign.md §11's resolved open question). Rendered
+ * nested inside AppShell's content column, so it never needs to know the
+ * sidebar's width itself — it just fills the column it's given.
+ *
+ * Restyled to the shared design system (styles/new-ui/tokens.css) — rounded,
+ * `.nui`-toned, matching `AppSidebar`'s card language. Requires a `.nui`
+ * ancestor; `AppShell` provides that on its own root, so this never needs to
+ * carry the scope itself.
  *
  * Deliberately minimal: title + optional subtitle (usually the company
  * name), plus an optional small set of page-specific FUNCTIONAL actions
@@ -19,9 +22,9 @@
  */
 
 const VARIANTS = {
-    primary: "text-white bg-[#15587B] hover:bg-[#0f4460] shadow-sm",
-    secondary: "text-gray-600 bg-gray-100 hover:bg-gray-200",
-    danger: "text-white bg-red-600 hover:bg-red-700",
+    primary: "text-white bg-[var(--nui-brand)] hover:bg-[var(--nui-brand-hover)] shadow-[var(--nui-shadow-1)]",
+    secondary: "text-[var(--nui-text-2)] bg-[var(--nui-surface-sunk)] hover:bg-[var(--nui-line-soft)]",
+    danger: "text-white bg-[var(--nui-risk)] hover:bg-[var(--nui-risk-hover)]",
 };
 
 const ActionButton = ({ label, onClick, variant = "primary", Icon, loading, disabled }) => (
@@ -30,7 +33,8 @@ const ActionButton = ({ label, onClick, variant = "primary", Icon, loading, disa
         onClick={onClick}
         disabled={disabled || loading}
         className={[
-            "inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed",
+            "inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-[var(--nui-r-sm)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+            "focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1",
             VARIANTS[variant] || VARIANTS.primary,
         ].join(" ")}
     >
@@ -53,10 +57,10 @@ const TopBar = ({ title, subtitle, actions = [] }) => (
             edge-to-edge of the container while the content underneath is inset
             24px on each side, so the two never line up. */}
         <div className="max-w-6xl mx-auto px-6">
-            <div className="bg-white border border-gray-200 shadow-sm px-6 py-3 flex items-center justify-between gap-4">
+            <div className="bg-[var(--nui-surface)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-1)] rounded-[var(--nui-r)] px-6 py-3 flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                    <h1 className="text-sm font-bold text-[#15587B] leading-none truncate">{title}</h1>
-                    {subtitle && <p className="text-xs text-gray-400 mt-0.5 truncate">{subtitle}</p>}
+                    <h1 className="text-sm font-bold text-[var(--nui-brand)] leading-none truncate">{title}</h1>
+                    {subtitle && <p className="text-xs text-[var(--nui-text-3)] mt-0.5 truncate">{subtitle}</p>}
                 </div>
                 {actions.length > 0 && (
                     <div className="flex items-center gap-2 flex-shrink-0">

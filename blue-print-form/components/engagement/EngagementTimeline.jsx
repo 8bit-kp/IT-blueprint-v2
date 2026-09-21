@@ -57,9 +57,9 @@ const PHASES = [
 ];
 
 const TAG_STYLES = {
-    Automated:  "bg-teal-50 text-teal-700",
-    Advisor:    "bg-blue-50 text-blue-700",
-    Engagement: "bg-amber-50 text-amber-700",
+    Automated:  "bg-[var(--nui-accent-tint)] text-[var(--nui-brand)]",
+    Advisor:    "bg-[var(--nui-info-bg)] text-[var(--nui-info)]",
+    Engagement: "bg-[var(--nui-warn-bg)] text-[var(--nui-warn)]",
 };
 
 const getPhaseStatus = (phaseId, currentPhase) => {
@@ -72,7 +72,7 @@ export default function EngagementTimeline({ currentPhase = 3 }) {
     return (
         <div className="relative">
             {/* Vertical connector line */}
-            <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-gray-100" aria-hidden="true" />
+            <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-[var(--nui-line)]" aria-hidden="true" />
             <ol className="space-y-0">
                 {PHASES.map((phase, index) => {
                     const status = getPhaseStatus(phase.id, currentPhase);
@@ -82,44 +82,44 @@ export default function EngagementTimeline({ currentPhase = 3 }) {
                             {/* Status icon */}
                             <div className="relative z-10 flex-shrink-0">
                                 {status === "completed" ? (
-                                    <div className="w-8 h-8 rounded-full bg-[#34808A] flex items-center justify-center shadow-sm">
+                                    <div className="w-8 h-8 rounded-full bg-[var(--nui-accent)] flex items-center justify-center shadow-[var(--nui-shadow-1)]">
                                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                                         </svg>
                                     </div>
                                 ) : status === "active" ? (
-                                    <div className="w-8 h-8 rounded-full bg-[#15587B] flex items-center justify-center shadow-sm ring-4 ring-[#15587B]/15">
+                                    <div className="w-8 h-8 rounded-full bg-[var(--nui-brand)] flex items-center justify-center shadow-[var(--nui-shadow-1)] ring-4 ring-[color:var(--nui-accent-tint-2)]">
                                         <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
                                     </div>
                                 ) : (
-                                    <div className="w-8 h-8 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center">
-                                        <span className="text-xs font-bold text-gray-400">{phase.id}</span>
+                                    <div className="w-8 h-8 rounded-full bg-[var(--nui-surface)] border-2 border-[var(--nui-line)] flex items-center justify-center">
+                                        <span className="nui-num text-xs font-bold text-[var(--nui-text-3)]">{phase.id}</span>
                                     </div>
                                 )}
                             </div>
                             {/* Content */}
-                            <div className={`flex-1 min-w-0 pb-1 ${status === "upcoming" ? "opacity-50" : ""}`}>
+                            <div className={`flex-1 min-w-0 pb-1 ${status === "upcoming" ? "opacity-60" : ""}`}>
                                 <div className="flex flex-wrap items-center gap-2 mb-0.5">
                                     <h3 className={`text-sm font-semibold ${
-                                        status === "completed" ? "text-[#34808A]" :
-                                        status === "active"    ? "text-[#15587B]" :
-                                                                  "text-gray-400"
+                                        status === "completed" ? "text-[var(--nui-accent)]" :
+                                        status === "active"    ? "text-[var(--nui-brand)]" :
+                                                                  "text-[var(--nui-text-3)]"
                                     }`}>
                                         {phase.label}
                                     </h3>
-                                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wide ${TAG_STYLES[phase.tag] || ""}`}>
+                                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-[var(--nui-r-xs)] uppercase tracking-wide ${TAG_STYLES[phase.tag] || ""}`}>
                                         {phase.tag}
                                     </span>
                                     {status === "active" && (
-                                        <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded uppercase tracking-wide">
+                                        <span className="text-[10px] font-bold text-[var(--nui-warn)] bg-[var(--nui-warn-bg)] px-1.5 py-0.5 rounded-[var(--nui-r-xs)] uppercase tracking-wide">
                                             Current
                                         </span>
                                     )}
                                 </div>
                                 <p className={`text-xs leading-relaxed ${
-                                    status === "completed" ? "text-gray-500" :
-                                    status === "active"    ? "text-gray-600" :
-                                                              "text-gray-400"
+                                    status === "completed" ? "text-[var(--nui-text-2)]" :
+                                    status === "active"    ? "text-[var(--nui-text-2)]" :
+                                                              "text-[var(--nui-text-3)]"
                                 }`}>
                                     {phase.description}
                                 </p>

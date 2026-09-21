@@ -18,15 +18,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-    FiUser, FiMail, FiCalendar, FiCheck, FiEdit3, FiArrowRight,
-    FiFileText, FiGrid, FiShield,
+    FiUser, FiCalendar, FiCheck, FiEdit3, FiArrowRight,
+    FiFileText, FiGrid, FiShield, FiClipboard,
 } from "react-icons/fi";
 import { blueprintAPI } from "@/utils/api";
 import { notify } from "@/lib/notify";
 import AppShell from "@/components/navigation/AppShell";
-import InfoTile from "@/components/report-dashboard/InfoTile";
 import { ASSESSMENT_STEPS, TOTAL_ASSESSMENT_STEPS } from "@/constants/assessmentSteps";
 import { useLocalStorageValue } from "@/lib/hooks/useLocalStorageValue";
+import {
+    NuiCanvas, NuiReveal, NuiHero, NuiSection, NuiPanel, NuiPanelHeader,
+    NuiButton, NuiMeter, NuiTag, NuiKeyValue, NuiKeyValueList,
+} from "@/components/ui/new";
 
 // A blueprint is "filled" if at least one Step 1 field is present — same
 // heuristic used by /assessment-report and /assessment-complete.
@@ -47,26 +50,38 @@ const StepRow = ({ step, title, Icon, state }) => {
     const isDone = state === "done";
     const isCurrent = state === "current";
     return (
-        <div className="flex items-center gap-3 py-2">
+        <div className="flex items-center gap-3 py-2.5 border-b border-[var(--nui-line-soft)] last:border-0">
             <span
                 className={[
                     "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                    isDone ? "bg-[#34808A] text-white" : isCurrent ? "bg-[#15587B] text-white" : "bg-gray-100 text-gray-400",
+                    isDone ? "bg-[var(--nui-accent)] text-white" : isCurrent ? "bg-[var(--nui-brand)] text-white" : "bg-[var(--nui-surface-sunk)] text-[var(--nui-text-3)]",
                 ].join(" ")}
             >
                 {isDone ? <FiCheck size={12} strokeWidth={3} /> : <Icon size={12} />}
             </span>
-            <span className={`text-sm ${isCurrent ? "font-semibold text-gray-800" : isDone ? "text-gray-600" : "text-gray-400"}`}>
+            <span className={`text-sm ${isCurrent ? "font-semibold text-[var(--nui-text)]" : isDone ? "text-[var(--nui-text-2)]" : "text-[var(--nui-text-3)]"}`}>
                 Step {step} — {title}
             </span>
             {isCurrent && (
-                <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-[#15587B] bg-[#15587B]/8 px-2 py-0.5 rounded-full">
+                <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-[var(--nui-brand)] bg-[var(--nui-accent-tint)] px-2 py-0.5 rounded-full">
                     In Progress
                 </span>
             )}
         </div>
     );
 };
+
+// One of the three report quick-link tiles, shown once the assessment is complete.
+const ReportLink = ({ Icon, label, onClick }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        className="flex items-center gap-2.5 px-4 py-3 rounded-[var(--nui-r-sm)] border border-[var(--nui-line)] hover:border-[color:var(--nui-accent-tint-2)] hover:bg-[var(--nui-surface-sunk)] transition-colors duration-[var(--nui-dur-fast)] text-left"
+    >
+        <Icon size={16} className="text-[var(--nui-accent)] flex-shrink-0" />
+        <span className="text-xs font-semibold text-[var(--nui-text-2)]">{label}</span>
+    </button>
+);
 
 export default function Profile() {
     const router = useRouter();
@@ -103,9 +118,9 @@ export default function Profile() {
     const status = isComplete ? "complete" : (started || lastSavedStep > 0) ? "in-progress" : "not-started";
 
     const STATUS_CONFIG = {
-        "not-started": { label: "Not Started", badge: "bg-gray-100 text-gray-500" },
-        "in-progress": { label: `In Progress — Step ${lastSavedStep} of ${TOTAL_ASSESSMENT_STEPS}`, badge: "bg-amber-100 text-amber-700" },
-        "complete": { label: "Complete", badge: "bg-green-100 text-green-700" },
+        "not-started": { label: "Not Started", tone: "invert" },
+        "in-progress": { label: `In Progress — Step ${lastSavedStep} of ${TOTAL_ASSESSMENT_STEPS}`, tone: "invert" },
+        "complete": { label: "Complete", tone: "invert" },
     };
     const statusCfg = STATUS_CONFIG[status];
     const progressPct = Math.round((Math.min(lastSavedStep, TOTAL_ASSESSMENT_STEPS) / TOTAL_ASSESSMENT_STEPS) * 100);
@@ -113,146 +128,128 @@ export default function Profile() {
     const memberSince = formatDate(createdAt);
     const displayName = companyName || username;
 
+    const ctaLabel = status === "not-started" ? "Start Assessment" : status === "in-progress" ? "Continue Assessment" : "Edit Assessment";
+
     return (
-        <AppShell title="My Account" subtitle={displayName} contentClassName="max-w-3xl mx-auto px-6 pb-10 space-y-6">
+        <AppShell contentClassName="px-4 pt-8 pb-24 sm:px-6 lg:px-8">
+            <NuiCanvas>
+                <div className="mx-auto max-w-[900px] space-y-14">
 
-            {/* ── Identity hero ─────────────────────────────────────────── */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="h-1.5 w-full bg-gradient-to-r from-[#34808A] to-[#15587B]" />
-                <div className="p-6 flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-[#15587B] text-white flex items-center justify-center text-2xl font-bold flex-shrink-0">
-                        {displayName?.[0]?.toUpperCase() || <FiUser size={24} />}
-                    </div>
-                    <div className="min-w-0">
-                        <h1 className="text-xl font-bold text-gray-800 truncate">{displayName || "Your Account"}</h1>
-                        {companyName && username && (
-                            <p className="text-sm text-gray-400 truncate">@{username}</p>
-                        )}
-                        {email && (
-                            <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
-                                <FiMail size={13} className="flex-shrink-0" /> {email}
-                            </p>
-                        )}
-                    </div>
-                </div>
-            </div>
+                    {/* ── Welcome / identity hero ─────────────────────────── */}
+                    <NuiReveal>
+                        <NuiHero
+                            eyebrow="IT Blueprint · My Account"
+                            title={displayName || "Your Account"}
+                            context={
+                                companyName && username
+                                    ? `@${username}`
+                                    : "Your account overview and Current State Assessment progress."
+                            }
+                            tags={[
+                                email && { label: "Email", value: email },
+                                memberSince && { label: "Member since", value: memberSince },
+                            ].filter(Boolean)}
+                            footer={
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <NuiTag tone="invert">{statusCfg.label}</NuiTag>
+                                </div>
+                            }
+                        />
+                    </NuiReveal>
 
-            {/* ── Assessment progress ───────────────────────────────────── */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="h-5 w-1 bg-[#34808A] rounded-full" />
-                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Current State Assessment</h2>
-                    </div>
-                    <span className={`text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full flex-shrink-0 ${statusCfg.badge}`}>
-                        {statusCfg.label}
-                    </span>
-                </div>
-
-                {loading ? (
-                    <div className="py-6 flex items-center justify-center">
-                        <div className="w-6 h-6 border-4 border-[#34808A] border-t-transparent rounded-full animate-spin" />
-                    </div>
-                ) : (
-                    <>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
-                            <div
-                                className="h-full bg-[#34808A] rounded-full transition-all duration-500"
-                                style={{ width: `${progressPct}%` }}
-                            />
-                        </div>
-
-                        <div className="divide-y divide-gray-50 mb-5">
-                            {ASSESSMENT_STEPS.map(({ step, title, Icon }) => (
-                                <StepRow
-                                    key={step}
-                                    step={step}
-                                    title={title}
-                                    Icon={Icon}
-                                    state={step <= lastSavedStep ? "done" : step === lastSavedStep + 1 ? "current" : "todo"}
+                    {/* ── Assessment progress ─────────────────────────────── */}
+                    <NuiSection
+                        index="01"
+                        title="Current State Assessment"
+                        description="Your progress through the 7-step assessment, and the action that moves it forward."
+                    >
+                        <NuiReveal>
+                            <NuiPanel tone="flat">
+                                <NuiPanelHeader
+                                    title="Assessment Progress"
+                                    Icon={FiClipboard}
+                                    meta={loading ? undefined : `${Math.min(lastSavedStep, TOTAL_ASSESSMENT_STEPS)} of ${TOTAL_ASSESSMENT_STEPS} steps saved`}
                                 />
-                            ))}
-                        </div>
 
-                        <div className="flex flex-wrap gap-3">
-                            <button
-                                type="button"
-                                onClick={() => router.push("/blueprint-form")}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-xl shadow-sm transition"
-                            >
-                                <FiEdit3 size={14} />
-                                {status === "not-started" ? "Start Assessment" : status === "in-progress" ? "Continue Assessment" : "Edit Assessment"}
-                            </button>
-                            {isComplete && (
-                                <button
-                                    type="button"
-                                    onClick={() => router.push("/blueprint-summary")}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-[#15587B] bg-gray-100 hover:bg-gray-200 rounded-xl transition"
-                                >
-                                    View Summary
-                                    <FiArrowRight size={14} />
-                                </button>
-                            )}
-                        </div>
-                    </>
-                )}
-            </div>
+                                {loading ? (
+                                    <div className="py-10 flex items-center justify-center">
+                                        <span
+                                            aria-hidden="true"
+                                            className="inline-block h-7 w-7 animate-spin rounded-full border-2 border-[var(--nui-line-strong)] border-t-[var(--nui-brand)]"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="p-6 pt-4">
+                                        <NuiMeter value={progressPct} total={100} label="Overall completion" tone="brand" showCount={false} />
+                                        <p className="nui-num mt-1 text-right text-[11px] font-semibold text-[var(--nui-text-2)]">{progressPct}%</p>
 
-            {/* ── Quick links (once there's something to show) ─────────── */}
-            {!loading && isComplete && (
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="h-5 w-1 bg-[#34808A] rounded-full" />
-                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Your Reports</h2>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <button
-                            type="button"
-                            onClick={() => router.push("/all-blueprints")}
-                            className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-gray-200 hover:border-[#34808A]/40 hover:bg-gray-50 transition text-left"
-                        >
-                            <FiFileText size={16} className="text-[#34808A] flex-shrink-0" />
-                            <span className="text-xs font-semibold text-gray-700">Current State Report</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => router.push("/assessment-report")}
-                            className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-gray-200 hover:border-[#34808A]/40 hover:bg-gray-50 transition text-left"
-                        >
-                            <FiShield size={16} className="text-[#34808A] flex-shrink-0" />
-                            <span className="text-xs font-semibold text-gray-700">Security Score</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => router.push("/blueprint-dashboard?type=Current-State-Blueprint")}
-                            className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-gray-200 hover:border-[#34808A]/40 hover:bg-gray-50 transition text-left"
-                        >
-                            <FiGrid size={16} className="text-[#34808A] flex-shrink-0" />
-                            <span className="text-xs font-semibold text-gray-700">Dashboards</span>
-                        </button>
-                    </div>
-                </div>
-            )}
+                                        <div className="mt-4">
+                                            {ASSESSMENT_STEPS.map(({ step, title, Icon }) => (
+                                                <StepRow
+                                                    key={step}
+                                                    step={step}
+                                                    title={title}
+                                                    Icon={Icon}
+                                                    state={step <= lastSavedStep ? "done" : step === lastSavedStep + 1 ? "current" : "todo"}
+                                                />
+                                            ))}
+                                        </div>
 
-            {/* ── Account details ───────────────────────────────────────── */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
-                    <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Account Details</h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <InfoTile label="Username" value={username} />
-                    <InfoTile label="Company" value={companyName} />
-                    <InfoTile label="Email" value={email} />
-                    {memberSince && (
-                        <InfoTile label="Member Since" value={memberSince} />
+                                        <div className="mt-5 flex flex-wrap gap-3">
+                                            <NuiButton variant="primary" size="lg" Icon={FiEdit3} onClick={() => router.push("/blueprint-form")}>
+                                                {ctaLabel}
+                                            </NuiButton>
+                                            {isComplete && (
+                                                <NuiButton variant="secondary" size="lg" Icon={FiArrowRight} onClick={() => router.push("/blueprint-summary")} className="flex-row-reverse">
+                                                    View Summary
+                                                </NuiButton>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </NuiPanel>
+                        </NuiReveal>
+                    </NuiSection>
+
+                    {/* ── Quick links (once there's something to show) ────── */}
+                    {!loading && isComplete && (
+                        <NuiSection index="02" title="Your Reports" description="Jump straight to the deliverables generated from your completed assessment.">
+                            <NuiReveal>
+                                <NuiPanel tone="flat" className="p-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <ReportLink Icon={FiFileText} label="Current State Report" onClick={() => router.push("/all-blueprints")} />
+                                        <ReportLink Icon={FiShield} label="Security Score" onClick={() => router.push("/assessment-report")} />
+                                        <ReportLink Icon={FiGrid} label="Dashboards" onClick={() => router.push("/blueprint-dashboard?type=Current-State-Blueprint")} />
+                                    </div>
+                                </NuiPanel>
+                            </NuiReveal>
+                        </NuiSection>
                     )}
+
+                    {/* ── Account details ─────────────────────────────────── */}
+                    <NuiSection index={isComplete ? "03" : "02"} title="Account Details" description="Identity information tied to this account.">
+                        <NuiReveal>
+                            <NuiPanel tone="flat">
+                                <NuiPanelHeader title="Account" Icon={FiUser} />
+                                <div className="px-6 pb-2 pt-1">
+                                    <NuiKeyValueList>
+                                        <NuiKeyValue label="Username" value={username} />
+                                        <NuiKeyValue label="Company" value={companyName} optional />
+                                        <NuiKeyValue label="Email" value={email} />
+                                        {memberSince && <NuiKeyValue label="Member Since" value={memberSince} optional />}
+                                    </NuiKeyValueList>
+                                </div>
+                                <div className="px-6 pb-5 pt-3 border-t border-[var(--nui-line-soft)] mt-2">
+                                    <p className="text-[11px] text-[var(--nui-text-3)] flex items-center gap-1.5">
+                                        <FiCalendar size={11} className="flex-shrink-0" aria-hidden="true" />
+                                        Your data is encrypted in transit and never sold — see the Privacy Policy for details.
+                                    </p>
+                                </div>
+                            </NuiPanel>
+                        </NuiReveal>
+                    </NuiSection>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-4 flex items-center gap-1.5">
-                    <FiCalendar size={11} className="flex-shrink-0" />
-                    Your data is encrypted in transit and never sold — see the Privacy Policy for details.
-                </p>
-            </div>
+            </NuiCanvas>
         </AppShell>
     );
 }

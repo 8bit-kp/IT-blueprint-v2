@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiCheckCircle, FiShield, FiDownload, FiMap, FiUsers } from "react-icons/fi";
+import { FiCheckCircle, FiShield, FiDownload, FiMap, FiUsers, FiClock, FiFileText, FiChevronRight } from "react-icons/fi";
 import EngagementTimeline from "@/components/engagement/EngagementTimeline";
 import SecurityScoreCard from "@/components/report-dashboard/SecurityScoreCard";
 import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
@@ -10,6 +10,10 @@ import AppShell from "@/components/navigation/AppShell";
 import { blueprintAPI } from "@/utils/api";
 import { generateReport } from "@/lib/report/index.js";
 import { useLocalStorageValue } from "@/lib/hooks/useLocalStorageValue";
+import {
+    NuiCanvas, NuiReveal, NuiHero, NuiSection, NuiPanel, NuiPanelHeader,
+    NuiButton, NuiTag,
+} from "@/components/ui/new";
 
 const SECTIONS = [
     { id: "complete", label: "Complete", Icon: FiCheckCircle },
@@ -29,49 +33,34 @@ const hasMeaningfulBlueprint = (bp) => {
 // ── Module-scope helper components ─────────────────────────────────────────
 // Defined at module scope per coding-conventions.md — never inside render body.
 
-const CheckIcon = () => (
-    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-    </svg>
-);
-
-const ClockIcon = () => (
-    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-
-const ChevronIcon = () => (
-    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-    </svg>
-);
-
-// Status pill rendered in the hero section.
-const StatusPill = ({ icon, label, variant }) => {
-    const base = "flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold";
-    const variants = {
-        success: "bg-green-50 border-green-200 text-green-700",
-        pending: "bg-amber-50 border-amber-200 text-amber-700",
-    };
-    return (
-        <div className={`${base} ${variants[variant] || variants.success}`}>
-            {icon}
-            {label}
-        </div>
-    );
-};
-
 // Advisor action bullet used in the "What your advisor does next" card.
 const AdvisorAction = ({ text }) => (
-    <li className="flex items-start gap-2.5 text-sm text-gray-600">
-        <div className="w-5 h-5 rounded-full bg-[#34808A]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <svg className="w-2.5 h-2.5 text-[#34808A]" fill="currentColor" viewBox="0 0 20 20">
+    <li className="flex items-start gap-2.5 text-sm text-[var(--nui-text-2)]">
+        <div className="w-5 h-5 rounded-full bg-[var(--nui-accent-tint)] flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-2.5 h-2.5 text-[var(--nui-accent)]" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
         </div>
         {text}
     </li>
+);
+
+// One of the two report-access action cards (Download / Review Summary).
+const ActionCard = ({ Icon, title, description, onClick, buttonLabel, buttonVariant = "primary" }) => (
+    <NuiPanel tone="flat" interactive className="h-full">
+        <div className="p-5 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-[var(--nui-r-sm)] bg-[var(--nui-accent-tint)] flex items-center justify-center flex-shrink-0">
+                <Icon size={18} className="text-[var(--nui-accent)]" />
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-[var(--nui-text)] mb-0.5">{title}</p>
+                <p className="text-xs text-[var(--nui-text-3)] mb-3 leading-relaxed">{description}</p>
+                <NuiButton variant={buttonVariant} size="sm" Icon={FiChevronRight} onClick={onClick} className="flex-row-reverse">
+                    {buttonLabel}
+                </NuiButton>
+            </div>
+        </div>
+    </NuiPanel>
 );
 
 // ── Page component ──────────────────────────────────────────────────────────
@@ -103,186 +92,167 @@ export default function AssessmentComplete() {
 
     return (
         <AppShell
-            title="Assessment Complete"
-            subtitle={companyName}
             sections={SECTIONS}
-            contentClassName="max-w-5xl mx-auto px-6 space-y-8 pb-24"
+            contentClassName="px-4 pt-8 pb-24 sm:px-6 lg:px-8"
         >
-                {/* ── Section 1: Completion hero ──────────────────────── */}
-                <div id="complete" className="scroll-mt-24 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                    {/* Top accent bar */}
-                    <div className="h-1.5 w-full bg-gradient-to-r from-[#34808A] to-[#15587B]" />
-                    <div className="px-8 py-10 flex flex-col items-center text-center">
-                        {/* Checkmark circle */}
-                        <div className="w-16 h-16 rounded-full bg-[#34808A]/10 flex items-center justify-center mb-5 flex-shrink-0">
-                            <svg className="w-8 h-8 text-[#34808A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h2 className="text-2xl font-bold text-[#15587B] mb-2">
-                            Your Current State Assessment is Complete
-                        </h2>
-                        <p className="text-sm text-gray-500 max-w-lg mb-7 leading-relaxed">
-                            {companyName
-                                ? `Well done, ${companyName}. Your Current State Report has been generated and your assessment is now with Consltek.`
-                                : "Your Current State Report has been generated and your assessment is now with Consltek."
+            <NuiCanvas>
+                <div className="mx-auto max-w-[1080px] space-y-14">
+
+                    {/* ── Section 1: Completion hero ──────────────────────── */}
+                    <NuiReveal>
+                        <NuiHero
+                            eyebrow="IT Blueprint · Current State Assessment"
+                            title="Your Current State Assessment is Complete"
+                            context={
+                                companyName
+                                    ? `Well done, ${companyName}. Your Current State Report has been generated and your assessment is now with Consltek.`
+                                    : "Your Current State Report has been generated and your assessment is now with Consltek."
                             }
-                        </p>
-                        {/* Status pills */}
-                        <div className="flex flex-wrap justify-center gap-3">
-                            <StatusPill variant="success" icon={<CheckIcon />} label="Assessment Received" />
-                            <StatusPill variant="success" icon={<CheckIcon />} label="Current State Report Generated" />
-                            <StatusPill variant="pending" icon={<ClockIcon />} label="Advisor Review Pending" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Section 2: Security Score ─────────────────────────
-                    The visual focal point of the page — reuses the exact
-                    SecurityScoreCard rendered on /assessment-report (same
-                    generateReport() output, no re-derived logic). */}
-                <div id="security-score" className="scroll-mt-24">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
-                        Your Security Score
-                    </p>
-                    <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] rounded-2xl p-px shadow-md">
-                        <div className="bg-white rounded-[calc(1rem-1px)] p-6">
-                            {reportLoading ? (
-                                <div className="flex flex-col items-center justify-center gap-3 py-10">
-                                    <div className="w-8 h-8 border-4 border-[#34808A] border-t-transparent rounded-full animate-spin" />
-                                    <p className="text-xs text-gray-400">Calculating your Security Score…</p>
+                            footer={
+                                <div id="complete" className="scroll-mt-24 flex flex-wrap gap-2">
+                                    <NuiTag tone="invert">✓ Assessment Received</NuiTag>
+                                    <NuiTag tone="invert">✓ Current State Report Generated</NuiTag>
+                                    <span className="inline-flex items-center gap-1.5 rounded-[var(--nui-r-pill)] border border-white/20 bg-white/12 px-2.5 py-[3px] text-[11px] font-medium text-[var(--nui-text-invert)]">
+                                        <FiClock size={11} aria-hidden="true" /> Advisor Review Pending
+                                    </span>
                                 </div>
-                            ) : report ? (
-                                <>
-                                    <SecurityScoreCard report={report} />
-                                    <div className="mt-6 flex justify-center">
-                                        <button
-                                            type="button"
-                                            onClick={() => router.push("/assessment-report")}
-                                            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-xl shadow-sm transition"
-                                        >
-                                            View Full Assessment Report
-                                            <ChevronIcon />
-                                        </button>
+                            }
+                        />
+                    </NuiReveal>
+
+                    {/* ── Section 2/3: Security Score + "View Full Report" ──
+                        The visual focal point of the page — reuses the exact
+                        SecurityScoreCard rendered on /assessment-report (same
+                        generateReport() output, no re-derived logic). */}
+                    <NuiSection
+                        id="security-score"
+                        index="01"
+                        title="Your Security Score"
+                        description="A formulaic snapshot of your Current State Assessment — not the advisor-built Assessment with Remediation Plan."
+                    >
+                        <NuiReveal>
+                            <NuiPanel tone="raised" className="p-6">
+                                {reportLoading ? (
+                                    <div className="flex flex-col items-center justify-center gap-3 py-10">
+                                        <span
+                                            aria-hidden="true"
+                                            className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-[var(--nui-line-strong)] border-t-[var(--nui-brand)]"
+                                        />
+                                        <p className="text-xs text-[var(--nui-text-3)]">Calculating your Security Score…</p>
                                     </div>
-                                </>
-                            ) : (
-                                <EmptyStateNotice
-                                    Icon={FiShield}
-                                    title="Security Score not available yet"
-                                    description="Your score will appear here once your Current State Assessment data is available."
-                                />
-                            )}
-                        </div>
-                    </div>
-                </div>
+                                ) : report ? (
+                                    <>
+                                        <SecurityScoreCard report={report} />
+                                        <div className="mt-6 flex justify-center">
+                                            <NuiButton variant="primary" size="lg" Icon={FiChevronRight} onClick={() => router.push("/assessment-report")} className="flex-row-reverse">
+                                                View Full Assessment Report
+                                            </NuiButton>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <EmptyStateNotice
+                                        Icon={FiShield}
+                                        title="Security Score not available yet"
+                                        description="Your score will appear here once your Current State Assessment data is available."
+                                    />
+                                )}
+                            </NuiPanel>
+                        </NuiReveal>
+                    </NuiSection>
 
-                {/* ── Section 3: Report access (unchanged actions, new position) ── */}
-                <div id="report-actions" className="scroll-mt-24">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
-                        Access Your Current State Report
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Report downloads */}
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-start gap-4 hover:border-[#34808A]/40 transition">
-                            <div className="w-10 h-10 rounded-lg bg-[#34808A]/10 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-5 h-5 text-[#34808A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
-                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 mb-0.5">Download Your Report</p>
-                                <p className="text-xs text-gray-400 mb-3">Access all PDF sections of your Current State Report.</p>
-                                <button
-                                    type="button"
+                    {/* ── Section 4/5: Report access (unchanged actions) ──── */}
+                    <NuiSection
+                        id="report-actions"
+                        index="02"
+                        title="Access Your Current State Report"
+                        description="Download the full PDF report, or review the data you submitted."
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <NuiReveal>
+                                <ActionCard
+                                    Icon={FiFileText}
+                                    title="Download Your Report"
+                                    description="Access all PDF sections of your Current State Report."
                                     onClick={() => router.push("/all-blueprints")}
-                                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#15587B] hover:bg-[#0f4460] rounded-lg shadow-sm transition"
-                                >
-                                    View Report
-                                    <ChevronIcon />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Summary review */}
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-start gap-4 hover:border-[#34808A]/40 transition">
-                            <div className="w-10 h-10 rounded-lg bg-[#15587B]/10 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-5 h-5 text-[#15587B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75"
-                                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 mb-0.5">Review Your Assessment</p>
-                                <p className="text-xs text-gray-400 mb-3">Review the data you submitted and make any corrections.</p>
-                                <button
-                                    type="button"
+                                    buttonLabel="View Report"
+                                    buttonVariant="primary"
+                                />
+                            </NuiReveal>
+                            <NuiReveal delay={60}>
+                                <ActionCard
+                                    Icon={FiCheckCircle}
+                                    title="Review Your Assessment"
+                                    description="Review the data you submitted and make any corrections."
                                     onClick={() => router.push("/blueprint-summary")}
-                                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#15587B] bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                                >
-                                    View Summary
-                                    <ChevronIcon />
-                                </button>
+                                    buttonLabel="View Summary"
+                                    buttonVariant="secondary"
+                                />
+                            </NuiReveal>
+                        </div>
+                    </NuiSection>
+
+                    {/* ── Section 6/7: Consulting journey + Advisor review ── */}
+                    <NuiSection
+                        index="03"
+                        title="What Happens Next"
+                        description="Where you are in the Consltek engagement, and what your advisor does before your consultation."
+                    >
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                            {/* Engagement timeline */}
+                            <NuiReveal>
+                                <NuiPanel id="consulting-journey" tone="flat" className="scroll-mt-24 h-full">
+                                    <NuiPanelHeader title="Your Consulting Journey" Icon={FiMap} />
+                                    <div className="p-6">
+                                        <EngagementTimeline currentPhase={3} />
+                                    </div>
+                                </NuiPanel>
+                            </NuiReveal>
+
+                            {/* Advisor review + upcoming deliverable */}
+                            <div id="advisor-info" className="scroll-mt-24 space-y-4">
+                                <NuiReveal delay={60}>
+                                    <NuiPanel tone="flat">
+                                        <NuiPanelHeader title="What Your Advisor Does Next" Icon={FiUsers} />
+                                        <div className="p-6 pt-4">
+                                            <ul className="space-y-3">
+                                                <AdvisorAction text="Reviews your Current State Report in detail." />
+                                                <AdvisorAction text="May conduct additional research on your environment and industry context." />
+                                                <AdvisorAction text="Prepares an agenda for your consultation covering the key areas of your assessment." />
+                                                <AdvisorAction text="Reaches out to schedule your consultation at a time that works for your team." />
+                                            </ul>
+                                            <div className="mt-4 pt-3 border-t border-[var(--nui-line-soft)]">
+                                                <p className="text-xs text-[var(--nui-text-3)] leading-relaxed">
+                                                    <strong className="text-[var(--nui-text-2)]">Important:</strong> Recommendations and remediation plans require professional judgment and are not automatically generated. Your{" "}
+                                                    <strong className="text-[var(--nui-text-2)]">Assessment with Remediation Plan</strong> — the paid engagement — is developed by your advisor based on a specific framework or standard, and delivered following your consultation.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </NuiPanel>
+                                </NuiReveal>
+
+                                {/* Upcoming deliverable card */}
+                                <NuiReveal delay={90}>
+                                    <NuiPanel tone="quiet" className="p-5">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-8 h-8 rounded-[var(--nui-r-sm)] bg-[var(--nui-accent-tint)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <FiFileText size={15} className="text-[var(--nui-brand)]" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-[var(--nui-brand)] mb-1">Assessment with Remediation Plan</h4>
+                                                <p className="text-xs text-[var(--nui-text-2)] leading-relaxed">
+                                                    Following your consultation, Consltek will propose and deliver your{" "}
+                                                    <strong>Assessment with Remediation Plan</strong> — your paid engagement. This includes gap analysis, risk assessment, and a prioritised roadmap anchored to a specific standard or framework.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </NuiPanel>
+                                </NuiReveal>
                             </div>
                         </div>
-                    </div>
+                    </NuiSection>
                 </div>
-
-                {/* ── Section 4/5: Consulting journey + Advisor review ─── */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                    {/* Engagement timeline */}
-                    <div id="consulting-journey" className="scroll-mt-24 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                        <div className="flex items-center gap-2 mb-5">
-                            <div className="h-5 w-1 bg-[#34808A] rounded-full" />
-                            <h3 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Your Consulting Journey</h3>
-                        </div>
-                        <EngagementTimeline currentPhase={3} />
-                    </div>
-
-                    {/* Advisor review + upcoming deliverable */}
-                    <div id="advisor-info" className="scroll-mt-24 space-y-4">
-                        {/* What advisor does next */}
-                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="h-5 w-1 bg-[#34808A] rounded-full" />
-                                <h3 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">What Your Advisor Does Next</h3>
-                            </div>
-                            <ul className="space-y-3">
-                                <AdvisorAction text="Reviews your Current State Report in detail." />
-                                <AdvisorAction text="May conduct additional research on your environment and industry context." />
-                                <AdvisorAction text="Prepares an agenda for your consultation covering the key areas of your assessment." />
-                                <AdvisorAction text="Reaches out to schedule your consultation at a time that works for your team." />
-                            </ul>
-                            <div className="mt-4 pt-3 border-t border-gray-100">
-                                <p className="text-xs text-gray-400 leading-relaxed">
-                                    <strong className="text-gray-600">Important:</strong> Recommendations and remediation plans require professional judgment and are not automatically generated. Your{" "}
-                                    <strong className="text-gray-600">Assessment with Remediation Plan</strong> — the paid engagement — is developed by your advisor based on a specific framework or standard, and delivered following your consultation.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Upcoming deliverable card */}
-                        <div className="bg-[#15587B]/5 border border-[#15587B]/15 rounded-2xl p-5">
-                            <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-[#15587B]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg className="w-4 h-4 text-[#15587B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-[#15587B] mb-1">Assessment with Remediation Plan</h4>
-                                    <p className="text-xs text-gray-600 leading-relaxed">
-                                        Following your consultation, Consltek will propose and deliver your{" "}
-                                        <strong>Assessment with Remediation Plan</strong> — your paid engagement. This includes gap analysis, risk assessment, and a prioritised roadmap anchored to a specific standard or framework.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </NuiCanvas>
         </AppShell>
     );
 }
