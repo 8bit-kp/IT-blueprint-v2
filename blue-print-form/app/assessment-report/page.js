@@ -894,8 +894,8 @@ export default function AssessmentReport() {
                     <NuiReveal>
                         <NuiHero
                             eyebrow="IT Blueprint · Current State Report"
-                            title={companyName ? `${companyName} — Security Score` : "Security Score"}
-                            context={`Generated ${assessmentDate}. A snapshot assessment based on self-reported data, calculated from a fixed, published methodology — not the advisor-built Assessment with Remediation Plan.`}
+                            title={companyName || "Security Score"}
+                            context={`Generated ${assessmentDate}. A snapshot assessment based on self-reported data, calculated from a fixed, published methodology, not the advisor-built Assessment with Remediation Plan.`}
                             snapshot={[
                                 { label: "Security Score", value: report.score, unit: "/100" },
                                 { label: "Maturity", value: `L${report.maturity.level}` },

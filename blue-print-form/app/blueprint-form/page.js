@@ -459,8 +459,8 @@ export default function BlueprintForm() {
                 // AppShell renders `bottomBar` as a sibling of the NuiCanvas-wrapped
                 // content below, not inside it — so this needs its own `.nui` scope
                 // for the design tokens used here to resolve. See docs/ui-redesign.md.
-                <div className="nui py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
+                <div className="nui px-4 sm:px-6 py-4 flex justify-between items-center gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
                         {step > 1 && (
                             <NuiButton variant="secondary" size="lg" onClick={handleBack} Icon={FiArrowLeft}>
                                 Back
