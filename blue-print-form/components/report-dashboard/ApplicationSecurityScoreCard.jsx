@@ -28,12 +28,12 @@ import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
 // for the main score (see SecurityScoreCard's scoreZone / GaugeChart's
 // getZoneColor) applied to this score's own six-tier band table.
 const APPLICATION_SCORE_BANDS = [
-    { min: 90, label: "Excellent",         badge: "bg-green-100 text-green-700" },
-    { min: 75, label: "Strong",            badge: "bg-teal-100 text-teal-700" },
-    { min: 55, label: "Moderate",          badge: "bg-yellow-100 text-yellow-700" },
-    { min: 35, label: "Needs Improvement", badge: "bg-amber-100 text-amber-700" },
-    { min: 15, label: "Poor",              badge: "bg-orange-100 text-orange-700" },
-    { min: 0,  label: "Critical",          badge: "bg-red-100 text-red-700" },
+    { min: 90, label: "Excellent",         badge: "bg-green-100 text-green-700 dark:bg-[var(--nui-ok-bg)] dark:text-[var(--nui-ok)]" },
+    { min: 75, label: "Strong",            badge: "bg-teal-100 text-teal-700 dark:bg-[var(--nui-accent-tint)] dark:text-[var(--nui-accent)]" },
+    { min: 55, label: "Moderate",          badge: "bg-yellow-100 text-yellow-700 dark:bg-[var(--nui-warn-bg)] dark:text-[var(--nui-warn)]" },
+    { min: 35, label: "Needs Improvement", badge: "bg-amber-100 text-amber-700 dark:bg-[var(--nui-warn-bg)] dark:text-[var(--nui-warn)]" },
+    { min: 15, label: "Poor",              badge: "bg-orange-100 text-orange-700 dark:bg-[var(--nui-warn-bg)] dark:text-[var(--nui-warn)]" },
+    { min: 0,  label: "Critical",          badge: "bg-red-100 text-red-700 dark:bg-[var(--nui-risk-bg)] dark:text-[var(--nui-risk)]" },
 ];
 
 const getApplicationScoreBand = (score) =>
@@ -79,7 +79,7 @@ const ApplicationSecurityScoreCard = ({ report }) => {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <StatCard label="Applications Assessed" value={totalApplications} sub="across all sections" Icon={FiLayers} color="#15587B" />
+                    <StatCard label="Applications Assessed" value={totalApplications} sub="across all sections" Icon={FiLayers} color="var(--nui-brand)" />
                     <StatCard
                         label="Without MFA"
                         value={driverCount(topRiskDrivers, "mfaEnabled")}

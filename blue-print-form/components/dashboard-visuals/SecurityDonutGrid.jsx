@@ -14,7 +14,7 @@ const DonutCard = ({ label, status }) => {
     const data = [{ value: 100 }];
 
     return (
-        <div className="flex flex-col items-center gap-2 bg-white rounded-2xl shadow-md border border-gray-100 p-4 hover:shadow-lg transition-all duration-300">
+        <div className="flex flex-col items-center gap-2 bg-[var(--nui-surface)] rounded-2xl shadow-md border border-[var(--nui-line-soft)] p-4 hover:shadow-lg transition-all duration-300">
             {/* Donut */}
             <div className="relative">
                 <PieChart width={120} height={120}>
@@ -57,7 +57,7 @@ const DonutCard = ({ label, status }) => {
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span
                         className="text-xs font-bold leading-tight"
-                        style={{ color: fillColor === DONUT_COLORS.default ? "#9ca3af" : fillColor }}
+                        style={{ color: fillColor === DONUT_COLORS.default ? "var(--nui-text-3)" : fillColor }}
                     >
                         {status || "—"}
                     </span>
@@ -65,7 +65,7 @@ const DonutCard = ({ label, status }) => {
             </div>
 
             {/* Control name */}
-            <p className="text-center text-xs font-semibold text-gray-700 leading-snug px-1">
+            <p className="text-center text-xs font-semibold text-[var(--nui-text-2)] leading-snug px-1">
                 {label}
             </p>
         </div>
@@ -112,7 +112,7 @@ const adminControls = [
 const DonutSection = ({ title, subtitle, items }) => (
     <div className="mb-10">
         {/* Section header */}
-        <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-6 py-4 rounded-xl mb-5 shadow">
+        <div className="bg-gradient-to-r from-[var(--nui-brand)] to-[var(--nui-accent)] text-white px-6 py-4 rounded-xl mb-5 shadow">
             <h3 className="text-lg font-bold">{title}</h3>
             {subtitle && <p className="text-sm text-white/80 mt-0.5">{subtitle}</p>}
         </div>

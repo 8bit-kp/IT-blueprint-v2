@@ -26,7 +26,7 @@ const getPriorityActiveClass = (priority) => {
         case "Medium":   return "bg-blue-500   text-white shadow-md ring-1 ring-blue-600";
         case "High":     return "bg-orange-500 text-white shadow-md ring-1 ring-orange-600";
         case "Critical": return "bg-red-600    text-white shadow-md ring-1 ring-red-700";
-        default:         return "bg-gray-100   text-gray-600";
+        default:         return "bg-[var(--nui-surface-sunk)]   text-[var(--nui-text-2)]";
     }
 };
 
@@ -71,7 +71,7 @@ const makeCustomDefaultApps = (categoryTitle) => [
 
 const PriorityToggle = ({ label, value, onChange }) => (
     <div>
-        <label className="text-[10px] uppercase font-bold text-gray-400 block mb-2">{label}</label>
+        <label className="text-[10px] uppercase font-bold text-[var(--nui-text-3)] block mb-2">{label}</label>
         <div className="flex gap-1.5">
             {PRIORITY_LEVELS.map((priority) => {
                 const isActive = value === priority;
@@ -81,7 +81,7 @@ const PriorityToggle = ({ label, value, onChange }) => (
                         type="button"
                         onClick={() => onChange(priority)}
                         className={`flex-1 px-2 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${
-                            isActive ? getPriorityActiveClass(priority) : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            isActive ? getPriorityActiveClass(priority) : "bg-[var(--nui-surface-sunk)] text-[var(--nui-text-2)] hover:bg-[var(--nui-line-soft)]"
                         }`}
                     >
                         {priority}
@@ -100,7 +100,7 @@ const getSensSelectClass = (value) => {
         case "Medium":   return "text-yellow-700 bg-yellow-50 border-yellow-200";
         case "High":     return "text-orange-700 bg-orange-50 border-orange-200";
         case "Critical": return "text-red-700    bg-red-50    border-red-200";
-        default:         return "text-gray-500   bg-gray-50   border-gray-200";
+        default:         return "text-[var(--nui-text-3)]   bg-[var(--nui-surface-sunk)]   border-[var(--nui-line)]";
     }
 };
 
@@ -110,11 +110,11 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
     const [sensOpen, setSensOpen] = useState(false);
 
     return (
-        <div className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm relative group hover:shadow-md transition">
+        <div className="p-4 border border-[var(--nui-line)] rounded-lg bg-[var(--nui-surface)] shadow-sm relative group hover:shadow-md transition">
             <button
                 type="button"
                 onClick={() => removeApp(index)}
-                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
+                className="absolute top-2 right-2 text-[var(--nui-text-3)] hover:text-[var(--nui-risk)] opacity-0 group-hover:opacity-100 transition"
                 title="Remove App"
             >
                 ✕
@@ -122,12 +122,12 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
 
             {/* Provider Name */}
             <div className="mb-3">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Provider Name</label>
+                <label className="block text-xs font-medium text-[var(--nui-text-3)] mb-1">Provider Name</label>
                 <TextInput
                     placeholder="e.g. Salesforce"
                     value={app.name || ""}
                     onChange={(v) => updateApp(index, "name", v)}
-                    className="font-medium text-gray-800 placeholder:font-normal"
+                    className="font-medium text-[var(--nui-text)] placeholder:font-normal"
                 />
             </div>
 
@@ -141,9 +141,9 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
 
                 {/* Offering */}
                 <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Offering</label>
+                    <label className="text-[10px] uppercase font-bold text-[var(--nui-text-3)] block mb-1">Offering</label>
                     <select
-                        className="w-full text-xs border-gray-200 rounded bg-gray-50 p-1.5 border text-gray-900"
+                        className="w-full text-xs border-[var(--nui-line)] rounded bg-[var(--nui-surface-sunk)] p-1.5 border text-[var(--nui-text)]"
                         value={app.offering || ""}
                         onChange={(e) => updateApp(index, "offering", e.target.value)}
                     >
@@ -154,17 +154,17 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
                 </div>
 
                 {/* Sensitivity Classification — collapsible */}
-                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                <div className="border border-[var(--nui-line-soft)] rounded-lg overflow-hidden">
                     <button
                         type="button"
                         onClick={() => setSensOpen((o) => !o)}
-                        className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
+                        className="w-full flex items-center justify-between px-3 py-2 bg-[var(--nui-surface-sunk)] hover:bg-[var(--nui-surface-sunk)] transition-colors"
                     >
-                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wide">
+                        <span className="text-[10px] uppercase font-bold text-[var(--nui-text-3)] tracking-wide">
                             Sensitivity Classification
                         </span>
                         <svg
-                            className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${sensOpen ? "rotate-180" : "rotate-0"}`}
+                            className={`w-3.5 h-3.5 text-[var(--nui-text-3)] transition-transform duration-200 ${sensOpen ? "rotate-180" : "rotate-0"}`}
                             fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
@@ -172,10 +172,10 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
                     </button>
 
                     {sensOpen && (
-                        <div className="px-3 py-2 space-y-2 bg-white">
+                        <div className="px-3 py-2 space-y-2 bg-[var(--nui-surface)]">
                             {SENSITIVITY_FIELDS.map((field) => (
                                 <div key={field.key}>
-                                    <label className="text-[9px] uppercase font-bold text-gray-400 block mb-1">
+                                    <label className="text-[9px] uppercase font-bold text-[var(--nui-text-3)] block mb-1">
                                         {field.label}
                                     </label>
                                     <select
@@ -197,7 +197,7 @@ const ApplicationCard = memo(({ app, index, updateApp, removeApp }) => {
             </div>
 
             {/* Yes/No toggles */}
-            <div className="space-y-2 pt-2 border-t border-gray-100">
+            <div className="space-y-2 pt-2 border-t border-[var(--nui-line-soft)]">
                 <YesNoCompact label="Sensitive Info"  value={app.containsSensitiveInfo} onChange={(v) => updateApp(index, "containsSensitiveInfo", v)} />
                 <YesNoCompact label="MFA Enabled"     value={app.mfa}                   onChange={(v) => updateApp(index, "mfa", v)} />
                 <YesNoCompact label="Backed Up"       value={app.backedUp}              onChange={(v) => updateApp(index, "backedUp", v)} />
@@ -255,23 +255,23 @@ const AddCategoryModal = ({ existingKeys, onConfirm, onCancel }) => {
                 onClick={onCancel}
             />
             {/* Dialog */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
+            <div className="relative bg-[var(--nui-surface)] rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-5">
-                    <div className="w-9 h-9 rounded-full bg-[#34808A]/10 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-[#34808A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-9 h-9 rounded-full bg-[var(--nui-accent)]/10 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-[var(--nui-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                         </svg>
                     </div>
                     <div>
-                        <h2 className="text-base font-bold text-[#15587B]">New Application Section</h2>
-                        <p className="text-xs text-gray-500">Enter a name for the new category.</p>
+                        <h2 className="text-base font-bold text-[var(--nui-brand)]">New Application Section</h2>
+                        <p className="text-xs text-[var(--nui-text-3)]">Enter a name for the new category.</p>
                     </div>
                 </div>
 
                 {/* Input */}
                 <div className="mb-4">
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-[var(--nui-text-2)] mb-1.5 uppercase tracking-wide">
                         Category Name
                     </label>
                     <input
@@ -281,10 +281,10 @@ const AddCategoryModal = ({ existingKeys, onConfirm, onCancel }) => {
                         onChange={(e) => { setName(e.target.value); setError(""); }}
                         onKeyDown={handleKeyDown}
                         placeholder="e.g. Operations, Legal, Marketing…"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#34808A] focus:ring-1 focus:ring-[#34808A] outline-none transition"
+                        className="w-full rounded-lg border border-[var(--nui-line-strong)] px-3 py-2.5 text-sm text-[var(--nui-text)] placeholder:text-[var(--nui-text-3)] focus:border-[var(--nui-accent)] focus:ring-1 focus:ring-[var(--nui-accent)] outline-none transition"
                     />
                     {error && (
-                        <p className="mt-1.5 text-xs text-red-500 font-medium">{error}</p>
+                        <p className="mt-1.5 text-xs text-[var(--nui-risk)] font-medium">{error}</p>
                     )}
                 </div>
 
@@ -293,14 +293,14 @@ const AddCategoryModal = ({ existingKeys, onConfirm, onCancel }) => {
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+                        className="px-4 py-2 text-sm font-medium text-[var(--nui-text-2)] bg-[var(--nui-surface-sunk)] hover:bg-[var(--nui-line-soft)] rounded-lg transition"
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
                         onClick={handleConfirm}
-                        className="px-5 py-2 text-sm font-bold text-white bg-[#34808A] hover:bg-[#2b6f6f] rounded-lg shadow-sm transition"
+                        className="px-5 py-2 text-sm font-bold text-white bg-[var(--nui-accent)] hover:bg-[var(--nui-accent-hover)] rounded-lg shadow-sm transition"
                     >
                         Create
                     </button>
@@ -315,26 +315,26 @@ const AddCategoryModal = ({ existingKeys, onConfirm, onCancel }) => {
 const DeleteCategoryModal = ({ title, onConfirm, onCancel }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 z-10">
+        <div className="relative bg-[var(--nui-surface)] rounded-2xl shadow-2xl w-full max-w-sm p-6 z-10">
             <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-9 h-9 rounded-full bg-[var(--nui-risk-bg)] flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-[var(--nui-risk)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                 </div>
                 <div>
-                    <h2 className="text-base font-bold text-gray-800">Delete Section</h2>
-                    <p className="text-xs text-gray-500">This cannot be undone.</p>
+                    <h2 className="text-base font-bold text-[var(--nui-text)]">Delete Section</h2>
+                    <p className="text-xs text-[var(--nui-text-3)]">This cannot be undone.</p>
                 </div>
             </div>
-            <p className="text-sm text-gray-600 mb-5">
-                Delete <span className="font-semibold text-gray-800">{title}</span> and all its applications?
+            <p className="text-sm text-[var(--nui-text-2)] mb-5">
+                Delete <span className="font-semibold text-[var(--nui-text)]">{title}</span> and all its applications?
             </p>
             <div className="flex gap-3 justify-end">
-                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-[var(--nui-text-2)] bg-[var(--nui-surface-sunk)] hover:bg-[var(--nui-line-soft)] rounded-lg transition">
                     Cancel
                 </button>
-                <button type="button" onClick={onConfirm} className="px-5 py-2 text-sm font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-sm transition">
+                <button type="button" onClick={onConfirm} className="px-5 py-2 text-sm font-bold text-white bg-[var(--nui-risk)] hover:bg-[var(--nui-risk-hover)] rounded-lg shadow-sm transition">
                     Delete
                 </button>
             </div>
@@ -398,11 +398,11 @@ const AppGroup = ({ title, category, apps, allApplications, updateFormData, isCu
             )}
 
             <div id={`app-cat-${category}`} className="mb-8 scroll-mt-24">
-                <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <div className="flex justify-between items-center mb-4 border-b border-[var(--nui-line)] pb-2">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-bold text-[#15587B]">{title}</h3>
+                        <h3 className="text-lg font-bold text-[var(--nui-brand)]">{title}</h3>
                         {isCustom && (
-                            <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#34808A]/10 text-[#34808A] border border-[#34808A]/20">
+                            <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[var(--nui-accent)]/10 text-[var(--nui-accent)] border border-[var(--nui-accent)]/20">
                                 Custom
                             </span>
                         )}
@@ -412,7 +412,7 @@ const AppGroup = ({ title, category, apps, allApplications, updateFormData, isCu
                             <button
                                 type="button"
                                 onClick={() => setShowDeleteModal(true)}
-                                className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded transition flex items-center gap-1"
+                                className="text-xs text-[var(--nui-risk)] hover:text-[var(--nui-risk-hover)] hover:bg-[var(--nui-risk-bg)] px-2 py-1.5 rounded transition flex items-center gap-1"
                                 title="Delete this category"
                             >
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -424,7 +424,7 @@ const AppGroup = ({ title, category, apps, allApplications, updateFormData, isCu
                         <button
                             type="button"
                             onClick={addApp}
-                            className="text-xs bg-[#34808A] text-white px-3 py-1.5 rounded hover:bg-[#2b6f6f] transition"
+                            className="text-xs bg-[var(--nui-accent)] text-white px-3 py-1.5 rounded hover:bg-[var(--nui-accent-hover)] transition"
                         >
                             + Add Application
                         </button>
@@ -432,7 +432,7 @@ const AppGroup = ({ title, category, apps, allApplications, updateFormData, isCu
                 </div>
 
                 {apps.length === 0 && (
-                    <div className="text-gray-400 text-sm italic border border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                    <div className="text-[var(--nui-text-3)] text-sm italic border border-dashed border-[var(--nui-line-strong)] rounded-lg p-6 text-center bg-[var(--nui-surface-sunk)]">
                         No applications added in this category yet.
                     </div>
                 )}
@@ -574,7 +574,7 @@ const ApplicationsStep = memo(({ formData, updateFormData }) => {
                     <button
                         type="button"
                         onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 border-2 border-dashed border-[#34808A]/40 text-[#34808A] font-semibold text-sm rounded-xl hover:border-[#34808A] hover:bg-[#34808A]/5 transition-all duration-200"
+                        className="flex items-center gap-2 px-6 py-3 border-2 border-dashed border-[var(--nui-accent)]/40 text-[var(--nui-accent)] font-semibold text-sm rounded-xl hover:border-[var(--nui-accent)] hover:bg-[var(--nui-accent)]/5 transition-all duration-200"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />

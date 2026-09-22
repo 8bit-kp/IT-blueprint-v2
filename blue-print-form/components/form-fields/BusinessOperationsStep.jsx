@@ -12,13 +12,13 @@ import { Card, TextInput } from "./FormComponents";
 // body — see docs/project-memory.md for why this matters.
 
 const OptionalBadge = () => (
-    <span className="ml-1.5 text-[10px] font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-wide align-middle">
+    <span className="ml-1.5 text-[10px] font-semibold text-[var(--nui-text-3)] bg-[var(--nui-surface-sunk)] px-1.5 py-0.5 rounded uppercase tracking-wide align-middle">
         Optional
     </span>
 );
 
 const HelperText = ({ text }) =>
-    text ? <p className="mt-1 text-xs text-gray-400 leading-relaxed">{text}</p> : null;
+    text ? <p className="mt-1 text-xs text-[var(--nui-text-3)] leading-relaxed">{text}</p> : null;
 
 // Pill-style single-select button group — reused for Customer Type, Geographic
 // Reach, and Business Priority selections.
@@ -33,8 +33,8 @@ const OptionGroup = ({ options, value, onChange }) => (
                     onClick={() => onChange(isActive ? "" : opt)}
                     className={`px-4 py-1.5 text-sm font-semibold rounded-lg border transition-all duration-150 ${
                         isActive
-                            ? "bg-[#15587B] text-white border-[#15587B] shadow-sm"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-[#34808A] hover:text-[#15587B] hover:bg-gray-50"
+                            ? "bg-[var(--nui-brand)] text-white border-[var(--nui-brand)] shadow-[var(--nui-shadow-1)]"
+                            : "bg-[var(--nui-surface)] text-[var(--nui-text-2)] border-[var(--nui-line-strong)] hover:border-[var(--nui-accent)] hover:text-[var(--nui-brand)] hover:bg-[var(--nui-surface-sunk)]"
                     }`}
                 >
                     {opt}
@@ -59,8 +59,8 @@ const MultiSelectChips = ({ options, values = [], onChange }) => {
                     onClick={() => toggle(opt)}
                     className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-all duration-150 ${
                         values.includes(opt)
-                            ? "bg-[#15587B] text-white border-[#15587B]"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-[#34808A] hover:text-[#15587B]"
+                            ? "bg-[var(--nui-brand)] text-white border-[var(--nui-brand)]"
+                            : "bg-[var(--nui-surface)] text-[var(--nui-text-2)] border-[var(--nui-line-strong)] hover:border-[var(--nui-accent)] hover:text-[var(--nui-brand)]"
                     }`}
                 >
                     {opt}
@@ -95,7 +95,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
         <>
             {/* ── Section 1: Business Context ─────────────────────────────── */}
             <Card id="section-business-context" title="Business Context" className="max-w-5xl mx-auto scroll-mt-24">
-                <p className="text-xs text-gray-400 mb-6">
+                <p className="text-xs text-[var(--nui-text-3)] mb-6">
                     This section helps your Consltek advisor understand your organisation's operating model before
                     the consultation. All fields are optional.
                 </p>
@@ -105,7 +105,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
                     {/* Primary Business Function + Products / Services */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Primary Business Function<OptionalBadge />
                             </label>
                             <TextInput
@@ -117,7 +117,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Main Products or Services<OptionalBadge />
                             </label>
                             <TextInput
@@ -131,7 +131,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
 
                     {/* Customer Type */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-2">
                             Primary Customer Type<OptionalBadge />
                         </label>
                         <OptionGroup
@@ -145,7 +145,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
                     {/* Geographic Reach + Number of Locations */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-2">
                                 Geographic Reach<OptionalBadge />
                             </label>
                             <OptionGroup
@@ -157,7 +157,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-2">
                                 Number of Business Locations<OptionalBadge />
                             </label>
                             <OptionGroup
@@ -173,7 +173,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
 
             {/* ── Section 2: Business Criticality ─────────────────────────── */}
             <Card id="section-business-criticality" title="Business Criticality" className="max-w-5xl mx-auto mt-6 scroll-mt-24">
-                <p className="text-xs text-gray-400 mb-6">
+                <p className="text-xs text-[var(--nui-text-3)] mb-6">
                     Helps your advisor prioritise findings and focus the consultation on what matters most.
                     All fields are optional.
                 </p>
@@ -181,7 +181,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Most Critical Business Function<OptionalBadge />
                             </label>
                             <TextInput
@@ -193,7 +193,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Systems That Cannot Experience Downtime<OptionalBadge />
                             </label>
                             <TextInput
@@ -206,7 +206,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-2">
                             Highest Business Priority<OptionalBadge />
                         </label>
                         <OptionGroup
@@ -221,7 +221,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
 
             {/* ── Section 3: Operational Challenges ───────────────────────── */}
             <Card title="Operational Challenges" className="max-w-5xl mx-auto mt-6">
-                <p className="text-xs text-gray-400 mb-5">
+                <p className="text-xs text-[var(--nui-text-3)] mb-5">
                     Select any challenges your organisation is currently experiencing. This helps your advisor
                     focus the consultation on your most pressing areas.
                 </p>
@@ -233,7 +233,7 @@ const BusinessOperationsStep = memo(({ formData, setField }) => {
                 />
 
                 {(formData.operationalChallenges || []).length > 0 && (
-                    <p className="mt-3 text-xs text-[#34808A] font-medium">
+                    <p className="mt-3 text-xs text-[var(--nui-accent)] font-medium">
                         {formData.operationalChallenges.length} challenge
                         {formData.operationalChallenges.length !== 1 ? "s" : ""} selected
                     </p>

@@ -5,16 +5,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { notify } from "@/lib/notify";
 import { FiUser, FiMail, FiLock, FiBriefcase, FiArrowLeft, FiCheck } from "react-icons/fi";
+import { NuiReveal } from "@/components/ui/new";
 
 // Reusable InputField component
 const InputField = ({ icon: Icon, ...props }) => (
     <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--nui-text-3)]">
             <Icon size={18} />
         </div>
         <input
             {...props}
-            className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-[#34808A] focus:border-[#34808A] block transition-all placeholder-gray-500 ${props.className || ""}`}
+            className={`w-full pl-10 pr-4 py-3 bg-[var(--nui-surface-sunk)] border border-[var(--nui-line)] text-[var(--nui-text)] text-sm rounded-[var(--nui-r-sm)] outline-none focus:ring-2 focus:ring-[var(--nui-accent)]/40 focus:border-[var(--nui-accent)] block transition-all placeholder:text-[var(--nui-text-3)] ${props.className || ""}`}
         />
     </div>
 );
@@ -36,16 +37,16 @@ const PasswordHint = ({ password }) => (
                 <li
                     key={label}
                     className={`flex items-center gap-2 text-xs font-medium transition-colors duration-200 ${
-                        met ? "text-[#34808A]" : started ? "text-red-400" : "text-gray-400"
+                        met ? "text-[var(--nui-ok)]" : started ? "text-[var(--nui-risk)]" : "text-[var(--nui-text-3)]"
                     }`}
                 >
                     <span
                         className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-200 ${
                             met
-                                ? "bg-[#34808A] border-[#34808A] text-white"
+                                ? "bg-[var(--nui-ok)] border-[var(--nui-ok)] text-white"
                                 : started
-                                ? "border-red-300 text-red-400"
-                                : "border-gray-300"
+                                ? "border-[var(--nui-risk-line)] text-[var(--nui-risk)]"
+                                : "border-[var(--nui-line-strong)]"
                         }`}
                     >
                         {met && <FiCheck size={9} strokeWidth={3} />}
@@ -123,32 +124,33 @@ const Auth = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F3F4F6] flex flex-col justify-center items-center p-4 relative font-sans">
+        <div className="nui min-h-screen relative flex flex-col justify-center items-center p-4 font-sans">
+            <div aria-hidden="true" className="nui-bg pointer-events-none fixed inset-0 -z-10" />
 
             {/* Back Button */}
             <button
                 onClick={() => router.push("/")}
-                className="absolute top-6 left-6 flex items-center gap-2 text-gray-500 hover:text-[#15587B] transition font-medium text-sm"
+                className="absolute top-6 left-6 flex items-center gap-2 text-[var(--nui-text-3)] hover:text-[var(--nui-brand)] transition font-medium text-sm focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-2 rounded-[var(--nui-r-xs)]"
             >
                 <FiArrowLeft /> Back to Home
             </button>
 
-            <div className="w-full max-w-md">
+            <NuiReveal as="div" className="w-full max-w-md relative z-10">
                 {/* Logo Area */}
                 <div className="flex justify-center mb-8">
                     <img src="/conslteklogo.png" alt="Consltek" className="h-12 object-contain" />
                 </div>
 
                 {/* Card */}
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10 relative overflow-hidden">
+                <div className="bg-[var(--nui-surface)] rounded-[var(--nui-r-lg)] shadow-[var(--nui-shadow-3)] border border-[var(--nui-line)] p-8 sm:p-10 relative overflow-hidden">
                     {/* Top colored accent line */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#15587B] to-[#34808A]" />
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-[linear-gradient(90deg,var(--nui-brand),var(--nui-accent))]" />
 
                     <div className="text-center mb-8">
-                        <h2 className="text-2xl font-bold text-[#15587B]">
+                        <h2 className="text-2xl font-bold text-[var(--nui-brand)]">
                             {isLogin ? "Welcome Back" : "Create Your Account"}
                         </h2>
-                        <p className="text-sm text-gray-500 mt-2">
+                        <p className="text-sm text-[var(--nui-text-3)] mt-2">
                             {isLogin
                                 ? "Sign in to access your Current State Assessment."
                                 : "Create your account to begin your Current State Assessment."}
@@ -158,7 +160,7 @@ const Auth = () => {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Username */}
                         <div>
-                            <label className="block mb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <label className="block mb-1.5 text-xs font-semibold text-[var(--nui-text-2)] uppercase tracking-wider">
                                 Username
                             </label>
                             <InputField
@@ -175,7 +177,7 @@ const Auth = () => {
                         {!isLogin && (
                             <div className="space-y-5 animate-fade-in">
                                 <div>
-                                    <label className="block mb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <label className="block mb-1.5 text-xs font-semibold text-[var(--nui-text-2)] uppercase tracking-wider">
                                         Email Address
                                     </label>
                                     <InputField
@@ -188,7 +190,7 @@ const Auth = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block mb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <label className="block mb-1.5 text-xs font-semibold text-[var(--nui-text-2)] uppercase tracking-wider">
                                         Company
                                     </label>
                                     <InputField
@@ -205,7 +207,7 @@ const Auth = () => {
 
                         {/* Password */}
                         <div>
-                            <label className="block mb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <label className="block mb-1.5 text-xs font-semibold text-[var(--nui-text-2)] uppercase tracking-wider">
                                 Password
                             </label>
                             <InputField
@@ -225,9 +227,9 @@ const Auth = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full py-3.5 rounded-lg text-white font-bold text-sm tracking-wide shadow-md transition-all duration-300 transform hover:-translate-y-0.5 ${loading
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-[#15587B] hover:bg-[#0f4460] hover:shadow-lg"
+                            className={`w-full py-3.5 rounded-[var(--nui-r-sm)] text-white font-bold text-sm tracking-wide shadow-[var(--nui-shadow-2)] transition-all duration-300 transform hover:-translate-y-0.5 ${loading
+                                ? "bg-[var(--nui-idle)] cursor-not-allowed"
+                                : "bg-[var(--nui-brand)] hover:bg-[var(--nui-brand-hover)] hover:shadow-[var(--nui-shadow-3)]"
                                 }`}
                         >
                             {loading
@@ -239,19 +241,19 @@ const Auth = () => {
 
                         {/* Privacy acknowledgement — registration only */}
                         {!isLogin && (
-                            <p className="text-xs text-gray-400 text-center leading-relaxed pt-1">
+                            <p className="text-xs text-[var(--nui-text-3)] text-center leading-relaxed pt-1">
                                 By creating an account you agree to Consltek&apos;s{" "}
-                                <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#34808A] hover:underline font-medium">Privacy Policy</a>
+                                <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[var(--nui-accent)] hover:text-[var(--nui-brand)] hover:underline font-medium">Privacy Policy</a>
                                 {" "}and{" "}
-                                <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-[#34808A] hover:underline font-medium">Terms of Use</a>
+                                <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-[var(--nui-accent)] hover:text-[var(--nui-brand)] hover:underline font-medium">Terms of Use</a>
                                 .
                             </p>
                         )}
                     </form>
 
                     {/* Toggle Login/Register */}
-                    <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                        <p className="text-sm text-gray-600">
+                    <div className="mt-8 pt-6 border-t border-[var(--nui-line-soft)] text-center">
+                        <p className="text-sm text-[var(--nui-text-2)]">
                             {isLogin ? "Don't have an account yet?" : "Already have an account?"}{" "}
                             <button
                                 type="button"
@@ -264,7 +266,7 @@ const Auth = () => {
                                         password: "",
                                     });
                                 }}
-                                className="text-[#34808A] font-bold hover:text-[#2b6f6f] hover:underline transition ml-1"
+                                className="text-[var(--nui-accent)] font-bold hover:text-[var(--nui-brand)] hover:underline transition ml-1"
                             >
                                 {isLogin ? "Register" : "Sign In"}
                             </button>
@@ -273,10 +275,10 @@ const Auth = () => {
                 </div>
 
                 {/* Footer Note */}
-                <p className="text-center text-xs text-gray-400 mt-8">
+                <p className="text-center text-xs text-[var(--nui-text-3)] mt-8">
                     &copy; {new Date().getFullYear()} Consltek. All rights reserved.
                 </p>
-            </div>
+            </NuiReveal>
         </div>
     );
 };

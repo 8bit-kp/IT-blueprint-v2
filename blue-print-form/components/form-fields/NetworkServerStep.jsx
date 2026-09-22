@@ -22,13 +22,13 @@ const NetworkServerStep = memo(({ formData, setField, initialTechControlState })
       <div className="space-y-8">
         {/* Main Location Section */}
         <div>
-          <h3 className="text-sm font-bold text-gray-400 uppercase mb-3 tracking-wider">Main Location</h3>
+          <h3 className="nui-eyebrow text-sm font-bold text-[var(--nui-text-3)] mb-3">Main Location</h3>
           <TextInput placeholder="HQ Location Name" value={formData.mainLocation} onChange={(v) => setField("mainLocation", v)} />
         </div>
 
         {/* Infrastructure Vendors Section */}
-        <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-sm font-bold text-gray-400 uppercase mb-4 tracking-wider">Infrastructure Vendors</h3>
+        <div className="border-t border-[var(--nui-line-soft)] pt-6">
+          <h3 className="nui-eyebrow text-sm font-bold text-[var(--nui-text-3)] mb-4">Infrastructure Vendors</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {infraControls.map((ctl) => {
               const currentData = (typeof formData[ctl.key] === 'object' && formData[ctl.key] !== null)
@@ -49,8 +49,8 @@ const NetworkServerStep = memo(({ formData, setField, initialTechControlState })
         </div>
 
         {/* Network Config & Servers Section */}
-        <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-sm font-bold text-gray-400 uppercase mb-4 tracking-wider">Network Config & Servers</h3>
+        <div className="border-t border-[var(--nui-line-soft)] pt-6">
+          <h3 className="nui-eyebrow text-sm font-bold text-[var(--nui-text-3)] mb-4">Network Config & Servers</h3>
 
           <div className="space-y-8">
 
@@ -84,7 +84,7 @@ const NetworkServerStep = memo(({ formData, setField, initialTechControlState })
                 />
 
                 {formData.windowsServers === "Yes" && (
-                  <div className="mt-2 ml-2 pl-3 border-l-2 border-gray-200">
+                  <div className="mt-2 ml-2 pl-3 border-l-2 border-[var(--nui-line)]">
                     <MultiCheckbox
                       label="Select features:"
                       options={["Protected", "Backed-up", "Monitored", "Not Monitored"]}
@@ -104,7 +104,7 @@ const NetworkServerStep = memo(({ formData, setField, initialTechControlState })
                 />
 
                 {formData.linuxServers === "Yes" && (
-                  <div className="mt-2 ml-2 pl-3 border-l-2 border-gray-200">
+                  <div className="mt-2 ml-2 pl-3 border-l-2 border-[var(--nui-line)]">
                     <MultiCheckbox
                       label="Select features:"
                       options={[
@@ -123,7 +123,7 @@ const NetworkServerStep = memo(({ formData, setField, initialTechControlState })
               </div>
               {/* Wireless Auth */}
               <div className="flex flex-col sm:flex-row justify-between sm:items-center py-2">
-                <span className="text-sm font-medium text-gray-700">Wireless Auth</span>
+                <span className="text-sm font-medium text-[var(--nui-text-2)]">Wireless Auth</span>
                 <ToggleButton
                   options={["PSK", "EAP-PEAP", "EAP-TLS"]}
                   value={formData.wirelessAuth}
@@ -135,7 +135,7 @@ const NetworkServerStep = memo(({ formData, setField, initialTechControlState })
 
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-6 pt-6 border-t border-[var(--nui-line-soft)]">
             <MultiCheckbox label="Desktops - Select all that apply:" options={["Fully patched", "Stored PHI/PII", "Monitored", "Protected", "Backed up"]} values={formData.desktopOptions || []} onChange={(vals) => setField("desktopOptions", vals)} />
           </div>
         </div>

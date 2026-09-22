@@ -13,7 +13,7 @@ const SecurityAdminStep = memo(({ formData, setField }) => (
         <YesNo label="Written BCDR Plan" value={formData.bcdrPlan} onChange={(v) => setField("bcdrPlan", v)} />
         <YesNo label="Cybersecurity Insurance" value={formData.cyberInsurance} onChange={(v) => setField("cyberInsurance", v)} />
       </div>
-      <div className="space-y-1 md:border-l-2 md:border-gray-300 md:pl-8">
+      <div className="space-y-1 md:border-l-2 md:border-[var(--nui-line-strong)] md:pl-8">
         <YesNo label="Back up Recovery Tested" value={formData.testBackup} onChange={(v) => setField("testBackup", v)} />
         <YesNo label="Change Control Process" value={formData.changeControl} onChange={(v) => setField("changeControl", v)} />
         <YesNo label="Incident Response Plan" value={formData.incidentResponse} onChange={(v) => setField("incidentResponse", v)} />

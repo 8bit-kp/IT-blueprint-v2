@@ -28,10 +28,10 @@ export const STATUS_COLORS = {
      * Tailwind classes: background + text + border.
      */
     badge: {
-        Yes: "bg-green-100 text-green-800 border border-green-300",
-        No: "bg-red-100   text-red-800   border border-red-300",
-        Partial: "bg-teal-100  text-teal-800  border border-teal-300",
-        default: "bg-gray-100  text-gray-500  border border-gray-300",
+        Yes: "bg-green-100 text-green-800 border border-green-300 dark:bg-[var(--nui-ok-bg)] dark:text-[var(--nui-ok)] dark:border-[var(--nui-ok-line)]",
+        No: "bg-red-100   text-red-800   border border-red-300 dark:bg-[var(--nui-risk-bg)] dark:text-[var(--nui-risk)] dark:border-[var(--nui-risk-line)]",
+        Partial: "bg-teal-100  text-teal-800  border border-teal-300 dark:bg-[var(--nui-accent-tint)] dark:text-[var(--nui-accent)] dark:border-[var(--nui-line-strong)]",
+        default: "bg-gray-100  text-gray-500  border border-gray-300 dark:bg-[var(--nui-surface-sunk)] dark:text-[var(--nui-text-3)] dark:border-[var(--nui-line)]",
     },
 
     /**
@@ -39,9 +39,9 @@ export const STATUS_COLORS = {
      * Tailwind classes for the active (selected) state only.
      */
     toggle: {
-        Yes: "bg-green-100 text-green-700 hover:bg-green-200",
-        No: "bg-red-100   text-red-700   hover:bg-red-200",
-        default: "bg-gray-100  text-gray-600  hover:bg-gray-200",
+        Yes: "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-[var(--nui-ok-bg)] dark:text-[var(--nui-ok)] dark:hover:bg-[var(--nui-ok-bg)]",
+        No: "bg-red-100   text-red-700   hover:bg-red-200 dark:bg-[var(--nui-risk-bg)] dark:text-[var(--nui-risk)] dark:hover:bg-[var(--nui-risk-bg)]",
+        default: "bg-gray-100  text-gray-600  hover:bg-gray-200 dark:bg-[var(--nui-surface-sunk)] dark:text-[var(--nui-text-2)] dark:hover:bg-[var(--nui-line-soft)]",
     },
 
     /**
@@ -73,22 +73,24 @@ export const PRIORITY_COLORS = {
      * Colored chip used inside <select> / row backgrounds in CurrentStateDashboard.
      */
     chip: {
-        Critical: "bg-red-100    text-red-800    font-bold",
-        High:     "bg-orange-100 text-orange-800 font-bold",
-        Medium:   "bg-blue-100   text-blue-800   font-bold",
-        Low:      "bg-green-100  text-green-800  font-bold",
-        default:  "bg-gray-50    text-gray-600",
+        Critical: "bg-red-100    text-red-800    font-bold dark:bg-[var(--nui-risk-bg)] dark:text-[var(--nui-risk)]",
+        High:     "bg-orange-100 text-orange-800 font-bold dark:bg-[var(--nui-warn-bg)] dark:text-[var(--nui-warn)]",
+        Medium:   "bg-blue-100   text-blue-800   font-bold dark:bg-[var(--nui-info-bg)] dark:text-[var(--nui-info)]",
+        Low:      "bg-green-100  text-green-800  font-bold dark:bg-[var(--nui-ok-bg)] dark:text-[var(--nui-ok)]",
+        default:  "bg-gray-50    text-gray-600 dark:bg-[var(--nui-surface-sunk)] dark:text-[var(--nui-text-3)]",
     },
 
     /**
      * Read-only pill badges in dashboards / blueprint-summary.
+     * Solid saturated backgrounds with white text — already legible on dark
+     * canvases without a dark: override (same rule as PRIORITY_COLORS.button).
      */
     badge: {
         Critical: "bg-red-600    text-white",
         High:     "bg-orange-500 text-white",
         Medium:   "bg-blue-500   text-white",
         Low:      "bg-green-500  text-white",
-        default:  "bg-gray-200   text-gray-500",
+        default:  "bg-gray-200   text-gray-500 dark:bg-[var(--nui-surface-sunk)] dark:text-[var(--nui-text-3)]",
     },
 };
 
@@ -99,12 +101,12 @@ export const OFFERING_COLORS = {
      * Read-only pill badges used in SecurityDashboard.
      */
     badge: {
-        "SaaS": "bg-indigo-100 text-indigo-800 border border-indigo-300",
-        "On-premise": "bg-gray-100   text-gray-700   border border-gray-300",
-        "On-Premise": "bg-gray-100   text-gray-700   border border-gray-300",
-        "Hybrid": "bg-purple-100 text-purple-800  border border-purple-300",
-        "Cloud": "bg-sky-100    text-sky-800     border border-sky-300",
-        default: "bg-gray-100   text-gray-500    border border-gray-300",
+        "SaaS": "bg-indigo-100 text-indigo-800 border border-indigo-300 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800",
+        "On-premise": "bg-gray-100   text-gray-700   border border-gray-300 dark:bg-[var(--nui-surface-sunk)] dark:text-[var(--nui-text-2)] dark:border-[var(--nui-line)]",
+        "On-Premise": "bg-gray-100   text-gray-700   border border-gray-300 dark:bg-[var(--nui-surface-sunk)] dark:text-[var(--nui-text-2)] dark:border-[var(--nui-line)]",
+        "Hybrid": "bg-purple-100 text-purple-800  border border-purple-300 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800",
+        "Cloud": "bg-sky-100    text-sky-800     border border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800",
+        default: "bg-gray-100   text-gray-500    border border-gray-300 dark:bg-[var(--nui-surface-sunk)] dark:text-[var(--nui-text-3)] dark:border-[var(--nui-line)]",
     },
 };
 
@@ -192,12 +194,20 @@ export const PRIORITY_HEX = {
     default:  "#d1d5db",  // gray-300
 };
 
+// CSS var() references (not literal hex) so this pale background tint
+// switches to its dark-surface-safe equivalent via the same html[data-theme]
+// cascade the rest of the nui token system uses — see styles/new-ui/tokens.css.
+// Safe here because the only consumer (ApplicationDonutGrid) sets it via an
+// inline `style.backgroundColor`, not an SVG fill attribute.
 export const PRIORITY_HEX_BG = {
-    Low:      "#dcfce7",  // green-100
-    Medium:   "#fef9c3",  // yellow-100
-    High:     "#ffedd5",  // orange-100
-    Critical: "#fee2e2",  // red-100
-    default:  "#f9fafb",
+    // nui has no dedicated "yellow" step, so Medium shares the amber warn-bg
+    // with High — the yellow vs. orange text color (PRIORITY_HEX above)
+    // still keeps the two tiers visually distinct.
+    Low:      "var(--nui-ok-bg)",
+    Medium:   "var(--nui-warn-bg)",
+    High:     "var(--nui-warn-bg)",
+    Critical: "var(--nui-risk-bg)",
+    default:  "var(--nui-surface-sunk)",
 };
 
 /**

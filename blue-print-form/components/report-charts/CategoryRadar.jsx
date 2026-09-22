@@ -19,9 +19,9 @@ const RadarTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
     const { subject, value } = payload[0]?.payload || {};
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-xs">
-            <p className="font-semibold text-gray-700">{subject}</p>
-            <p className="text-[#15587B] font-bold">{value}/100</p>
+        <div className="bg-[var(--nui-surface)] border border-[var(--nui-line)] rounded-lg shadow-[var(--nui-shadow-2)] px-3 py-2 text-xs">
+            <p className="font-semibold text-[var(--nui-text-2)]">{subject}</p>
+            <p className="text-[var(--nui-brand)] font-bold">{value}/100</p>
         </div>
     );
 };
@@ -52,19 +52,19 @@ const CategoryRadar = ({ categories = [] }) => {
     return (
         <ResponsiveContainer width="100%" height={320}>
             <RadarChart data={data} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
-                <PolarGrid gridType="polygon" stroke="#e5e7eb" />
+                <PolarGrid gridType="polygon" stroke="var(--nui-line)" />
                 <PolarAngleAxis
                     dataKey="subject"
-                    tick={{ fontSize: 10, fill: "#6b7280", fontWeight: 500 }}
+                    tick={{ fontSize: 10, fill: "var(--nui-text-2)", fontWeight: 500 }}
                 />
                 <Radar
                     name="Score"
                     dataKey="value"
-                    stroke="#15587B"
-                    fill="#15587B"
+                    stroke="var(--nui-brand)"
+                    fill="var(--nui-brand)"
                     fillOpacity={0.18}
                     strokeWidth={2}
-                    dot={{ r: 3, fill: "#15587B", strokeWidth: 0 }}
+                    dot={{ r: 3, fill: "var(--nui-brand)", strokeWidth: 0 }}
                 />
                 <Tooltip content={<RadarTooltip />} />
             </RadarChart>

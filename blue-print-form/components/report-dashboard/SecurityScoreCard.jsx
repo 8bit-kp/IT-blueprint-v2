@@ -29,11 +29,11 @@ const scoreColor = (s) => {
 };
 
 const scoreZone = (s) => {
-    if (s <= 30) return { badge: "bg-red-100 text-red-700", label: "Critical" };
-    if (s <= 50) return { badge: "bg-amber-100 text-amber-700", label: "At Risk" };
-    if (s <= 65) return { badge: "bg-yellow-100 text-yellow-700", label: "Developing" };
-    if (s <= 80) return { badge: "bg-teal-100 text-teal-700", label: "Managed" };
-    return { badge: "bg-green-100 text-green-700", label: "Optimized" };
+    if (s <= 30) return { badge: "bg-red-100 text-red-700 dark:bg-[var(--nui-risk-bg)] dark:text-[var(--nui-risk)]", label: "Critical" };
+    if (s <= 50) return { badge: "bg-amber-100 text-amber-700 dark:bg-[var(--nui-warn-bg)] dark:text-[var(--nui-warn)]", label: "At Risk" };
+    if (s <= 65) return { badge: "bg-yellow-100 text-yellow-700 dark:bg-[var(--nui-warn-bg)] dark:text-[var(--nui-warn)]", label: "Developing" };
+    if (s <= 80) return { badge: "bg-teal-100 text-teal-700 dark:bg-[var(--nui-accent-tint)] dark:text-[var(--nui-accent)]", label: "Managed" };
+    return { badge: "bg-green-100 text-green-700 dark:bg-[var(--nui-ok-bg)] dark:text-[var(--nui-ok)]", label: "Optimized" };
 };
 
 const SecurityScoreCard = ({ report }) => {

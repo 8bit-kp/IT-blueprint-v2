@@ -53,11 +53,11 @@ const CategoryTooltip = ({ active, payload }) => {
     const d = payload[0]?.payload;
     if (!d) return null;
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-xs max-w-48">
-            <p className="font-bold text-gray-800 mb-0.5">{d.fullName}</p>
-            <p className="text-gray-500">Score: <span className="font-bold" style={{ color: getBarColor(d.rawScore) }}>{d.rawScore}/100</span></p>
-            <p className="text-gray-500">Weight: <span className="font-medium">{Math.round(d.weight * 100)}%</span></p>
-            <p className="text-gray-500">Contribution: <span className="font-medium">+{d.contribution} pts</span></p>
+        <div className="bg-[var(--nui-surface)] border border-[var(--nui-line)] rounded-lg shadow-[var(--nui-shadow-2)] px-3 py-2 text-xs max-w-48">
+            <p className="font-bold text-[var(--nui-text)] mb-0.5">{d.fullName}</p>
+            <p className="text-[var(--nui-text-3)]">Score: <span className="font-bold" style={{ color: getBarColor(d.rawScore) }}>{d.rawScore}/100</span></p>
+            <p className="text-[var(--nui-text-3)]">Weight: <span className="font-medium">{Math.round(d.weight * 100)}%</span></p>
+            <p className="text-[var(--nui-text-3)]">Contribution: <span className="font-medium">+{d.contribution} pts</span></p>
         </div>
     );
 };
@@ -80,20 +80,20 @@ const HorizontalBarChart = ({ categories = [] }) => {
                 margin={{ top: 5, right: 60, bottom: 5, left: 10 }}
                 barSize={16}
             >
-                <CartesianGrid horizontal={false} stroke="#f3f4f6" strokeDasharray="3 3" />
-                <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
+                <CartesianGrid horizontal={false} stroke="var(--nui-line-soft)" strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: "var(--nui-text-3)" }} tickLine={false} axisLine={false} />
                 <YAxis
                     type="category"
                     dataKey="name"
                     width={82}
-                    tick={{ fontSize: 10, fill: "#6b7280", fontWeight: 500 }}
+                    tick={{ fontSize: 10, fill: "var(--nui-text-2)", fontWeight: 500 }}
                     tickLine={false}
                     axisLine={false}
                 />
-                <Tooltip content={<CategoryTooltip />} cursor={{ fill: "#f9fafb" }} />
+                <Tooltip content={<CategoryTooltip />} cursor={{ fill: "var(--nui-surface-sunk)" }} />
 
                 {/* Gap bar (background, light gray) */}
-                <Bar dataKey="gap" stackId="a" fill="#f3f4f6" radius={[0, 6, 6, 0]} isAnimationActive={false} />
+                <Bar dataKey="gap" stackId="a" fill="var(--nui-line-soft)" radius={[0, 6, 6, 0]} isAnimationActive={false} />
 
                 {/* Score bar (foreground, colour-coded) */}
                 <Bar dataKey="rawScore" stackId="a" radius={[0, 4, 4, 0]} isAnimationActive>
@@ -103,7 +103,7 @@ const HorizontalBarChart = ({ categories = [] }) => {
                     <LabelList
                         dataKey="rawScore"
                         position="right"
-                        style={{ fontSize: 10, fontWeight: 700, fill: "#374151" }}
+                        style={{ fontSize: 10, fontWeight: 700, fill: "var(--nui-text)" }}
                         formatter={(v) => `${v}`}
                     />
                 </Bar>

@@ -120,8 +120,8 @@ const BlueprintDashboardContent = () => {
     // No Data State
     if (!formData) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-gray-700">No data found</div>
+            <div className="min-h-screen flex items-center justify-center bg-[var(--nui-canvas)]">
+                <div className="text-[var(--nui-text-2)]">No data found</div>
             </div>
         );
     }
@@ -141,8 +141,8 @@ const BlueprintDashboardContent = () => {
                 return <AdministrationDashboard formData={formData} updateField={updateField} />;
             default:
                 return (
-                    <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8 text-center">
-                        <p className="text-gray-700">Unknown blueprint type</p>
+                    <div className="bg-[var(--nui-surface)] rounded-xl shadow-[var(--nui-shadow-2)] border border-[var(--nui-line)] p-8 text-center">
+                        <p className="text-[var(--nui-text-2)]">Unknown blueprint type</p>
                     </div>
                 );
         }

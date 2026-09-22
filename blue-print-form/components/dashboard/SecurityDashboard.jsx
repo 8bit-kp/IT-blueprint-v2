@@ -33,19 +33,19 @@ const SecurityDashboard = ({ formData }) => {
     return (
         <div className="space-y-6">
             {/* ── Technical Controls Table ───────────────────────────────── */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+            <div className="bg-[var(--nui-surface)] rounded-xl border border-[var(--nui-line)] overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-[var(--nui-line-soft)] bg-[var(--nui-surface-sunk)]/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[var(--nui-accent)] rounded-full" />
                     <div>
-                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Security Technical Controls</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">Security controls inventory from your Current State Assessment</p>
+                        <h2 className="text-sm font-bold text-[var(--nui-brand)] uppercase tracking-wide">Security Technical Controls</h2>
+                        <p className="text-xs text-[var(--nui-text-3)] mt-0.5">Security controls inventory from your Current State Assessment</p>
                     </div>
                 </div>
                 <div className="p-5">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse">
                             <thead>
-                                <tr className="bg-gray-100 text-gray-600 text-xs">
+                                <tr className="bg-[var(--nui-surface-sunk)] text-[var(--nui-text-2)] text-xs">
                                     <th className="px-4 py-3 text-left font-bold">Control</th>
                                     <th className="px-4 py-3 text-left font-bold">Status</th>
                                     <th className="px-4 py-3 text-left font-bold">Vendor / Provider</th>
@@ -59,20 +59,20 @@ const SecurityDashboard = ({ formData }) => {
                                     return (
                                         <tr
                                             key={control.key}
-                                            className={`border-b border-gray-200 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? "bg-[#B8E6E6]/30" : "bg-white"
+                                            className={`border-b border-[var(--nui-line)] hover:bg-[var(--nui-surface-sunk)] transition-colors ${index % 2 === 0 ? "bg-[var(--nui-accent-tint)]" : "bg-[var(--nui-surface)]"
                                                 }`}
                                         >
-                                            <td className="px-4 py-4 font-semibold text-gray-800">
+                                            <td className="px-4 py-4 font-semibold text-[var(--nui-text)]">
                                                 {control.label}
                                             </td>
                                             <td className="px-4 py-4">
                                                 <StatusBadge value={value.choice} />
                                             </td>
-                                            <td className="px-4 py-4 text-sm text-gray-700">
+                                            <td className="px-4 py-4 text-sm text-[var(--nui-text-2)]">
                                                 {value.vendor ? (
                                                     <span className="font-medium">{value.vendor}</span>
                                                 ) : (
-                                                    <span className="text-gray-400 italic text-xs">—</span>
+                                                    <span className="text-[var(--nui-text-3)] italic text-xs">—</span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-4">
@@ -91,12 +91,12 @@ const SecurityDashboard = ({ formData }) => {
             </div>
 
             {/* ── Administrative Controls Grid ───────────────────────────── */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+            <div className="bg-[var(--nui-surface)] rounded-xl border border-[var(--nui-line)] overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-[var(--nui-line-soft)] bg-[var(--nui-surface-sunk)]/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[var(--nui-accent)] rounded-full" />
                     <div>
-                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Governance &amp; Administrative Controls</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">Governance and administrative controls inventory from your assessment</p>
+                        <h2 className="text-sm font-bold text-[var(--nui-brand)] uppercase tracking-wide">Governance &amp; Administrative Controls</h2>
+                        <p className="text-xs text-[var(--nui-text-3)] mt-0.5">Governance and administrative controls inventory from your assessment</p>
                     </div>
                 </div>
                 <div className="p-5">
@@ -104,9 +104,9 @@ const SecurityDashboard = ({ formData }) => {
                         {ADMIN_CONTROLS.map((control) => (
                             <div
                                 key={control.key}
-                                className="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-colors"
+                                className="flex items-center justify-between gap-4 p-4 bg-[var(--nui-surface-sunk)] rounded-xl border border-[var(--nui-line)] hover:border-[var(--nui-accent)]/50 transition-colors"
                             >
-                                <span className="font-semibold text-gray-700 text-sm">{control.label}</span>
+                                <span className="font-semibold text-[var(--nui-text-2)] text-sm">{control.label}</span>
                                 <StatusBadge value={formData?.[control.key]} />
                             </div>
                         ))}

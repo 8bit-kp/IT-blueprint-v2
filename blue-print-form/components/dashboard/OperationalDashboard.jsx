@@ -41,12 +41,12 @@ const OperationalDashboard = ({ formData, updateField }) => {
     return (
         <div className="space-y-6">
             {/* Infrastructure Vendors Section */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+            <div className="bg-[var(--nui-surface)] rounded-xl border border-[var(--nui-line)] overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-[var(--nui-line-soft)] bg-[var(--nui-surface-sunk)]/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[var(--nui-accent)] rounded-full" />
                     <div>
-                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Infrastructure Vendors</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">Network and server infrastructure providers</p>
+                        <h2 className="text-sm font-bold text-[var(--nui-brand)] uppercase tracking-wide">Infrastructure Vendors</h2>
+                        <p className="text-xs text-[var(--nui-text-3)] mt-0.5">Network and server infrastructure providers</p>
                     </div>
                 </div>
                 <div className="p-5">
@@ -55,13 +55,13 @@ const OperationalDashboard = ({ formData, updateField }) => {
                             const value = formData[vendor.key] || {};
                             const vendorList = getVendors(vendor.key);
                             return (
-                                <div key={vendor.key} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-all">
-                                    <div className="font-semibold text-gray-700 text-sm flex items-center">{vendor.label}</div>
+                                <div key={vendor.key} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-[var(--nui-surface-sunk)] rounded-xl border border-[var(--nui-line)] hover:border-[var(--nui-accent)]/50 transition-all">
+                                    <div className="font-semibold text-[var(--nui-text-2)] text-sm flex items-center">{vendor.label}</div>
                                     {vendorList.length > 0 ? (
                                         <select
                                             value={value.vendor || ""}
                                             onChange={(e) => updateVendorField(vendor.key, "vendor", e.target.value)}
-                                            className="px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] bg-white"
+                                            className="px-4 py-2.5 border-2 border-[var(--nui-line-strong)] rounded-lg text-[var(--nui-text)] focus:ring-2 focus:ring-[var(--nui-accent)] focus:border-[var(--nui-accent)] bg-[var(--nui-surface)]"
                                         >
                                             <option value="">Select Vendor...</option>
                                             {vendorList.map((v) => (
@@ -74,13 +74,13 @@ const OperationalDashboard = ({ formData, updateField }) => {
                                             value={value.vendor || ""}
                                             onChange={(e) => updateVendorField(vendor.key, "vendor", e.target.value)}
                                             placeholder="Enter vendor name..."
-                                            className="px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] focus:placeholder-gray-500 bg-white"
+                                            className="px-4 py-2.5 border-2 border-[var(--nui-line-strong)] rounded-lg text-[var(--nui-text)] placeholder-gray-400 focus:ring-2 focus:ring-[var(--nui-accent)] focus:border-[var(--nui-accent)] focus:placeholder-gray-500 bg-[var(--nui-surface)]"
                                         />
                                     )}
                                     <select
                                         value={value.businessPriority || "Medium"}
                                         onChange={(e) => updateVendorField(vendor.key, "businessPriority", e.target.value)}
-                                        className={`px-4 py-2.5 border-2 border-gray-300 rounded-lg font-semibold focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] ${getPriorityChipClass(value.businessPriority)}`}
+                                        className={`px-4 py-2.5 border-2 border-[var(--nui-line-strong)] rounded-lg font-semibold focus:ring-2 focus:ring-[var(--nui-accent)] focus:border-[var(--nui-accent)] ${getPriorityChipClass(value.businessPriority)}`}
                                     >
                                         <option value="Critical">Critical</option>
                                         <option value="High">High</option>
@@ -90,7 +90,7 @@ const OperationalDashboard = ({ formData, updateField }) => {
                                     <select
                                         value={value.offering || "On-Premise"}
                                         onChange={(e) => updateVendorField(vendor.key, "offering", e.target.value)}
-                                        className="px-4 py-2.5 border-2 border-gray-300 rounded-lg font-medium text-gray-800 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] bg-white"
+                                        className="px-4 py-2.5 border-2 border-[var(--nui-line-strong)] rounded-lg font-medium text-[var(--nui-text)] focus:ring-2 focus:ring-[var(--nui-accent)] focus:border-[var(--nui-accent)] bg-[var(--nui-surface)]"
                                     >
                                         <option value="On-Premise">On-Premise</option>
                                         <option value="SaaS">SaaS</option>
@@ -105,25 +105,25 @@ const OperationalDashboard = ({ formData, updateField }) => {
             </div>
 
             {/* Network Configuration Section */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+            <div className="bg-[var(--nui-surface)] rounded-xl border border-[var(--nui-line)] overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-[var(--nui-line-soft)] bg-[var(--nui-surface-sunk)]/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[var(--nui-accent)] rounded-full" />
                     <div>
-                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Network Configuration</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">WAN connections and network topology</p>
+                        <h2 className="text-sm font-bold text-[var(--nui-brand)] uppercase tracking-wide">Network Configuration</h2>
+                        <p className="text-xs text-[var(--nui-text-3)] mt-0.5">WAN connections and network topology</p>
                     </div>
                 </div>
                 <div className="p-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {networkConfig.map((config) => (
-                            <div key={config.key} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-all">
-                                <label className="flex-1 font-semibold text-gray-700 text-sm">{config.label}</label>
+                            <div key={config.key} className="flex items-center gap-4 p-4 bg-[var(--nui-surface-sunk)] rounded-xl border border-[var(--nui-line)] hover:border-[var(--nui-accent)]/50 transition-all">
+                                <label className="flex-1 font-semibold text-[var(--nui-text-2)] text-sm">{config.label}</label>
                                 <input
                                     type="text"
                                     value={formData[config.key] || ""}
                                     onChange={(e) => updateField(config.key, e.target.value)}
                                     placeholder="Enter value..."
-                                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] focus:placeholder-gray-500 bg-white"
+                                    className="flex-1 px-4 py-2.5 border-2 border-[var(--nui-line-strong)] rounded-lg text-[var(--nui-text)] placeholder-gray-400 focus:ring-2 focus:ring-[var(--nui-accent)] focus:border-[var(--nui-accent)] focus:placeholder-gray-500 bg-[var(--nui-surface)]"
                                 />
                             </div>
                         ))}
@@ -132,25 +132,25 @@ const OperationalDashboard = ({ formData, updateField }) => {
             </div>
 
             {/* Facilities Section */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                    <div className="h-5 w-1 bg-[#34808A] rounded-full" />
+            <div className="bg-[var(--nui-surface)] rounded-xl border border-[var(--nui-line)] overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-[var(--nui-line-soft)] bg-[var(--nui-surface-sunk)]/50 flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[var(--nui-accent)] rounded-full" />
                     <div>
-                        <h2 className="text-sm font-bold text-[#15587B] uppercase tracking-wide">Facilities Information</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">Physical infrastructure and data centers</p>
+                        <h2 className="text-sm font-bold text-[var(--nui-brand)] uppercase tracking-wide">Facilities Information</h2>
+                        <p className="text-xs text-[var(--nui-text-3)] mt-0.5">Physical infrastructure and data centers</p>
                     </div>
                 </div>
                 <div className="p-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {facilities.map((facility) => (
-                            <div key={facility.key} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#34808A]/50 transition-all">
-                                <label className="flex-1 font-semibold text-gray-700 text-sm">{facility.label}</label>
+                            <div key={facility.key} className="flex items-center gap-4 p-4 bg-[var(--nui-surface-sunk)] rounded-xl border border-[var(--nui-line)] hover:border-[var(--nui-accent)]/50 transition-all">
+                                <label className="flex-1 font-semibold text-[var(--nui-text-2)] text-sm">{facility.label}</label>
                                 <input
                                     type="text"
                                     value={formData[facility.key] || ""}
                                     onChange={(e) => updateField(facility.key, e.target.value)}
                                     placeholder="Enter value..."
-                                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-[#34808A] focus:border-[#34808A] focus:placeholder-gray-500 bg-white"
+                                    className="flex-1 px-4 py-2.5 border-2 border-[var(--nui-line-strong)] rounded-lg text-[var(--nui-text)] placeholder-gray-400 focus:ring-2 focus:ring-[var(--nui-accent)] focus:border-[var(--nui-accent)] focus:placeholder-gray-500 bg-[var(--nui-surface)]"
                                 />
                             </div>
                         ))}

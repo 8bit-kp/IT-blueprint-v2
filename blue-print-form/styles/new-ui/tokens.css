@@ -97,6 +97,121 @@
     color: var(--nui-text);
 }
 
+/* ══ Dark theme ════════════════════════════════════════════════════════════
+   One attribute, one place: `data-theme="dark"` on <html> (set by
+   lib/theme.js before hydration, toggled by ThemeContext, read by every
+   `.nui`-scoped element below via this single selector). Every `.nui`
+   element in the app — whether it's <NuiCanvas>'s root, AppShell's root, or
+   one of the several self-scoping components (Navbar, Footer, standalone
+   modals) — inherits these overrides the same way, because the selector
+   targets ANY `.nui` descendant of a dark-flagged <html>, not one specific
+   wrapper. See docs/ui-redesign.md "Dark mode" section for the full
+   rationale and the contrast numbers behind every value below.
+
+   This is a proper dark surface hierarchy, not an inversion: canvas is the
+   darkest layer (furthest back), surface sits one step lighter (cards read
+   as "raised" the same way they do via shadow in light mode — lightness
+   *is* elevation in dark UIs), and sunk/quiet sit between the two, exactly
+   mirroring the light theme's own canvas < surface-sunk < surface-quiet <
+   surface ordering.
+
+   Brand teal/orange hues are preserved, per requirement — only a few
+   lightness-shifted for dark-mode TEXT legibility (`--nui-brand` at
+   #15587B is 2.18:1 as text on a dark surface, well under the 4.5:1 AA
+   floor; #3E93BD is the same hue family, verified at 4.91:1). That
+   necessarily lightens solid brand-coloured buttons too, since both roles
+   share one token — verified white-on-button-fill still clears 3.44:1
+   (AA for bold UI-scale text; WCAG 1.4.11 only requires 3:1 for the
+   control itself). Semantic status colours (ok/warn/risk/info/idle) follow
+   the same rule the light theme already set: fixed meanings, never
+   reskinned to brand teal, brightened here only for dark-surface legibility
+   — background tints are dark, desaturated washes of the same hue rather
+   than the light theme's pale washes. */
+html[data-theme="dark"] .nui {
+    /* ── Brand ─────────────────────────────────────────────────────────── */
+    --nui-brand:            #3E93BD;
+    --nui-brand-hover:      #5AA8CE;   /* dark mode hover = lighten, not darken */
+    --nui-brand-deep:       #173047;
+    --nui-accent:           #4DA8B2;
+    --nui-accent-hover:     #68BAC3;
+    --nui-accent-tint:      rgba(77, 168, 178, 0.14);
+    --nui-accent-tint-2:    rgba(77, 168, 178, 0.28);
+    --nui-warm:             #D98A3D;
+    --nui-warm-hover:       #E8A05C;
+
+    /* ── Neutral surface ladder — canvas darkest, surface one step lighter
+       ("raised" = lighter, the dark-UI equivalent of light mode's shadow) ── */
+    --nui-canvas:           #0A1520;
+    --nui-surface:          #101E2C;
+    --nui-surface-sunk:     #0C1826;
+    --nui-surface-quiet:    #0E1B29;
+
+    /* ── Lines ─────────────────────────────────────────────────────────── */
+    --nui-line:             #22323F;
+    --nui-line-soft:        #1A2733;
+    --nui-line-strong:      #3A5164;
+
+    /* ── Text ──────────────────────────────────────────────────────────── */
+    --nui-text:             #EAF2F6;
+    --nui-text-2:           #AEC3CE;
+    --nui-text-3:           #8199A6;   /* 5.7:1 on surface — AA, still muted */
+    /* --nui-text-invert / --nui-text-invert-2 intentionally NOT overridden:
+       they sit on the brand-coloured hero panel, which stays a dark teal
+       surface in both themes, so the light theme's near-white value is
+       already correct here regardless of the page theme. */
+
+    /* ── Semantic status — dark, desaturated washes instead of light
+       theme's pale ones; text brightened for legibility on both the
+       surface and the tinted background below it (both verified ≥5.2:1) ── */
+    --nui-ok:               #3DD16F;
+    --nui-ok-bg:            #0E2B1A;
+    --nui-ok-line:          #1C4A30;
+
+    --nui-warn:             #F5A524;
+    --nui-warn-bg:          #3A2708;
+    --nui-warn-line:        #5C4110;
+
+    --nui-risk:             #FF6B6B;
+    --nui-risk-bg:          #3A1414;
+    --nui-risk-line:        #5C2222;
+    --nui-risk-hover:       #FF8A8A;   /* lighten on hover, matching brand/accent */
+
+    --nui-info:             #5B9DF5;
+    --nui-info-bg:          #122A47;
+    --nui-info-line:        #1F3F63;
+
+    --nui-idle:             #9AACB8;
+    --nui-idle-bg:          #1B242C;
+    --nui-idle-line:        #2A3540;
+
+    /* ── Elevation — shadows barely register against an already-dark
+       canvas at light-mode opacities, so dark mode leans on much higher
+       alpha (40–65%) to keep the same three-step depth language. Borders
+       (--nui-line*) do most of the separation work in dark mode; shadows
+       here are a secondary, subtler cue than in light mode. ──────────────── */
+    --nui-shadow-0:         none;
+    --nui-shadow-1:         0 1px 2px rgba(0, 0, 0, 0.4);
+    --nui-shadow-2:         0 1px 2px rgba(0, 0, 0, 0.4),
+                            0 10px 28px -16px rgba(0, 0, 0, 0.65);
+    --nui-shadow-3:         0 2px 4px rgba(0, 0, 0, 0.45),
+                            0 20px 44px -20px rgba(0, 0, 0, 0.7);
+}
+
+/* Ambient canvas blooms + hero grid — same technique, dark-tuned so the
+   brand blooms read as a faint glow against near-black rather than the
+   light theme's soft wash against off-white. */
+html[data-theme="dark"] .nui-bg {
+    background-image:
+        radial-gradient(880px 460px at 10% -10%, rgba(77, 168, 178, 0.16), transparent 62%),
+        radial-gradient(720px 420px at 94% 2%,   rgba(62, 147, 189, 0.12), transparent 60%),
+        linear-gradient(180deg, #0A1520 0%, #08111A 100%);
+}
+html[data-theme="dark"] .nui-bg::after {
+    background-image:
+        linear-gradient(to right,  rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
 /* ══ Ambient page canvas ══════════════════════════════════════════════════ */
 
 .nui-bg {

@@ -117,7 +117,7 @@ export const ToggleButton = memo(({ options, value, onChange }) => {
                         onClick={() => onChange(opt)}
                         className={`px-4 py-1.5 text-xs sm:text-sm font-bold rounded-[var(--nui-r-xs)] transition-all duration-150 ${isActive
                             ? activeClass
-                            : "text-[var(--nui-text-3)] hover:text-[var(--nui-text)] hover:bg-white/60"
+                            : "text-[var(--nui-text-3)] hover:text-[var(--nui-text)] hover:bg-[var(--nui-line-soft)]"
                             }`}
                         type="button"
                     >
@@ -198,7 +198,7 @@ export const RangeInput = memo(({ label, value, onChange }) => {
                 value={localValue}
                 onChange={handleChange}
                 style={{
-                    background: `linear-gradient(to right, #34808A ${localValue}%, #e5e7eb ${localValue}%)`
+                    background: `linear-gradient(to right, var(--nui-accent) ${localValue}%, var(--nui-line-strong) ${localValue}%)`
                 }}
                 className="w-full h-3 rounded-lg appearance-none cursor-pointer accent-transparent"
             />
@@ -220,14 +220,14 @@ export const YesNoCompact = ({ label, value, onChange }) => (
             <button
                 type="button"
                 onClick={() => onChange("Yes")}
-                className={`px-3 py-1 rounded-[var(--nui-r-xs)] text-xs font-bold transition-all duration-150 ${value === "Yes" ? "bg-[var(--nui-ok)] text-white shadow-[var(--nui-shadow-1)]" : "text-[var(--nui-text-3)] hover:text-[var(--nui-text)] hover:bg-white/60"}`}
+                className={`px-3 py-1 rounded-[var(--nui-r-xs)] text-xs font-bold transition-all duration-150 ${value === "Yes" ? "bg-[var(--nui-ok)] text-white shadow-[var(--nui-shadow-1)]" : "text-[var(--nui-text-3)] hover:text-[var(--nui-text)] hover:bg-[var(--nui-line-soft)]"}`}
             >
                 Yes
             </button>
             <button
                 type="button"
                 onClick={() => onChange("No")}
-                className={`px-3 py-1 rounded-[var(--nui-r-xs)] text-xs font-bold transition-all duration-150 ${value === "No" ? "bg-[var(--nui-risk)] text-white shadow-[var(--nui-shadow-1)]" : "text-[var(--nui-text-3)] hover:text-[var(--nui-text)] hover:bg-white/60"}`}
+                className={`px-3 py-1 rounded-[var(--nui-r-xs)] text-xs font-bold transition-all duration-150 ${value === "No" ? "bg-[var(--nui-risk)] text-white shadow-[var(--nui-shadow-1)]" : "text-[var(--nui-text-3)] hover:text-[var(--nui-text)] hover:bg-[var(--nui-line-soft)]"}`}
             >
                 No
             </button>

@@ -33,15 +33,15 @@ const ProgressFooter = ({ step, totalSteps, lastSavedStep }) => {
     const pct = Math.round((step / totalSteps) * 100);
     return (
         <div>
-            <div className="flex justify-between text-[10px] text-gray-400 mb-1.5">
+            <div className="flex justify-between text-[10px] text-[var(--nui-text-3)] mb-1.5">
                 <span className="font-semibold uppercase tracking-wider">Progress</span>
-                <span className="font-bold text-[#34808A]">{pct}%</span>
+                <span className="font-bold text-[var(--nui-accent)]">{pct}%</span>
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-[#34808A] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+            <div className="h-1.5 bg-[var(--nui-surface-sunk)] rounded-full overflow-hidden">
+                <div className="h-full bg-[var(--nui-accent)] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
             </div>
             {lastSavedStep > 0 && (
-                <p className="text-[10px] text-gray-400 mt-1.5">Last saved at step {lastSavedStep}</p>
+                <p className="text-[10px] text-[var(--nui-text-3)] mt-1.5">Last saved at step {lastSavedStep}</p>
             )}
         </div>
     );

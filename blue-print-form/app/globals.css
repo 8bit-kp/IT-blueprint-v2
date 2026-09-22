@@ -1,4 +1,16 @@
 @import "tailwindcss";
+
+/* Wires Tailwind's `dark:` variant to the same `data-theme="dark"` attribute
+   the `.nui` token system reacts to (set on <html> by lib/theme.js before
+   hydration, toggled by ThemeContext — see docs/ui-redesign.md "Dark mode").
+   One toggle, one attribute, both the CSS-variable system and any `dark:`
+   utility class stay in sync — this is NOT tied to prefers-color-scheme, so
+   a user's explicit choice always wins over their OS setting. Must come
+   immediately after the `tailwindcss` import, before any other CSS, or
+   Tailwind v4 silently keeps its default prefers-color-scheme-based `dark:`
+   behavior instead of overriding it. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* Scoped design tokens for the /blueprint-summary UI redesign prototype.
    Everything inside is namespaced under `.nui` and affects no existing page.
    See docs/ui-redesign.md — remove this one line to revert the experiment. */
@@ -7,13 +19,25 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  /* This app is designed exclusively for a light theme — every component
-     hardcodes light-mode Tailwind colors (bg-white, text-gray-900, etc).
-     Without this, browsers auto-darken native form controls (select,
-     option popups) when the OS/browser is in dark mode, while the
-     hardcoded light text on top of them stays dark — making dropdown
-     text invisible (dark text on a dark native control background). */
+  /* Native form controls (select, date/color pickers) render themselves
+     using the browser's own dark or light chrome based on `color-scheme` —
+     independent of any CSS colours we apply on top. This now tracks the
+     app's OWN theme choice (light default; flipped to dark below) rather
+     than being hardcoded to light, so a native control's browser-drawn
+     chrome always matches the rest of the page instead of the OS setting. */
   color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  /* Matches --nui-canvas / --nui-text's dark values in styles/new-ui/tokens.css
+     exactly — written as literals rather than var() because those custom
+     properties are only defined on `.nui`-classed elements, not on <html>
+     itself, so a var() reference here would just silently fall through to
+     its fallback anyway. Keep these two literals in sync if the dark
+     canvas/text tokens ever change. */
+  --background: #0A1520;
+  --foreground: #EAF2F6;
+  color-scheme: dark;
 }
 
 @theme inline {

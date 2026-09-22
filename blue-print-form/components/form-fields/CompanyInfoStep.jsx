@@ -12,18 +12,18 @@ const PHONE_RE = /^[+]?[\d\s\-().]{7,20}$/;
 // ── Module-scope helper components (never inside render body) ──────────────
 
 const RequiredMark = () => (
-    <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>
+    <span className="text-[var(--nui-risk)] ml-0.5" aria-hidden="true">*</span>
 );
 
 const OptionalBadge = () => (
-    <span className="ml-1.5 text-[10px] font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-wide align-middle">
+    <span className="ml-1.5 text-[10px] font-semibold text-[var(--nui-text-3)] bg-[var(--nui-surface-sunk)] px-1.5 py-0.5 rounded uppercase tracking-wide align-middle">
         Optional
     </span>
 );
 
 const FieldError = ({ message }) =>
     message ? (
-        <p className="mt-1.5 text-xs text-red-500 flex items-start gap-1">
+        <p className="mt-1.5 text-xs text-[var(--nui-risk)] flex items-start gap-1">
             <svg className="w-3 h-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
@@ -32,12 +32,12 @@ const FieldError = ({ message }) =>
     ) : null;
 
 const HelperText = ({ text }) =>
-    text ? <p className="mt-1 text-xs text-gray-400 leading-relaxed">{text}</p> : null;
+    text ? <p className="mt-1 text-xs text-[var(--nui-text-3)] leading-relaxed">{text}</p> : null;
 
 // Pill-style button group for selecting a single option from a short list.
 // Used for Deployment Model, IT Management, MSP Relationship.
 const OptionGroup = ({ options, value, onChange, error }) => (
-    <div className={`flex flex-wrap gap-2 ${error ? "p-2 rounded-lg border border-red-200 bg-red-50/30" : ""}`}>
+    <div className={`flex flex-wrap gap-2 ${error ? "p-2 rounded-lg border border-[var(--nui-risk-line)] bg-[var(--nui-risk-bg)]" : ""}`}>
         {options.map(opt => {
             const isActive = value === opt;
             return (
@@ -47,8 +47,8 @@ const OptionGroup = ({ options, value, onChange, error }) => (
                     onClick={() => onChange(opt)}
                     className={`px-5 py-2 text-sm font-semibold rounded-lg border transition-all duration-150 ${
                         isActive
-                            ? "bg-[#15587B] text-white border-[#15587B] shadow-sm"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-[#34808A] hover:text-[#15587B] hover:bg-gray-50"
+                            ? "bg-[var(--nui-brand)] text-white border-[var(--nui-brand)] shadow-[var(--nui-shadow-1)]"
+                            : "bg-[var(--nui-surface)] text-[var(--nui-text-2)] border-[var(--nui-line-strong)] hover:border-[var(--nui-accent)] hover:text-[var(--nui-brand)] hover:bg-[var(--nui-surface-sunk)]"
                     }`}
                 >
                     {opt}
@@ -82,8 +82,8 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
         <>
             <ConfidentialityNotice />
             <Card title="General Information" className="max-w-5xl mx-auto">
-                <p className="text-xs text-gray-400 mb-6">
-                    Fields marked <span className="text-red-500">*</span> are required to proceed. All other fields are optional and improve the accuracy of your Current State Report.
+                <p className="text-xs text-[var(--nui-text-3)] mb-6">
+                    Fields marked <span className="text-[var(--nui-risk)]">*</span> are required to proceed. All other fields are optional and improve the accuracy of your Current State Report.
                 </p>
 
                 <div className="space-y-8">
@@ -91,7 +91,7 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                     {/* ── Organisation Details ──────────────────────────────────── */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="col-span-1 md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Company Name<RequiredMark />
                             </label>
                             <TextInput
@@ -105,7 +105,7 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Contact Person<OptionalBadge />
                             </label>
                             <TextInput
@@ -117,7 +117,7 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Email Address<RequiredMark />
                             </label>
                             <TextInput
@@ -132,7 +132,7 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Phone<OptionalBadge />
                             </label>
                             <TextInput
@@ -148,12 +148,12 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Industry<RequiredMark />
                             </label>
                             <select
-                                className={`block w-full rounded-md border shadow-sm focus:border-[#34808A] focus:ring-[#34808A] sm:text-sm p-2.5 text-gray-900 ${
-                                    errors.industry ? "border-red-300 bg-red-50/30" : "border-gray-300"
+                                className={`block w-full rounded-[var(--nui-r-sm)] border shadow-[var(--nui-shadow-1)] bg-[var(--nui-surface)] outline-none focus:border-[var(--nui-accent)] focus:ring-2 focus:ring-[var(--nui-accent)]/40 sm:text-sm p-2.5 text-[var(--nui-text)] ${
+                                    errors.industry ? "border-[var(--nui-risk-line)] bg-[var(--nui-risk-bg)]" : "border-[var(--nui-line-strong)]"
                                 }`}
                                 value={formData.industry || ""}
                                 onChange={(e) => handleRequired("industry", e.target.value)}
@@ -180,12 +180,12 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-1">
                                 Organisation Size<RequiredMark />
                             </label>
                             <select
-                                className={`block w-full rounded-md border shadow-sm focus:border-[#34808A] focus:ring-[#34808A] sm:text-sm p-2.5 text-gray-900 ${
-                                    errors.employees ? "border-red-300 bg-red-50/30" : "border-gray-300"
+                                className={`block w-full rounded-[var(--nui-r-sm)] border shadow-[var(--nui-shadow-1)] bg-[var(--nui-surface)] outline-none focus:border-[var(--nui-accent)] focus:ring-2 focus:ring-[var(--nui-accent)]/40 sm:text-sm p-2.5 text-[var(--nui-text)] ${
+                                    errors.employees ? "border-[var(--nui-risk-line)] bg-[var(--nui-risk-bg)]" : "border-[var(--nui-line-strong)]"
                                 }`}
                                 value={formData.employees || ""}
                                 onChange={(e) => handleRequired("employees", e.target.value)}
@@ -202,10 +202,10 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                     </div>
 
                     {/* ── IT Environment (Required) ─────────────────────────────── */}
-                    <div className="border-t border-gray-100 pt-6">
+                    <div className="border-t border-[var(--nui-line-soft)] pt-6">
                         <div className="mb-5">
-                            <h4 className="text-sm font-semibold text-gray-800">IT Environment Overview</h4>
-                            <p className="text-xs text-gray-400 mt-0.5">
+                            <h4 className="text-sm font-semibold text-[var(--nui-text)]">IT Environment Overview</h4>
+                            <p className="text-xs text-[var(--nui-text-3)] mt-0.5">
                                 These three fields are required. They help your advisor understand your environment before your consultation.
                             </p>
                         </div>
@@ -213,7 +213,7 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                         <div className="space-y-6">
                             {/* Deployment Model */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-2">
                                     Deployment Model<RequiredMark />
                                 </label>
                                 <OptionGroup
@@ -228,7 +228,7 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
 
                             {/* IT Management */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-2">
                                     IT Management<RequiredMark />
                                 </label>
                                 <OptionGroup
@@ -243,7 +243,7 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
 
                             {/* MSP Relationship */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-[var(--nui-text-2)] mb-2">
                                     Existing MSP Relationship<RequiredMark />
                                 </label>
                                 <OptionGroup
@@ -256,7 +256,7 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                                 <FieldError message={errors.mspRelationship} />
                                 {formData.mspRelationship === "Yes" && (
                                     <div className="mt-3 pl-1">
-                                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        <label className="block text-xs font-medium text-[var(--nui-text-2)] mb-1">
                                             MSP Name<OptionalBadge />
                                         </label>
                                         <TextInput
@@ -272,12 +272,12 @@ const CompanyInfoStep = memo(({ formData, setField, errors = {}, clearError }) =
                     </div>
 
                     {/* ── Staffing Breakdown (Optional) ────────────────────────── */}
-                    <div className="border-t border-gray-100 pt-6">
+                    <div className="border-t border-[var(--nui-line-soft)] pt-6">
                         <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700">
+                            <h4 className="text-sm font-medium text-[var(--nui-text-2)]">
                                 Staffing Breakdown<OptionalBadge />
                             </h4>
-                            <p className="text-xs text-gray-400 mt-0.5">
+                            <p className="text-xs text-[var(--nui-text-3)] mt-0.5">
                                 These figures help contextualise your IT environment. Skip this section if the information is not readily available.
                             </p>
                         </div>

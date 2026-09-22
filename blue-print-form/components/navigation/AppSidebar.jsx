@@ -6,9 +6,76 @@ import { notify } from "@/lib/notify";
 import {
     FiHome, FiClipboard, FiFileText, FiGrid, FiShield,
     FiChevronLeft, FiChevronRight, FiLogOut, FiUser, FiCheck,
+    FiSun, FiMoon,
 } from "react-icons/fi";
 import { authAPI } from "@/utils/api";
 import { useLocalStorageValue } from "@/lib/hooks/useLocalStorageValue";
+import { useTheme } from "@/context/ThemeContext";
+
+/**
+ * ThemeToggle — the sidebar's Light/Dark switch. A segmented two-option
+ * control (not a single swapping icon) so the current theme is always
+ * visible at a glance, not just inferable from which icon happens to be
+ * showing — the same "state should be visible, not just implied" reasoning
+ * behind every other status indicator in the app (see NuiStatus).
+ *
+ * `expanded` mirrors the sidebar's own collapse state: the full segmented
+ * control when there's room for two labelled options, a single icon button
+ * (toggling directly) when collapsed to icon-only width — same pattern the
+ * primary nav and "This Page" links already use for the two sidebar widths.
+ */
+const ThemeToggle = ({ expanded }) => {
+    const { theme, setTheme } = useTheme();
+    const isDark = theme === "dark";
+
+    if (!expanded) {
+        return (
+            <button
+                type="button"
+                onClick={() => setTheme(isDark ? "light" : "dark")}
+                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                className="flex items-center justify-center w-full rounded-[var(--nui-r-sm)] px-2 py-2.5 text-[var(--nui-text-3)] hover:bg-[var(--nui-surface-sunk)] hover:text-[var(--nui-text)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1"
+            >
+                {isDark ? <FiMoon size={15} /> : <FiSun size={15} />}
+            </button>
+        );
+    }
+
+    return (
+        <div
+            role="radiogroup"
+            aria-label="Theme"
+            className="flex items-center gap-0.5 rounded-[var(--nui-r-sm)] bg-[var(--nui-surface-sunk)] border border-[var(--nui-line)] p-0.5 mb-2"
+        >
+            {[
+                { value: "light", label: "Light", Icon: FiSun },
+                { value: "dark", label: "Dark", Icon: FiMoon },
+            ].map(({ value, label, Icon }) => {
+                const active = theme === value;
+                return (
+                    <button
+                        key={value}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => setTheme(value)}
+                        className={[
+                            "flex-1 inline-flex items-center justify-center gap-1.5 rounded-[calc(var(--nui-r-sm)-2px)] px-2 py-1.5 text-xs font-semibold transition-colors",
+                            "focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1",
+                            active
+                                ? "bg-[var(--nui-surface)] text-[var(--nui-brand)] shadow-[var(--nui-shadow-1)]"
+                                : "text-[var(--nui-text-3)] hover:text-[var(--nui-text)]",
+                        ].join(" ")}
+                    >
+                        <Icon size={13} aria-hidden="true" />
+                        {label}
+                    </button>
+                );
+            })}
+        </div>
+    );
+};
 
 /**
  * AppSidebar
@@ -257,6 +324,7 @@ const AppSidebar = ({
                         )}
                     </button>
                 )}
+                <ThemeToggle expanded={expanded} />
                 <button
                     type="button"
                     onClick={handleLogout}

@@ -33,7 +33,7 @@ const SensitivityCircle = ({ abbr, value, label }) => {
                 style={{
                     width: 34,
                     height: 34,
-                    backgroundColor: empty ? "#e5e7eb" : bg,
+                    backgroundColor: empty ? "var(--nui-line)" : bg,
                     boxShadow: empty ? "none" : `0 2px 6px ${bg}55`,
                 }}
             >
@@ -41,7 +41,7 @@ const SensitivityCircle = ({ abbr, value, label }) => {
                     className="font-black leading-none select-none"
                     style={{
                         fontSize: abbr.length > 2 ? 9 : 11,
-                        color: empty ? "#9ca3af" : text,
+                        color: empty ? "var(--nui-text-3)" : text,
                         letterSpacing: "-0.5px",
                     }}
                 >
@@ -51,7 +51,7 @@ const SensitivityCircle = ({ abbr, value, label }) => {
             {/* Value label below circle */}
             <span
                 className="text-[8px] font-semibold uppercase leading-none"
-                style={{ color: empty ? "#9ca3af" : bg }}
+                style={{ color: empty ? "var(--nui-text-3)" : bg }}
             >
                 {value ? value.slice(0, 4) : "—"}
             </span>
@@ -66,7 +66,7 @@ const AppDonutCard = ({ app }) => {
     const priority   = app.businessPriority;
     const fillColor  = getPriorityHexColor(priority);
     const bgColor    = getPriorityHexBg(priority);
-    const trackColor = "#e5e7eb"; // gray-200
+    const trackColor = "var(--nui-line)";
 
     const displayName = (app.name?.trim()) || "Unnamed App";
     const shortName   = displayName.length > 18 ? displayName.slice(0, 16) + "…" : displayName;
@@ -75,7 +75,7 @@ const AppDonutCard = ({ app }) => {
         <div
             className="flex flex-col items-center rounded-2xl shadow-md border p-4 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
             style={{
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--nui-surface)",
                 borderColor: fillColor + "44",
                 borderWidth: "1.5px",
             }}
@@ -143,7 +143,7 @@ const AppDonutCard = ({ app }) => {
             )}
 
             {/* ── Sensitivity Circles Row ── */}
-            <div className="grid grid-cols-5 place-items-center gap-5 w-full mt-3 pt-3 border-t border-gray-100">
+            <div className="grid grid-cols-5 place-items-center gap-5 w-full mt-3 pt-3 border-t border-[var(--nui-line-soft)]">
                 {SENSITIVITY_CIRCLES.map((sc) => (
                     <SensitivityCircle
                         key={sc.key}
@@ -165,7 +165,7 @@ const CategorySection = ({ title, apps }) => {
     return (
         <div className="mb-10">
             {/* Section header */}
-            <div className="bg-gradient-to-r from-[#15587B] to-[#34808A] text-white px-6 py-4 rounded-xl mb-5 shadow flex items-center justify-between">
+            <div className="bg-gradient-to-r from-[var(--nui-brand)] to-[var(--nui-accent)] text-white px-6 py-4 rounded-xl mb-5 shadow flex items-center justify-between">
                 <div>
                     <h3 className="text-lg font-bold">{title}</h3>
                     <p className="text-sm text-white/80 mt-0.5">
@@ -189,11 +189,11 @@ const CategorySection = ({ title, apps }) => {
             </div>
 
             {/* Sensitivity circle legend */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4 px-1 text-[10px] text-gray-500 font-medium">
-                <span className="font-semibold text-gray-600">Circles:</span>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4 px-1 text-[10px] text-[var(--nui-text-3)] font-medium">
+                <span className="font-semibold text-[var(--nui-text-2)]">Circles:</span>
                 {SENSITIVITY_CIRCLES.map((sc) => (
                     <span key={sc.key}>
-                        <span className="font-bold text-gray-700">{sc.abbr}</span> = {sc.label}
+                        <span className="font-bold text-[var(--nui-text-2)]">{sc.abbr}</span> = {sc.label}
                     </span>
                 ))}
             </div>
@@ -247,7 +247,7 @@ const ApplicationDonutGrid = ({ formData }) => {
 
     if (!hasAnyApp) {
         return (
-            <div className="py-16 text-center text-gray-400 text-sm">
+            <div className="py-16 text-center text-[var(--nui-text-3)] text-sm">
                 No applications found. Add applications in the blueprint form to see them here.
             </div>
         );

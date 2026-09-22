@@ -10,8 +10,8 @@ const ProgressRing = ({
     label = "",
     size  = 80,
     strokeWidth = 8,
-    color = "#34808A",
-    emptyColor = "#e5e7eb",
+    color = "var(--nui-accent)",
+    emptyColor = "var(--nui-line-strong)",
 }) => {
     const r         = (size - strokeWidth) / 2;
     const cx        = size / 2;
@@ -54,7 +54,7 @@ const ProgressRing = ({
                     x={cx} y={cy + 1}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fill={showValue ? "#111827" : "#9ca3af"}
+                    fill={showValue ? "var(--nui-text)" : "var(--nui-text-3)"}
                     fontSize={size * 0.2}
                     fontWeight="700"
                     fontFamily="system-ui, sans-serif"
@@ -63,7 +63,7 @@ const ProgressRing = ({
                 </text>
             </svg>
             {label && (
-                <span className="text-[10px] font-semibold text-gray-500 text-center leading-tight max-w-[80px]">
+                <span className="text-[10px] font-semibold text-[var(--nui-text-3)] text-center leading-tight max-w-[80px]">
                     {label}
                 </span>
             )}

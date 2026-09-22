@@ -90,8 +90,8 @@ const GaugeChart = ({ score = 0, size = 240 }) => {
                     <feDropShadow dx="0" dy="1.5" stdDeviation="1.4" floodColor="#0f172a" floodOpacity="0.35" />
                 </filter>
                 <radialGradient id="gaugePivotGrad" cx="35%" cy="30%" r="75%">
-                    <stop offset="0%" stopColor="#4b5563" />
-                    <stop offset="100%" stopColor="#111827" />
+                    <stop offset="0%" stopColor="var(--nui-text-3)" />
+                    <stop offset="100%" stopColor="var(--nui-text)" />
                 </radialGradient>
             </defs>
 
@@ -99,7 +99,7 @@ const GaugeChart = ({ score = 0, size = 240 }) => {
             <circle
                 cx={CX} cy={CY} r={R}
                 fill="none"
-                stroke="#e5e7eb"
+                stroke="var(--nui-line-strong)"
                 strokeWidth={SW + 5}
                 strokeDasharray={`${HALF_C} ${HALF_C}`}
                 strokeDashoffset={HALF_C}
@@ -137,7 +137,7 @@ const GaugeChart = ({ score = 0, size = 240 }) => {
                         x={p.x}
                         y={p.y + 4}
                         textAnchor="middle"
-                        fill="#9ca3af"
+                        fill="var(--nui-text-3)"
                         fontSize={11}
                         fontWeight="600"
                         fontFamily="system-ui, -apple-system, sans-serif"
@@ -151,7 +151,7 @@ const GaugeChart = ({ score = 0, size = 240 }) => {
             <g filter="url(#gaugeNeedleShadow)">
                 <polygon
                     points={`${tip.x},${tip.y} ${hubL.x},${hubL.y} ${tail.x},${tail.y} ${hubR.x},${hubR.y}`}
-                    fill="#1f2937"
+                    fill="var(--nui-text)"
                 />
             </g>
 
@@ -164,7 +164,7 @@ const GaugeChart = ({ score = 0, size = 240 }) => {
                 x={CX}
                 y={CY + 62}
                 textAnchor="middle"
-                fill="#111827"
+                fill="var(--nui-text)"
                 fontSize={46}
                 fontWeight="800"
                 fontFamily="system-ui, -apple-system, sans-serif"
@@ -177,7 +177,7 @@ const GaugeChart = ({ score = 0, size = 240 }) => {
                 x={CX}
                 y={CY + 83}
                 textAnchor="middle"
-                fill="#9ca3af"
+                fill="var(--nui-text-3)"
                 fontSize={13}
                 fontWeight="600"
                 fontFamily="system-ui, -apple-system, sans-serif"

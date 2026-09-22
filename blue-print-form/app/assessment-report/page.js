@@ -328,7 +328,7 @@ const SecuritySection = ({ report }) => {
                 <Disclosure label={`Score Deduction Waterfall${appliedCap !== null ? " (cap applied)" : ""}`}>
                     <WaterfallChart waterfall={waterfall} />
                     {appliedCap !== null && (
-                        <p className="text-[11px] text-amber-600 mt-3 border-l-2 border-amber-300 pl-3">
+                        <p className="text-[11px] text-[var(--nui-warn)] mt-3 border-l-2 border-[var(--nui-warn-line)] pl-3">
                             Score cap applied: one or more critical controls are absent. The cap prevents the score
                             from misrepresenting the organisation&apos;s actual risk exposure.
                         </p>
@@ -342,7 +342,7 @@ const SecuritySection = ({ report }) => {
                                 {triggeredPenalties.map((p, i) => (
                                     <div key={i} className="flex items-center justify-between py-1 border-b border-[var(--nui-line-soft)] last:border-0">
                                         <span className="text-xs text-[var(--nui-text-2)]">{p.label}</span>
-                                        <span className="text-xs font-bold text-red-600">−{p.value} pts</span>
+                                        <span className="text-xs font-bold text-[var(--nui-risk)]">−{p.value} pts</span>
                                     </div>
                                 ))}
                             </div>
@@ -461,7 +461,7 @@ const ApplicationSecuritySection = ({ report }) => {
                             {topRiskDrivers.map((d, i) => (
                                 <li key={d.factor} className="flex items-center justify-between gap-3 bg-[var(--nui-surface-sunk)] border border-[var(--nui-line-soft)] rounded-xl px-4 py-3">
                                     <div className="flex items-center gap-3 min-w-0">
-                                        <span className="w-5 h-5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                                        <span className="w-5 h-5 rounded-full bg-[var(--nui-risk-bg)] text-[var(--nui-risk)] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                                             {i + 1}
                                         </span>
                                         <span className="text-xs font-medium text-[var(--nui-text-2)]">{d.description}</span>
@@ -484,7 +484,7 @@ const ApplicationSecuritySection = ({ report }) => {
                         <ul className="space-y-1.5">
                             {hypotheticals.map((h) => (
                                 <li key={h.factor} className="flex items-start gap-2 text-xs text-[var(--nui-text-2)] leading-relaxed">
-                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#34808A] flex-shrink-0" />
+                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[var(--nui-accent)] flex-shrink-0" />
                                     <span>
                                         {HYPOTHETICAL_VERB_PHRASE[h.factor] || "Fixing this factor"} on the{" "}
                                         {h.affectedApplicationCount} flagged application{h.affectedApplicationCount === 1 ? "" : "s"} would
@@ -543,7 +543,7 @@ const ApplicationSecuritySection = ({ report }) => {
 
                 {/* ── Application Breakdown Table ──────────────────────────────── */}
                 <div>
-                    <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#15587B] bg-[#15587B]/8 border border-[#15587B]/15 rounded-full px-3 py-1 mb-3">
+                    <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[var(--nui-brand)] bg-[var(--nui-accent-tint)] border border-[color:var(--nui-accent-tint-2)] rounded-full px-3 py-1 mb-3">
                         Applications ({allApps.length}), highest risk first
                     </p>
                     <div className="overflow-x-auto border border-[var(--nui-line-soft)] rounded-xl">
@@ -611,7 +611,7 @@ const BusinessOperationsSection = ({ blueprint }) => {
                     {hasChips ? (
                         <div className="flex flex-wrap gap-2">
                             {bp.operationalChallenges.map((c, i) => (
-                                <span key={i} className="px-3 py-1 rounded-full bg-[#15587B]/8 text-[#15587B] text-xs font-semibold">
+                                <span key={i} className="px-3 py-1 rounded-full bg-[var(--nui-accent-tint)] text-[var(--nui-brand)] text-xs font-semibold">
                                     {c}
                                 </span>
                             ))}
@@ -701,11 +701,11 @@ const AssessmentDataSection = ({ report }) => {
     const { categories, dataGaps } = report;
 
     const getZone = (s) => {
-        if (s <= 30) return { label: "Critical", color: "#ef4444", badge: "bg-red-100 text-red-700" };
-        if (s <= 50) return { label: "At Risk", color: "#f97316", badge: "bg-amber-100 text-amber-700" };
-        if (s <= 65) return { label: "Developing", color: "#eab308", badge: "bg-yellow-100 text-yellow-700" };
-        if (s <= 80) return { label: "Managed", color: ACCENT, badge: "bg-teal-100 text-teal-700" };
-        return { label: "Optimized", color: "#22c55e", badge: "bg-green-100 text-green-700" };
+        if (s <= 30) return { label: "Critical", color: "#ef4444", badge: "bg-red-100 text-red-700 dark:bg-[var(--nui-risk-bg)] dark:text-[var(--nui-risk)]" };
+        if (s <= 50) return { label: "At Risk", color: "#f97316", badge: "bg-amber-100 text-amber-700 dark:bg-[var(--nui-warn-bg)] dark:text-[var(--nui-warn)]" };
+        if (s <= 65) return { label: "Developing", color: "#eab308", badge: "bg-yellow-100 text-yellow-700 dark:bg-[var(--nui-warn-bg)] dark:text-[var(--nui-warn)]" };
+        if (s <= 80) return { label: "Managed", color: ACCENT, badge: "bg-teal-100 text-teal-700 dark:bg-[var(--nui-accent-tint)] dark:text-[var(--nui-accent)]" };
+        return { label: "Optimized", color: "#22c55e", badge: "bg-green-100 text-green-700 dark:bg-[var(--nui-ok-bg)] dark:text-[var(--nui-ok)]" };
     };
 
     return (

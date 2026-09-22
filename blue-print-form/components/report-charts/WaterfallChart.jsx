@@ -45,23 +45,23 @@ const WaterfallRow = ({ label, value, maxValue = 100, type, isLast = false }) =>
     else                        valueLabel = `${value > 0 ? "+" : ""}${value}`;
 
     return (
-        <div className={`flex items-center gap-3 py-2 ${isLast ? "" : "border-b border-gray-50"}`}>
+        <div className={`flex items-center gap-3 py-2 ${isLast ? "" : "border-b border-[var(--nui-line-soft)]"}`}>
             {/* Label */}
             <div className="w-52 flex-shrink-0 pr-2">
-                <span className={`text-xs leading-tight ${isFinal ? "font-bold text-gray-800" : isPenalty ? "text-red-700" : isCap ? "text-amber-700" : "text-gray-600"}`}>
+                <span className={`text-xs leading-tight ${isFinal ? "font-bold text-[var(--nui-text)]" : isPenalty ? "text-[var(--nui-risk)]" : isCap ? "text-[var(--nui-warn)]" : "text-[var(--nui-text-2)]"}`}>
                     {label}
                 </span>
             </div>
 
             {/* Bar + value */}
             <div className="flex-1 flex items-center gap-2 min-w-0">
-                <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden relative">
+                <div className="flex-1 h-5 bg-[var(--nui-surface-sunk)] rounded-full overflow-hidden relative">
                     <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{ width: `${Math.min(100, barWidth)}%`, backgroundColor: barColor }}
                     />
                 </div>
-                <span className={`text-xs font-bold w-10 text-right flex-shrink-0 ${isPenalty ? "text-red-600" : isCap ? "text-amber-600" : "text-gray-700"}`}>
+                <span className={`text-xs font-bold w-10 text-right flex-shrink-0 ${isPenalty ? "text-[var(--nui-risk)]" : isCap ? "text-[var(--nui-warn)]" : "text-[var(--nui-text-2)]"}`}>
                     {valueLabel}
                 </span>
             </div>
@@ -76,18 +76,18 @@ const WaterfallChart = ({ waterfall = [] }) => {
     const maxValue= Math.max(...waterfall.map((w) => Math.abs(w.value)), 100);
 
     if (!waterfall.length) {
-        return <p className="text-sm text-gray-400">No waterfall data available.</p>;
+        return <p className="text-sm text-[var(--nui-text-3)]">No waterfall data available.</p>;
     }
 
     return (
         <div className="w-full">
             {/* Header row */}
-            <div className="flex items-center gap-3 pb-2 border-b border-gray-200 mb-1">
+            <div className="flex items-center gap-3 pb-2 border-b border-[var(--nui-line)] mb-1">
                 <div className="w-52 flex-shrink-0">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Component</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--nui-text-3)]">Component</span>
                 </div>
                 <div className="flex-1">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Contribution</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--nui-text-3)]">Contribution</span>
                 </div>
             </div>
 
@@ -105,7 +105,7 @@ const WaterfallChart = ({ waterfall = [] }) => {
             {/* Divider before final */}
             {finalRow && (
                 <>
-                    <div className="border-t-2 border-gray-300 my-3" />
+                    <div className="border-t-2 border-[var(--nui-line-strong)] my-3" />
                     <WaterfallRow
                         label={finalRow.label}
                         value={finalRow.value}
