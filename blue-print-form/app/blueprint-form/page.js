@@ -310,6 +310,13 @@ export default function BlueprintForm() {
                 setTimeout(() => router.push("/auth"), 2000);
             } else if (err.code === 'ECONNABORTED') {
                 notify.error("Save timeout. Please try again.");
+            } else if (err.response?.data?.errors) {
+                // Zod field-level errors (see lib/validation/blueprintSchema.js) —
+                // surface which field(s) failed instead of the generic message,
+                // so a validation failure is diagnosable from the toast alone.
+                const fields = Object.keys(err.response.data.errors).join(", ");
+                console.error("Validation errors:", err.response.data.errors);
+                notify.error(`${err.response.data.message || "Payload validation failed"}: ${fields}`);
             } else if (err.response?.data?.message) {
                 notify.error(err.response.data.message);
             } else if (err.message) {

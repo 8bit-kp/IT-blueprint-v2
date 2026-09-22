@@ -38,7 +38,19 @@ const technicalControlSchema = z
         // Note: both "On-premise" and "On-Premise" appear in the codebase
         // (the casing inconsistency is acknowledged in docs/coding-conventions.md).
         // Both values are accepted here to avoid rejecting existing saved data.
-        choice:           optionalEnum(["Yes", "No"]),
+        //
+        // "Vendor" is a legitimate third choice value, not a typo: it's the
+        // sentinel app/blueprint-form/page.js's normalizeVendorField() (save
+        // path) and its blueprint-fetch hydration logic (load path, "Vendor:"
+        // prefix) both use for a control whose legacy stored value was a
+        // plain vendor-name string rather than "Yes"/"No" — predates this
+        // schema. Omitting it here caused every save for an account with any
+        // such legacy field (WAN1-3, switchingVendor, routingVendor,
+        // wirelessVendor, baremetalVendor, virtualizationVendor, cloudVendor,
+        // or any technicalControls key) to fail with "Payload validation
+        // failed" / "Invalid input" — the client-side migration shim
+        // produced a value the schema didn't yet allow.
+        choice:           optionalEnum(["Yes", "No", "Vendor"]),
         vendor:           z.string().optional(),
         businessPriority: optionalEnum(["Critical", "High", "Medium", "Low"]),
         offering:         optionalEnum(["SaaS", "On-premise", "On-Premise", "Hybrid", "Cloud"]),
