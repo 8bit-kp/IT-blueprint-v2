@@ -69,22 +69,22 @@ const SecurityScoreCard = ({ report }) => {
                         color={metrics.controlsMissingCount > 8 ? "#dc2626" : metrics.controlsMissingCount > 4 ? "#d97706" : "#16a34a"}
                         Icon={FiShield}
                     />
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col items-center justify-center gap-1">
+                    <div className="bg-[var(--nui-surface)] rounded-[var(--nui-r)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-1)] p-4 flex flex-col items-center justify-center gap-1">
                         <ProgressRing value={metrics.appMfaCoverage} size={56} strokeWidth={6} color={metrics.appMfaCoverage !== null && metrics.appMfaCoverage >= 80 ? "#16a34a" : "#d97706"} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">App MFA Coverage</span>
+                        <span className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] text-center">App MFA Coverage</span>
                     </div>
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col items-center justify-center gap-1">
+                    <div className="bg-[var(--nui-surface)] rounded-[var(--nui-r)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-1)] p-4 flex flex-col items-center justify-center gap-1">
                         <ProgressRing value={metrics.appBackupCoverage} size={56} strokeWidth={6} color={metrics.appBackupCoverage !== null && metrics.appBackupCoverage >= 80 ? "#16a34a" : "#d97706"} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">App Backup Coverage</span>
+                        <span className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] text-center">App Backup Coverage</span>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-6 bg-[#15587B]/5 border border-[#15587B]/15 rounded-xl px-5 py-4">
-                <p className="text-xs text-gray-600 leading-relaxed">
+            <div className="mt-6 bg-[var(--nui-accent-tint)] border border-[color:var(--nui-accent-tint-2)] rounded-[var(--nui-r)] px-5 py-4">
+                <p className="text-xs text-[var(--nui-text-2)] leading-relaxed">
                     This report is a formulaic snapshot — it scores your answers against a fixed published methodology.
                     It is not equivalent to the{" "}
-                    <strong className="text-gray-800">Assessment with Remediation Plan</strong>, which requires advisor
+                    <strong className="text-[var(--nui-text)]">Assessment with Remediation Plan</strong>, which requires advisor
                     review and is delivered as a paid engagement following your consultation.
                 </p>
             </div>

@@ -7,6 +7,13 @@ import { FiLogOut, FiUser, FiLogIn } from "react-icons/fi";
 import { authAPI } from "@/utils/api";
 import { useLocalStorageValue } from "@/lib/hooks/useLocalStorageValue";
 
+/**
+ * Navbar — top navigation for PUBLIC pages only (/, /privacy-policy,
+ * /terms-of-service). Restyled to the shared design system
+ * (styles/new-ui/tokens.css) — carries its own `.nui` scope since it is
+ * never nested inside AppShell (which provides that scope on authenticated
+ * pages). Same props/behavior as before.
+ */
 function Navbar() {
   // Username is stored in localStorage only for display purposes.
   // The actual authentication token lives in an HTTP-only cookie.
@@ -42,7 +49,7 @@ function Navbar() {
 
   return (
 
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
+    <nav className="nui fixed top-0 left-0 right-0 z-50 bg-[var(--nui-surface)]/90 backdrop-blur-md border-b border-[var(--nui-line)] shadow-[var(--nui-shadow-1)] transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo Section */}
@@ -64,11 +71,11 @@ function Navbar() {
           {username && !loggedOut ? (
             <>
               {/* User Badge */}
-              <div className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-blue-50/50 border border-blue-100 rounded-full">
-                <div className="w-6 h-6 bg-[#15587B] rounded-full flex items-center justify-center text-white text-xs">
+              <div className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-[var(--nui-accent-tint)] border border-[color:var(--nui-accent-tint-2)] rounded-[var(--nui-r-pill)]">
+                <div className="w-6 h-6 bg-[var(--nui-brand)] rounded-full flex items-center justify-center text-white text-xs">
                   <FiUser />
                 </div>
-                <span className="text-sm font-semibold text-[#15587B] truncate max-w-[150px]">
+                <span className="text-sm font-semibold text-[var(--nui-brand)] truncate max-w-[150px]">
                   {username}
                 </span>
               </div>
@@ -76,7 +83,7 @@ function Navbar() {
               {/* Logout Button */}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--nui-text-2)] hover:text-[var(--nui-risk)] hover:bg-[var(--nui-risk-bg)] rounded-[var(--nui-r-pill)] transition-all duration-200"
                 title="Logout"
               >
                 <span className="hidden sm:inline">Logout</span>
@@ -86,7 +93,7 @@ function Navbar() {
           ) : (
             <Link
               href="/auth"
-              className="flex items-center gap-2 px-5 py-2 bg-[#935010] text-white text-sm font-bold rounded-full shadow-md hover:bg-[#7a3d0d] hover:shadow-lg transition-all duration-300"
+              className="flex items-center gap-2 px-5 py-2 bg-[var(--nui-warm)] text-white text-sm font-bold rounded-[var(--nui-r-pill)] shadow-[var(--nui-shadow-1)] hover:brightness-90 hover:shadow-[var(--nui-shadow-2)] transition-all duration-300"
             >
               Login <FiLogIn size={16} />
             </Link>

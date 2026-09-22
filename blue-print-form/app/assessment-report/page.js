@@ -51,16 +51,17 @@ import EmptyStateNotice from "@/components/report-dashboard/EmptyStateNotice";
 import Disclosure from "@/components/report-dashboard/Disclosure";
 import SecurityScoreCard from "@/components/report-dashboard/SecurityScoreCard";
 import ApplicationSecurityScoreCard from "@/components/report-dashboard/ApplicationSecurityScoreCard";
+import { NuiCanvas, NuiReveal, NuiHero } from "@/components/ui/new";
 
 // ── Brand colours ────────────────────────────────────────────────────────────
 const PRIMARY = "#15587B";
 const ACCENT = "#34808A";
 
 const RISK_CONFIG = {
-    Critical: { bg: "bg-red-100", text: "text-red-700", dot: "bg-red-500" },
-    High: { bg: "bg-red-50", text: "text-red-600", dot: "bg-red-400" },
-    Medium: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" },
-    Low: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-500" },
+    Critical: { bg: "bg-[var(--nui-risk-bg)]", text: "text-[var(--nui-risk)]", dot: "bg-[var(--nui-risk)]" },
+    High: { bg: "bg-[var(--nui-risk-bg)]", text: "text-[var(--nui-risk)]", dot: "bg-[var(--nui-risk)]" },
+    Medium: { bg: "bg-[var(--nui-warn-bg)]", text: "text-[var(--nui-warn)]", dot: "bg-[var(--nui-warn)]" },
+    Low: { bg: "bg-[var(--nui-ok-bg)]", text: "text-[var(--nui-ok)]", dot: "bg-[var(--nui-ok)]" },
 };
 
 // A blueprint is "filled" if at least one Step 1 field is present
@@ -112,18 +113,19 @@ const SECTIONS = [
 // ════════════════════════════════════════════════════════════════════════════
 // Section: Overview
 // ════════════════════════════════════════════════════════════════════════════
-const OverviewSection = ({ report, companyName, assessmentDate }) => (
+const OverviewSection = ({ report }) => (
     <SectionCard
         id="overview"
-        eyebrow="Current State Report"
-        title={companyName ? `${companyName} — Security Score` : "Security Score"}
-        description={`Generated ${assessmentDate}. A snapshot assessment based on self-reported data, calculated from a fixed, published methodology.`}
+        eyebrow="Score Breakdown"
+        title="Security Score & Coverage"
+        description="The gauge, maturity level, and headline KPIs behind the score above, plus the independent Application Security companion score."
+        Icon={FiHome}
     >
         <SecurityScoreCard report={report} />
 
-        <div className="mt-6 pt-6 border-t border-gray-100">
-            <h3 className="text-sm font-bold text-gray-800 mb-1">Application and data security</h3>
-            <p className="text-xs text-gray-400 mb-5 max-w-xl leading-relaxed">
+        <div className="mt-6 pt-6 border-t border-[var(--nui-line-soft)]">
+            <h3 className="text-sm font-bold text-[var(--nui-text)] mb-1">Application and data security</h3>
+            <p className="text-xs text-[var(--nui-text-3)] mb-5 max-w-xl leading-relaxed">
                 An independent companion score scoped to the Application Portfolio (Step 7), calculated from its own
                 fixed methodology. Related to, but never merged into, the Security Score above.
             </p>
@@ -137,21 +139,21 @@ const OverviewSection = ({ report, companyName, assessmentDate }) => (
 // ════════════════════════════════════════════════════════════════════════════
 const StrengthsAndRisks = ({ strengths, criticalRisks }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
+        <div className="bg-[var(--nui-surface-sunk)] rounded-[var(--nui-r)] border border-[var(--nui-line-soft)] p-5">
             <div className="flex items-center gap-2 mb-4">
-                <div className="h-5 w-1 bg-green-500 rounded-full" />
-                <h3 className="text-xs font-bold uppercase tracking-wide text-gray-700">Top Strengths</h3>
+                <div className="h-5 w-1 bg-[var(--nui-ok)] rounded-full" />
+                <h3 className="text-xs font-bold uppercase tracking-wide text-[var(--nui-text-2)]">Top Strengths</h3>
             </div>
             {strengths.length === 0 ? (
-                <p className="text-xs text-gray-400">No categories scored above 60/100.</p>
+                <p className="text-xs text-[var(--nui-text-3)]">No categories scored above 60/100.</p>
             ) : (
                 <ul className="space-y-3">
                     {strengths.map((s, i) => (
                         <li key={i} className="flex items-start gap-2.5">
-                            <FiCheckCircle size={14} className="text-green-600 flex-shrink-0 mt-0.5" />
+                            <FiCheckCircle size={14} className="text-[var(--nui-ok)] flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-xs font-semibold text-gray-700">{s.label}</p>
-                                <p className="text-[11px] text-gray-500 leading-snug">{s.description}</p>
+                                <p className="text-xs font-semibold text-[var(--nui-text-2)]">{s.label}</p>
+                                <p className="text-[11px] text-[var(--nui-text-3)] leading-snug">{s.description}</p>
                             </div>
                         </li>
                     ))}
@@ -159,21 +161,21 @@ const StrengthsAndRisks = ({ strengths, criticalRisks }) => (
             )}
         </div>
 
-        <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
+        <div className="bg-[var(--nui-surface-sunk)] rounded-[var(--nui-r)] border border-[var(--nui-line-soft)] p-5">
             <div className="flex items-center gap-2 mb-4">
-                <div className="h-5 w-1 bg-red-500 rounded-full" />
-                <h3 className="text-xs font-bold uppercase tracking-wide text-gray-700">Critical Risks</h3>
+                <div className="h-5 w-1 bg-[var(--nui-risk)] rounded-full" />
+                <h3 className="text-xs font-bold uppercase tracking-wide text-[var(--nui-text-2)]">Critical Risks</h3>
             </div>
             {criticalRisks.length === 0 ? (
-                <p className="text-xs text-gray-400">No critical penalties triggered — strong posture.</p>
+                <p className="text-xs text-[var(--nui-text-3)]">No critical penalties triggered — strong posture.</p>
             ) : (
                 <ul className="space-y-3">
                     {criticalRisks.map((r, i) => (
                         <li key={i} className="flex items-start gap-2.5">
-                            <FiAlertTriangle size={14} className="text-red-600 flex-shrink-0 mt-0.5" />
+                            <FiAlertTriangle size={14} className="text-[var(--nui-risk)] flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-xs font-semibold text-red-700">{r.label}</p>
-                                <p className="text-[11px] text-gray-500 leading-snug">{r.description}</p>
+                                <p className="text-xs font-semibold text-[var(--nui-risk)]">{r.label}</p>
+                                <p className="text-[11px] text-[var(--nui-text-3)] leading-snug">{r.description}</p>
                             </div>
                         </li>
                     ))}
@@ -229,7 +231,7 @@ const InfrastructureSection = ({ blueprint }) => {
         >
             <div className="space-y-5">
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Facilities</p>
+                    <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-2">Facilities</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                         <InfoTile label="Physical Offices" value={bp.physicalOffices} />
                         <InfoTile label="Data Centers" value={yn(bp.hasDataCenters)} />
@@ -242,7 +244,7 @@ const InfrastructureSection = ({ blueprint }) => {
                 </div>
 
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Network</p>
+                    <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-2">Network</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                         <InfoTile label="WAN 1" value={fmtControl(bp.WAN1)} />
                         <InfoTile label="WAN 2" value={fmtControl(bp.WAN2)} />
@@ -256,7 +258,7 @@ const InfrastructureSection = ({ blueprint }) => {
                 </div>
 
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Servers &amp; Desktops</p>
+                    <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-2">Servers &amp; Desktops</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                         <InfoTile label="Windows Servers" value={yn(bp.windowsServers)} />
                         <InfoTile label="Windows Posture" value={fmtList(bp.windowsOptions)} />
@@ -300,14 +302,14 @@ const SecuritySection = ({ report }) => {
                 <StrengthsAndRisks strengths={strengths} criticalRisks={criticalRisks} />
 
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Risk Summary</p>
+                    <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-3">Risk Summary</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {["cyber", "downtime", "compliance"].map((k) => {
                             const cfg = RISK_CONFIG[risks[k]] || RISK_CONFIG.Medium;
                             const labels = { cyber: "Cyber Risk", downtime: "Downtime Risk", compliance: "Compliance Risk" };
                             return (
                                 <div key={k} className={`flex items-center justify-between rounded-xl px-4 py-3 ${cfg.bg}`}>
-                                    <span className="text-xs font-semibold text-gray-700">{labels[k]}</span>
+                                    <span className="text-xs font-semibold text-[var(--nui-text-2)]">{labels[k]}</span>
                                     <div className={`flex items-center gap-1.5 text-xs font-bold ${cfg.text}`}>
                                         <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
                                         {risks[k]}
@@ -316,10 +318,10 @@ const SecuritySection = ({ report }) => {
                             );
                         })}
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">
+                    <p className="text-[10px] text-[var(--nui-text-3)] mt-2 leading-relaxed">
                         Risk levels are derived mechanically from assessment signals. Precise risk quantification and
                         business-specific context are part of the{" "}
-                        <strong className="text-gray-600">Assessment with Remediation Plan</strong>.
+                        <strong className="text-[var(--nui-text-2)]">Assessment with Remediation Plan</strong>.
                     </p>
                 </div>
 
@@ -332,14 +334,14 @@ const SecuritySection = ({ report }) => {
                         </p>
                     )}
                     {triggeredPenalties.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
+                        <div className="mt-4 pt-4 border-t border-[var(--nui-line-soft)]">
+                            <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-2">
                                 Penalties Applied ({triggeredPenalties.length})
                             </p>
                             <div className="space-y-1.5">
                                 {triggeredPenalties.map((p, i) => (
-                                    <div key={i} className="flex items-center justify-between py-1 border-b border-gray-50 last:border-0">
-                                        <span className="text-xs text-gray-600">{p.label}</span>
+                                    <div key={i} className="flex items-center justify-between py-1 border-b border-[var(--nui-line-soft)] last:border-0">
+                                        <span className="text-xs text-[var(--nui-text-2)]">{p.label}</span>
                                         <span className="text-xs font-bold text-red-600">−{p.value} pts</span>
                                     </div>
                                 ))}
@@ -349,11 +351,11 @@ const SecuritySection = ({ report }) => {
                 </Disclosure>
 
                 <Disclosure label={`IT Maturity Characteristics — Level ${maturity.level}`}>
-                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">{maturity.description}</p>
+                    <p className="text-xs text-[var(--nui-text-2)] mb-3 leading-relaxed">{maturity.description}</p>
                     <ul className="space-y-1.5">
                         {maturity.characteristics.map((c, i) => (
-                            <li key={i} className="flex items-start gap-2 text-xs text-gray-500">
-                                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0" />
+                            <li key={i} className="flex items-start gap-2 text-xs text-[var(--nui-text-3)]">
+                                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[var(--nui-text-3)] flex-shrink-0" />
                                 {c}
                             </li>
                         ))}
@@ -384,7 +386,7 @@ const HYPOTHETICAL_VERB_PHRASE = {
 
 const IncompleteDataTag = () => (
     <span
-        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500 border border-dashed border-gray-300"
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[var(--nui-r-pill)] text-[10px] font-semibold bg-[var(--nui-idle-bg)] text-[var(--nui-idle)] border border-dashed border-[var(--nui-idle-line)]"
         title="One or more fields on this application were left unanswered — this is not a confirmed weakness."
     >
         <FiInfo size={10} />
@@ -451,20 +453,20 @@ const ApplicationSecuritySection = ({ report }) => {
             <div className="space-y-6">
                 {/* ── Top Risk Drivers ────────────────────────────────────────── */}
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Top Risk Drivers</p>
+                    <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-3">Top Risk Drivers</p>
                     {topRiskDrivers.length === 0 ? (
-                        <p className="text-xs text-gray-400">No significant risk drivers identified.</p>
+                        <p className="text-xs text-[var(--nui-text-3)]">No significant risk drivers identified.</p>
                     ) : (
                         <ul className="space-y-2">
                             {topRiskDrivers.map((d, i) => (
-                                <li key={d.factor} className="flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                                <li key={d.factor} className="flex items-center justify-between gap-3 bg-[var(--nui-surface-sunk)] border border-[var(--nui-line-soft)] rounded-xl px-4 py-3">
                                     <div className="flex items-center gap-3 min-w-0">
                                         <span className="w-5 h-5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                                             {i + 1}
                                         </span>
-                                        <span className="text-xs font-medium text-gray-700">{d.description}</span>
+                                        <span className="text-xs font-medium text-[var(--nui-text-2)]">{d.description}</span>
                                     </div>
-                                    <span className="text-[10px] font-bold text-gray-400 flex-shrink-0">
+                                    <span className="text-[10px] font-bold text-[var(--nui-text-3)] flex-shrink-0">
                                         {d.affectedApplicationCount} app{d.affectedApplicationCount === 1 ? "" : "s"}
                                     </span>
                                 </li>
@@ -476,18 +478,18 @@ const ApplicationSecuritySection = ({ report }) => {
                 {/* ── Improvement Hypotheticals (factual, module-recomputed) ──── */}
                 {hypotheticals.length > 0 && (
                     <div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                        <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-3">
                             If the Top Issues Were Fixed
                         </p>
                         <ul className="space-y-1.5">
                             {hypotheticals.map((h) => (
-                                <li key={h.factor} className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
+                                <li key={h.factor} className="flex items-start gap-2 text-xs text-[var(--nui-text-2)] leading-relaxed">
                                     <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#34808A] flex-shrink-0" />
                                     <span>
                                         {HYPOTHETICAL_VERB_PHRASE[h.factor] || "Fixing this factor"} on the{" "}
                                         {h.affectedApplicationCount} flagged application{h.affectedApplicationCount === 1 ? "" : "s"} would
                                         raise the application and data security score to approximately{" "}
-                                        <strong className="text-gray-800">{h.hypotheticalScore}</strong> (currently {h.currentScore}).
+                                        <strong className="text-[var(--nui-text)]">{h.hypotheticalScore}</strong> (currently {h.currentScore}).
                                     </span>
                                 </li>
                             ))}
@@ -497,28 +499,28 @@ const ApplicationSecuritySection = ({ report }) => {
 
                 {/* ── Section Breakdown ────────────────────────────────────────── */}
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Section Breakdown</p>
+                    <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-3">Section Breakdown</p>
                     <div className="space-y-2.5">
                         {sectionsByRisk.map((s) => {
                             const level = getRiskLevel(Math.round(s.sectionRisk));
                             const cfg = RISK_CONFIG[level] || RISK_CONFIG.Medium;
                             return (
-                                <div key={s.sectionId} className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                                <div key={s.sectionId} className="bg-[var(--nui-surface-sunk)] border border-[var(--nui-line-soft)] rounded-xl px-4 py-3">
                                     <div className="flex items-center justify-between mb-2 gap-3">
-                                        <span className="text-xs font-semibold text-gray-700 truncate">{s.sectionName}</span>
+                                        <span className="text-xs font-semibold text-[var(--nui-text-2)] truncate">{s.sectionName}</span>
                                         <div className="flex items-center gap-3 flex-shrink-0">
-                                            <span className="text-[10px] text-gray-400">{Math.round(s.normalizedWeight * 100)}% weight</span>
+                                            <span className="text-[10px] text-[var(--nui-text-3)]">{Math.round(s.normalizedWeight * 100)}% weight</span>
                                             <RiskLevelBadge level={level} />
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div className="flex-1 h-2 bg-[var(--nui-line)] rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full ${cfg.dot}`}
                                                 style={{ width: `${Math.min(100, Math.round(s.sectionRisk))}%` }}
                                             />
                                         </div>
-                                        <span className="text-xs font-bold text-gray-700 w-16 text-right flex-shrink-0">
+                                        <span className="text-xs font-bold text-[var(--nui-text-2)] w-16 text-right flex-shrink-0">
                                             Risk {Math.round(s.sectionRisk)}
                                         </span>
                                     </div>
@@ -530,9 +532,9 @@ const ApplicationSecuritySection = ({ report }) => {
 
                 {/* ── Incomplete data note (portfolio level) ───────────────────── */}
                 {incompleteCount > 0 && (
-                    <div className="flex items-start gap-2.5 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
-                        <FiInfo size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-gray-500 leading-relaxed">
+                    <div className="flex items-start gap-2.5 bg-[var(--nui-surface-sunk)] border border-[var(--nui-line-soft)] rounded-xl px-4 py-3">
+                        <FiInfo size={14} className="text-[var(--nui-text-3)] flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-[var(--nui-text-3)] leading-relaxed">
                             {incompleteCount} application{incompleteCount === 1 ? " has" : "s have"} unanswered fields — complete
                             them in Step 7 for a more accurate score.
                         </p>
@@ -544,27 +546,27 @@ const ApplicationSecuritySection = ({ report }) => {
                     <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#15587B] bg-[#15587B]/8 border border-[#15587B]/15 rounded-full px-3 py-1 mb-3">
                         Applications ({allApps.length}), highest risk first
                     </p>
-                    <div className="overflow-x-auto border border-gray-100 rounded-xl">
+                    <div className="overflow-x-auto border border-[var(--nui-line-soft)] rounded-xl">
                         <table className="w-full text-xs min-w-[520px]">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="text-left font-bold uppercase tracking-wide text-gray-400 text-[10px] px-4 py-2.5">Provider Name</th>
-                                    <th className="text-left font-bold uppercase tracking-wide text-gray-400 text-[10px] px-4 py-2.5">Section</th>
-                                    <th className="text-left font-bold uppercase tracking-wide text-gray-400 text-[10px] px-4 py-2.5">Risk Score</th>
-                                    <th className="text-left font-bold uppercase tracking-wide text-gray-400 text-[10px] px-4 py-2.5">Risk Level</th>
+                                <tr className="bg-[var(--nui-surface-sunk)] border-b border-[var(--nui-line-soft)]">
+                                    <th className="text-left font-bold uppercase tracking-wide text-[var(--nui-text-3)] text-[10px] px-4 py-2.5">Provider Name</th>
+                                    <th className="text-left font-bold uppercase tracking-wide text-[var(--nui-text-3)] text-[10px] px-4 py-2.5">Section</th>
+                                    <th className="text-left font-bold uppercase tracking-wide text-[var(--nui-text-3)] text-[10px] px-4 py-2.5">Risk Score</th>
+                                    <th className="text-left font-bold uppercase tracking-wide text-[var(--nui-text-3)] text-[10px] px-4 py-2.5">Risk Level</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {allApps.map((a) => (
-                                    <tr key={a.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors">
-                                        <td className="px-4 py-2.5 font-medium text-gray-700">
+                                    <tr key={a.id} className="border-b border-[var(--nui-line-soft)] last:border-0 hover:bg-[var(--nui-surface-sunk)]/60 transition-colors">
+                                        <td className="px-4 py-2.5 font-medium text-[var(--nui-text-2)]">
                                             <div className="flex items-center gap-2">
                                                 <span className="truncate max-w-[160px]">{a.name || "Unnamed application"}</span>
                                                 {a.hasIncompleteData && <IncompleteDataTag />}
                                             </div>
                                         </td>
-                                        <td className="px-4 py-2.5 text-gray-500">{a.sectionName}</td>
-                                        <td className="px-4 py-2.5 font-bold text-gray-700">{a.riskScore}/100</td>
+                                        <td className="px-4 py-2.5 text-[var(--nui-text-3)]">{a.sectionName}</td>
+                                        <td className="px-4 py-2.5 font-bold text-[var(--nui-text-2)]">{a.riskScore}/100</td>
                                         <td className="px-4 py-2.5"><RiskLevelBadge level={a.riskLevel} /></td>
                                     </tr>
                                 ))}
@@ -605,7 +607,7 @@ const BusinessOperationsSection = ({ blueprint }) => {
                 </div>
 
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Operational Challenges</p>
+                    <p className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] mb-2">Operational Challenges</p>
                     {hasChips ? (
                         <div className="flex flex-wrap gap-2">
                             {bp.operationalChallenges.map((c, i) => (
@@ -615,7 +617,7 @@ const BusinessOperationsSection = ({ blueprint }) => {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-xs text-gray-400">No operational challenges recorded.</p>
+                        <p className="text-xs text-[var(--nui-text-3)]">No operational challenges recorded.</p>
                     )}
                 </div>
             </div>
@@ -677,13 +679,13 @@ const ApplicationsSection = ({ blueprint, report }) => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 max-w-sm">
-                        <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 flex flex-col items-center gap-1.5">
+                        <div className="bg-[var(--nui-surface-sunk)] rounded-xl border border-[var(--nui-line-soft)] p-4 flex flex-col items-center gap-1.5">
                             <ProgressRing value={report.metrics.appMfaCoverage} size={64} strokeWidth={7} color={ACCENT} />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">MFA Coverage</span>
+                            <span className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] text-center">MFA Coverage</span>
                         </div>
-                        <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 flex flex-col items-center gap-1.5">
+                        <div className="bg-[var(--nui-surface-sunk)] rounded-xl border border-[var(--nui-line-soft)] p-4 flex flex-col items-center gap-1.5">
                             <ProgressRing value={report.metrics.appBackupCoverage} size={64} strokeWidth={7} color={PRIMARY} />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">Backup Coverage</span>
+                            <span className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)] text-center">Backup Coverage</span>
                         </div>
                     </div>
                 </div>
@@ -719,27 +721,27 @@ const AssessmentDataSection = ({ report }) => {
                     {categories.map((c) => {
                         const zone = getZone(c.rawScore);
                         return (
-                            <div key={c.id} className="bg-gray-50 rounded-xl border border-gray-100 p-4">
+                            <div key={c.id} className="bg-[var(--nui-surface-sunk)] rounded-xl border border-[var(--nui-line-soft)] p-4">
                                 <div className="flex items-start justify-between gap-2 mb-2">
-                                    <p className="text-xs font-semibold text-gray-700 leading-tight">{c.name}</p>
+                                    <p className="text-xs font-semibold text-[var(--nui-text-2)] leading-tight">{c.name}</p>
                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${zone.badge}`}>
                                         {zone.label}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className="flex-1 h-2 bg-[var(--nui-line)] rounded-full overflow-hidden">
                                         <div
                                             className="h-full rounded-full transition-all duration-700"
                                             style={{ width: `${c.rawScore}%`, backgroundColor: zone.color }}
                                         />
                                     </div>
-                                    <span className="text-xs font-bold text-gray-700 w-10 text-right flex-shrink-0">
+                                    <span className="text-xs font-bold text-[var(--nui-text-2)] w-10 text-right flex-shrink-0">
                                         {c.rawScore}/100
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between mt-1.5">
-                                    <span className="text-[10px] text-gray-400">Weight: {Math.round(c.weight * 100)}%</span>
-                                    <span className="text-[10px] text-gray-400">Contribution: +{c.contribution}</span>
+                                    <span className="text-[10px] text-[var(--nui-text-3)]">Weight: {Math.round(c.weight * 100)}%</span>
+                                    <span className="text-[10px] text-[var(--nui-text-3)]">Contribution: +{c.contribution}</span>
                                 </div>
                             </div>
                         );
@@ -747,23 +749,23 @@ const AssessmentDataSection = ({ report }) => {
                 </div>
 
                 <Disclosure label={`Data Availability Notes (${dataGaps.length})`}>
-                    <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+                    <p className="text-xs text-[var(--nui-text-3)] mb-3 leading-relaxed">
                         These signals are not captured by the current 7-step assessment, so the scoring engine cannot
                         use them. They are listed here for transparency.
                     </p>
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
                         {dataGaps.map((gap, i) => (
-                            <li key={i} className="flex items-start gap-2 text-xs text-gray-500">
-                                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0" />
+                            <li key={i} className="flex items-start gap-2 text-xs text-[var(--nui-text-3)]">
+                                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[var(--nui-line-strong)] flex-shrink-0" />
                                 {gap}
                             </li>
                         ))}
                     </ul>
                 </Disclosure>
 
-                <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
-                    <p className="text-[11px] text-gray-500 leading-relaxed">
-                        <strong className="text-gray-600">Scoring methodology:</strong> Each category scores 0–100
+                <div className="bg-[var(--nui-surface-sunk)] border border-[var(--nui-line-soft)] rounded-xl p-4">
+                    <p className="text-[11px] text-[var(--nui-text-3)] leading-relaxed">
+                        <strong className="text-[var(--nui-text-2)]">Scoring methodology:</strong> Each category scores 0–100
                         based on specific controls and configurations. Categories are weighted and summed to produce
                         a composite, then critical-control penalties and caps are applied. Full methodology is
                         documented in the IT Blueprint scoring architecture reference.
@@ -840,10 +842,23 @@ export default function AssessmentReport() {
     // ── Loading ───────────────────────────────────────────────────────────────
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
-                <div className="text-center space-y-3">
-                    <div className="w-10 h-10 border-4 border-[#34808A] border-t-transparent rounded-full animate-spin mx-auto" />
-                    <p className="text-sm text-gray-500">Generating your Current State Report…</p>
+            <div className="nui relative min-h-screen">
+                <div aria-hidden="true" className="nui-bg pointer-events-none fixed inset-0" />
+                <div
+                    role="status"
+                    aria-live="polite"
+                    className="relative flex min-h-screen flex-col items-center justify-center px-6"
+                >
+                    <span
+                        aria-hidden="true"
+                        className="mb-5 inline-block h-9 w-9 animate-spin rounded-full border-2 border-[var(--nui-line-strong)] border-t-[var(--nui-brand)]"
+                    />
+                    <p className="nui-display text-[15px] font-semibold text-[var(--nui-text)]">
+                        Generating your Current State Report
+                    </p>
+                    <p className="mt-1 text-[13px] text-[var(--nui-text-3)]">
+                        Calculating your Security Score from your assessment data…
+                    </p>
                 </div>
             </div>
         );
@@ -852,13 +867,14 @@ export default function AssessmentReport() {
     // ── Error ─────────────────────────────────────────────────────────────────
     if (error || !report) {
         return (
-            <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
-                <div className="text-center space-y-4 max-w-sm p-6">
-                    <p className="text-sm text-red-600">{error || "Report data unavailable."}</p>
+            <div className="nui relative min-h-screen">
+                <div aria-hidden="true" className="nui-bg pointer-events-none fixed inset-0" />
+                <div className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center">
+                    <p className="mb-4 max-w-sm text-sm text-[var(--nui-risk)]">{error || "Report data unavailable."}</p>
                     <button
                         type="button"
                         onClick={() => router.push("/assessment-complete")}
-                        className="px-4 py-2 text-sm font-semibold text-white bg-[#15587B] rounded-lg hover:bg-[#0f4460] transition"
+                        className="px-4 py-2 text-sm font-semibold text-white bg-[var(--nui-brand)] rounded-[var(--nui-r-sm)] hover:bg-[var(--nui-brand-hover)] transition-colors"
                     >
                         Back to Assessment Complete
                     </button>
@@ -870,20 +886,34 @@ export default function AssessmentReport() {
     // ── Render ────────────────────────────────────────────────────────────────
     return (
         <AppShell
-            title="Current State Report"
-            subtitle={companyName}
             sections={SECTIONS}
-            contentClassName="max-w-6xl mx-auto px-6 pb-8 space-y-6"
+            contentClassName="px-4 pt-8 pb-24 sm:px-6 lg:px-8"
         >
-            <OverviewSection report={report} companyName={companyName} assessmentDate={assessmentDate} />
-            <OrganizationSection blueprint={blueprint} />
-            <InfrastructureSection blueprint={blueprint} />
-            <SecuritySection report={report} />
-            <ApplicationSecuritySection report={report} />
-            <BusinessOperationsSection blueprint={blueprint} />
-            <BusinessWorkflowsSection />
-            <ApplicationsSection blueprint={blueprint} report={report} />
-            <AssessmentDataSection report={report} />
+            <NuiCanvas>
+                <div className="mx-auto max-w-[1180px] space-y-6">
+                    <NuiReveal>
+                        <NuiHero
+                            eyebrow="IT Blueprint · Current State Report"
+                            title={companyName || "Security Score"}
+                            context={`Generated ${assessmentDate}. A snapshot assessment based on self-reported data, calculated from a fixed, published methodology, not the advisor-built Assessment with Remediation Plan.`}
+                            snapshot={[
+                                { label: "Security Score", value: report.score, unit: "/100" },
+                                { label: "Maturity", value: `L${report.maturity.level}` },
+                            ]}
+                        />
+                    </NuiReveal>
+
+                    <OverviewSection report={report} />
+                    <OrganizationSection blueprint={blueprint} />
+                    <InfrastructureSection blueprint={blueprint} />
+                    <SecuritySection report={report} />
+                    <ApplicationSecuritySection report={report} />
+                    <BusinessOperationsSection blueprint={blueprint} />
+                    <BusinessWorkflowsSection />
+                    <ApplicationsSection blueprint={blueprint} report={report} />
+                    <AssessmentDataSection report={report} />
+                </div>
+            </NuiCanvas>
         </AppShell>
     );
 }

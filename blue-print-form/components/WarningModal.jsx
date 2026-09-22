@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import { FiAlertTriangle, FiX } from "react-icons/fi";
 
+/**
+ * WarningModal — confirm/cancel dialog, restyled to the shared design
+ * system (styles/new-ui/tokens.css). Same props, same behavior (Escape to
+ * close, backdrop click to close, body scroll lock while open) as before —
+ * only the visual treatment changed: flat risk-red accent instead of
+ * gradients, a single fade+rise entrance instead of pulsing/ping decorative
+ * blobs, calmer hover states. See docs/ui-redesign.md.
+ */
 export default function WarningModal({ isOpen, onClose, onConfirm, title, message, confirmText = "Yes, Continue", cancelText = "Cancel" }) {
   useEffect(() => {
     if (isOpen) {
@@ -26,102 +35,89 @@ export default function WarningModal({ isOpen, onClose, onConfirm, title, messag
 
   if (!isOpen) return null;
 
+  // Strip the legacy "⚠️ WARNING" emoji prefix some callers still pass —
+  // the icon header now carries that meaning visually.
+  const cleanTitle = (title || "Warning").replace(/^[^\w]*WARNING[^\w]*/i, "").trim() || "Warning";
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop with gradient and blur */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-md transition-all duration-300"
+    <div className="nui fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-[color:rgba(15,42,56,0.55)] backdrop-blur-sm nui-modal-fade"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
-      <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-scale-in border border-red-100">
-        {/* Decorative gradient overlay */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-red-500" />
-        
-        {/* Warning Icon Header */}
-        <div className="relative bg-gradient-to-br from-red-50 to-orange-50 p-8 text-center border-b border-red-100">
-          {/* Floating animation circles */}
-          <div className="absolute top-4 right-4 w-20 h-20 bg-red-200/30 rounded-full blur-2xl animate-pulse" />
-          <div className="absolute bottom-4 left-4 w-16 h-16 bg-orange-200/30 rounded-full blur-2xl animate-pulse delay-75" />
-          
-          <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
-            <div className="absolute inset-0 bg-red-400 rounded-full animate-ping opacity-20" />
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-11 w-11 text-white relative z-10" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2.5} 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
-              />
-            </svg>
+      <div className="relative bg-[var(--nui-surface)] rounded-[var(--nui-r-lg)] shadow-[var(--nui-shadow-3)] max-w-lg w-full overflow-hidden border border-[var(--nui-line)] nui-modal-rise">
+        {/* Flat risk accent — no gradient, no pulsing decoration */}
+        <div className="h-1 w-full bg-[var(--nui-risk)]" />
+
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-[var(--nui-r-sm)] flex items-center justify-center text-[var(--nui-text-3)] hover:text-[var(--nui-text)] hover:bg-[var(--nui-surface-sunk)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1"
+        >
+          <FiX size={16} />
+        </button>
+
+        {/* Icon header */}
+        <div className="px-8 pt-8 pb-6 text-center border-b border-[var(--nui-line-soft)]">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-[var(--nui-risk-bg)] rounded-full mb-4">
+            <FiAlertTriangle size={26} className="text-[var(--nui-risk)]" strokeWidth={2} />
           </div>
-          <h3 className="text-3xl font-extrabold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
-            {title || "⚠️ WARNING"}
+          <h3 className="nui-display text-xl font-bold text-[var(--nui-text)]">
+            {cleanTitle}
           </h3>
         </div>
 
         {/* Content */}
-        <div className="p-8 bg-white/95 backdrop-blur-sm">
-          <div className="bg-gradient-to-br from-red-50/80 to-orange-50/80 backdrop-blur-sm rounded-2xl p-6 border border-red-100/50 shadow-inner">
-            <p className="text-gray-800 text-base leading-relaxed whitespace-pre-line font-medium">
+        <div className="px-8 py-6">
+          <div className="bg-[var(--nui-risk-bg)] border border-[var(--nui-risk-line)] rounded-[var(--nui-r)] p-5">
+            <p className="text-[var(--nui-text-2)] text-sm leading-relaxed whitespace-pre-line">
               {message}
             </p>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="bg-gradient-to-br from-gray-50/95 to-gray-100/95 backdrop-blur-sm px-8 py-6 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end border-t border-gray-200/50">
+        <div className="bg-[var(--nui-surface-sunk)] px-8 py-5 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end border-t border-[var(--nui-line-soft)]">
           <button
             onClick={onClose}
-            className="group px-6 py-3 text-sm font-semibold text-gray-700 bg-white/90 backdrop-blur-sm border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+            className="px-5 py-2.5 text-sm font-semibold text-[var(--nui-text-2)] bg-[var(--nui-surface)] border border-[var(--nui-line-strong)] rounded-[var(--nui-r-sm)] hover:border-[var(--nui-accent)] hover:text-[var(--nui-brand)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-1"
           >
-            <span className="flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              {cancelText}
-            </span>
+            {cancelText}
           </button>
           <button
             onClick={() => {
               onConfirm();
               onClose();
             }}
-            className="group px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-red-600 to-red-500 rounded-xl hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            className="px-5 py-2.5 text-sm font-bold text-white bg-[var(--nui-risk)] hover:bg-[var(--nui-risk-hover)] rounded-[var(--nui-r-sm)] shadow-[var(--nui-shadow-1)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--nui-risk)] focus-visible:outline-offset-1"
           >
-            <span className="flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              {confirmText}
-            </span>
+            {confirmText}
           </button>
         </div>
       </div>
 
+      {/* Fade + 8px rise entrance, matching the design system's animation
+          language (styles/new-ui/tokens.css). The global `.nui, .nui *`
+          prefers-reduced-motion block collapses these to 1ms — no separate
+          handling needed here. */}
       <style jsx>{`
-        @keyframes scale-in {
-          from {
-            transform: scale(0.95) translateY(-10px);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-          }
+        @keyframes nui-modal-fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        .animate-scale-in {
-          animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        @keyframes nui-modal-rise-in {
+          from { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.98); }
+          to { opacity: 1; transform: none; }
         }
-        .delay-75 {
-          animation-delay: 75ms;
+        .nui-modal-fade {
+          animation: nui-modal-fade-in 180ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        }
+        .nui-modal-rise {
+          animation: nui-modal-rise-in 220ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
         }
       `}</style>
     </div>

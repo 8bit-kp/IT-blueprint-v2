@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { blueprintAPI } from "@/utils/api";
 import { notify } from "@/lib/notify";
-import { FiGrid } from "react-icons/fi";
+import { FiGrid, FiArrowLeft, FiArrowRight, FiRotateCcw, FiSave } from "react-icons/fi";
 import ProgressBar from "@/components/ProgressBar";
 import AppShell from "@/components/navigation/AppShell";
+import { NuiCanvas, NuiReveal, NuiHero, NuiSection, NuiButton } from "@/components/ui/new";
 import { useForm } from "@/context/FormContext";
 import { useRouter } from "next/navigation";
 import WarningModal from "@/components/WarningModal";
@@ -414,10 +415,23 @@ export default function BlueprintForm() {
 
     if (loadingData) {
         return (
-            <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
-                <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#15587B] mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading your assessment...</p>
+            <div className="nui relative min-h-screen">
+                <div aria-hidden="true" className="nui-bg pointer-events-none fixed inset-0" />
+                <div
+                    role="status"
+                    aria-live="polite"
+                    className="relative flex min-h-screen flex-col items-center justify-center px-6"
+                >
+                    <span
+                        aria-hidden="true"
+                        className="mb-5 inline-block h-9 w-9 animate-spin rounded-full border-2 border-[var(--nui-line-strong)] border-t-[var(--nui-brand)]"
+                    />
+                    <p className="nui-display text-[15px] font-semibold text-[var(--nui-text)]">
+                        Loading your assessment
+                    </p>
+                    <p className="mt-1 text-[13px] text-[var(--nui-text-3)]">
+                        Restoring your saved progress…
+                    </p>
                 </div>
             </div>
         );
@@ -435,119 +449,149 @@ export default function BlueprintForm() {
 
     return (
         <AppShell
-            title="Current State Assessment"
-            subtitle="IT Blueprint Platform"
             sections={stepSections}
             navMode="action"
             activeId={String(step)}
             onSelect={(id) => handleStepClick(Number(id))}
             sidebarFooter={<ProgressFooter step={step} totalSteps={totalSteps} lastSavedStep={lastSavedStep} />}
-            contentClassName="max-w-6xl mx-auto px-6 pb-6"
+            contentClassName="px-4 pt-8 sm:px-6 lg:px-8"
             bottomBar={
-                <div className="py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
+                // AppShell renders `bottomBar` as a sibling of the NuiCanvas-wrapped
+                // content below, not inside it — so this needs its own `.nui` scope
+                // for the design tokens used here to resolve. See docs/ui-redesign.md.
+                <div className="nui px-4 sm:px-6 py-4 flex justify-between items-center gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
                         {step > 1 && (
-                            <button
-                                onClick={handleBack}
-                                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 hover:text-[#15587B] hover:border-gray-300 transition-all duration-200 group"
-                            >
-                                <span className="group-hover:-translate-x-0.5 transition-transform duration-200">←</span>
-                                <span>Back</span>
-                            </button>
+                            <NuiButton variant="secondary" size="lg" onClick={handleBack} Icon={FiArrowLeft}>
+                                Back
+                            </NuiButton>
                         )}
-                        <span className="text-xs text-gray-400 hidden sm:inline-block border-l border-gray-300 pl-4">
+                        <span className="text-xs text-[var(--nui-text-3)] hidden sm:inline-block border-l border-[var(--nui-line)] pl-4">
                             {lastSavedStep > 0 ? `Last saved at Step ${lastSavedStep}` : "Not saved yet"}
                         </span>
                     </div>
-                    <div className="flex gap-3">
-                        <button
+                    <div className="flex gap-2 sm:gap-3">
+                        <NuiButton
+                            variant="danger"
+                            size="md"
                             onClick={() => setShowResetModal(true)}
                             disabled={loadingReset || loadingSave}
-                            className="px-4 sm:px-6 py-2.5 text-sm text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg font-medium transition flex items-center gap-2"
+                            loading={loadingReset}
+                            Icon={FiRotateCcw}
                             title="Reset all data to default values"
                         >
-                            {loadingReset ? (
+                            {loadingReset ? "Resetting..." : (
                                 <>
-                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <span>Resetting...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
                                     <span className="hidden sm:inline">Reset Data</span>
                                     <span className="sm:hidden">Reset</span>
                                 </>
                             )}
-                        </button>
-                        <button
+                        </NuiButton>
+                        <NuiButton
+                            variant="secondary"
+                            size="md"
                             onClick={handleSaveOnly}
                             disabled={loadingSave || loadingReset}
-                            className="px-4 sm:px-6 py-2.5 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-200 disabled:cursor-not-allowed rounded-lg font-medium transition"
+                            loading={loadingSave}
                         >
-                            {loadingSave ? "Saving..." : "Save Draft"}
-                        </button>
-                        <button
+                            {loadingSave ? "Saving..." : (
+                                <>
+                                    <span className="hidden sm:inline">Save Draft</span>
+                                    <span className="sm:hidden">Save</span>
+                                </>
+                            )}
+                        </NuiButton>
+                        <NuiButton
+                            variant="primary"
+                            size="md"
                             onClick={handleSaveAndNext}
                             disabled={loadingSave || loadingReset}
-                            className="px-6 sm:px-8 py-2.5 text-sm text-white bg-[#15587B] hover:bg-[#0f4460] disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg font-bold shadow-md transition flex items-center gap-2"
+                            loading={loadingSave}
                         >
-                            {step === totalSteps ? "Complete Assessment" : "Next Step →"}
-                        </button>
+                            {step === totalSteps ? (
+                                <>
+                                    <span className="hidden sm:inline">Complete Assessment</span>
+                                    <span className="sm:hidden">Complete</span>
+                                </>
+                            ) : (
+                                <span className="inline-flex items-center gap-1.5">
+                                    Next Step <FiArrowRight size={14} aria-hidden="true" />
+                                </span>
+                            )}
+                        </NuiButton>
                     </div>
                 </div>
             }
         >
-            <WarningModal
-                isOpen={showResetModal}
-                onClose={() => setShowResetModal(false)}
-                onConfirm={handleResetData}
-                title="⚠️ WARNING"
-                message="This will permanently delete all your filled data and reset the form to default values. This action cannot be undone.
+            <NuiCanvas>
+                <WarningModal
+                    isOpen={showResetModal}
+                    onClose={() => setShowResetModal(false)}
+                    onConfirm={handleResetData}
+                    title="⚠️ WARNING"
+                    message="This will permanently delete all your filled data and reset the form to default values. This action cannot be undone.
 
 Are you sure you want to continue?"
-                confirmText="Yes, Reset All Data"
-                cancelText="Cancel"
-            />
+                    confirmText="Yes, Reset All Data"
+                    cancelText="Cancel"
+                />
 
-            <div ref={contentRef} className="pb-24">
-                {/* Progress bar — visible on all screen sizes */}
-                <div className="mb-6">
-                    <ProgressBar
-                        step={step}
-                        totalSteps={totalSteps}
-                        onStepClick={handleStepClick}
-                    />
-                </div>
+                {/* Same `mx-auto max-w-[1180px]` wrapper every other migrated page uses
+                    (see docs/ui-redesign.md) — kept as a real block element nested
+                    inside NuiCanvas rather than a direct flex child of AppShell's
+                    content column, which is what a fixed page width requires: AppShell's
+                    column is a `flex flex-col` container, and a flex item with
+                    `mx-auto` but no explicit width shrink-to-fits its own content
+                    instead of filling the column (fixed for every page at the AppShell
+                    level too — see components/navigation/AppShell.jsx — but this
+                    wrapper's own non-flex nesting is what actually keeps this page's
+                    width identical across all 7 steps regardless of how wide any one
+                    step's content happens to be). */}
+                <div className="mx-auto max-w-[1180px]">
+                    <NuiReveal>
+                        <NuiHero
+                            eyebrow="IT Blueprint · Current State Assessment"
+                            title={formData.companyName || "Current State Assessment"}
+                            context="Complete all 7 steps to generate your Current State Report. Save your progress at any point — Save Draft keeps your place without advancing."
+                        />
+                    </NuiReveal>
 
-                {/* Step heading — width now comes from AppShell's contentClassName
-                    (max-w-6xl mx-auto px-6), not a duplicate wrapper here. */}
-                <div className="flex justify-between items-end mb-6">
-                    <div>
-                        <h2 className="text-2xl font-bold text-[#15587B]">{stepTitles[step]}</h2>
-                        <p className="text-sm text-gray-500">
-                            {step === 1
-                                ? "This information contextualises your assessment for your Consltek advisor."
-                                : "All fields on this step are optional — completing them improves your Current State Report."}
-                        </p>
+                    <div ref={contentRef} className="pt-8 pb-24">
+                        {/* Progress bar — visible on all screen sizes */}
+                        <div className="mb-6">
+                            <ProgressBar
+                                step={step}
+                                totalSteps={totalSteps}
+                                onStepClick={handleStepClick}
+                            />
+                        </div>
+
+                        {/* Step heading — editorial section spine, matching the
+                            /blueprint-summary design language (docs/ui-redesign.md). */}
+                        <NuiSection
+                            index={`0${step}`}
+                            title={stepTitles[step]}
+                            description={
+                                step === 1
+                                    ? "This information contextualises your assessment for your Consltek advisor."
+                                    : "All fields on this step are optional — completing them improves your Current State Report."
+                            }
+                            className="mb-6"
+                        />
+
+                        {/* Active step component */}
+                        <div className="animate-fade-in">
+                            {step === 1 && <Step1 formData={formData} setField={setField} errors={stepErrors} clearError={clearError} />}
+                            {step === 2 && <Step2 formData={formData} setField={setField} />}
+                            {step === 3 && <Step3 formData={formData} setField={setField} initialTechControlState={initialTechControlState} />}
+                            {step === 4 && <Step4 formData={formData} setField={setField} />}
+                            {step === 5 && <Step5 technicalControls={technicalControls} setTechnicalControls={setTechnicalControls} initialTechControlState={initialTechControlState} />}
+                            {step === 6 && <Step6 formData={formData} setField={setField} />}
+                            {step === 7 && <Step7 formData={formData} updateFormData={updateFormData} />}
+                        </div>
                     </div>
                 </div>
-
-                {/* Active step component */}
-                <div className="animate-fade-in">
-                    {step === 1 && <Step1 formData={formData} setField={setField} errors={stepErrors} clearError={clearError} />}
-                    {step === 2 && <Step2 formData={formData} setField={setField} />}
-                    {step === 3 && <Step3 formData={formData} setField={setField} initialTechControlState={initialTechControlState} />}
-                    {step === 4 && <Step4 formData={formData} setField={setField} />}
-                    {step === 5 && <Step5 technicalControls={technicalControls} setTechnicalControls={setTechnicalControls} initialTechControlState={initialTechControlState} />}
-                    {step === 6 && <Step6 formData={formData} setField={setField} />}
-                    {step === 7 && <Step7 formData={formData} updateFormData={updateFormData} />}
-                </div>
-            </div>
+            </NuiCanvas>
         </AppShell>
     );
 }

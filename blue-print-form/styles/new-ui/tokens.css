@@ -1,0 +1,245 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   IT Blueprint — "new UI" design tokens  (redesign prototype)
+   ──────────────────────────────────────────────────────────────────────────
+   Every token below is scoped to the `.nui` class, which is applied by
+   <NuiCanvas> (components/ui/new/NuiCanvas.jsx). Nothing here leaks into the
+   existing application: no Tailwind `@theme` registration, no element or
+   utility overrides outside `.nui`.
+
+   Reverting the whole experiment = delete this file, delete the single
+   `@import` line in app/globals.css, delete components/ui/new/.
+
+   The brand hexes are the SAME values already used across the app
+   (#15587B primary, #34808A accent, #935010 warm) — this layer only adds a
+   disciplined neutral ladder, line/text tiers, and elevation around them.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Everything below lives in Tailwind's `components` layer, so a Tailwind
+   utility class on an element always wins over these component defaults.
+   (Unlayered CSS beats *any* layered rule regardless of specificity — which
+   would otherwise let `.nui-table td { color }` override a `text-[...]`
+   utility on that same cell.) `!important` inside a media query here still
+   wins over utilities, because important declarations reverse layer order —
+   which is exactly what the reduced-motion block needs. */
+@layer components {
+.nui {
+    /* ── Brand ─────────────────────────────────────────────────────────── */
+    --nui-brand:            #15587B;   /* primary dark teal (unchanged) */
+    --nui-brand-hover:      #0F4460;   /* same hover already used by TopBar */
+    --nui-brand-deep:       #0C405A;   /* deepest teal — hero gradient anchor */
+    --nui-accent:           #34808A;   /* accent teal (unchanged) */
+    --nui-accent-hover:     #2B6D75;
+    --nui-accent-tint:      rgba(52, 128, 138, 0.10);
+    --nui-accent-tint-2:    rgba(52, 128, 138, 0.18);
+    --nui-warm:             #935010;   /* warm orange (unchanged) */
+
+    /* ── Neutral surface ladder ────────────────────────────────────────── */
+    --nui-canvas:           #F4F6F8;
+    --nui-surface:          #FFFFFF;
+    --nui-surface-sunk:     #F7F9FA;
+    --nui-surface-quiet:    #FBFCFD;
+
+    /* ── Lines ─────────────────────────────────────────────────────────── */
+    --nui-line:             #E5EAEE;
+    --nui-line-soft:        #EEF2F5;
+    --nui-line-strong:      #D2DBE2;
+
+    /* ── Text ──────────────────────────────────────────────────────────── */
+    --nui-text:             #0F2A38;
+    --nui-text-2:           #47616F;
+    --nui-text-3:           #5F7380;   /* AA on surface (4.9:1) — muted, not faint */
+    --nui-text-invert:      #F1F7F9;
+    --nui-text-invert-2:    rgba(241, 247, 249, 0.86);
+
+    /* ── Semantic status (fixed meanings — never reskinned to brand teal) ─ */
+    --nui-ok:               #15803D;
+    --nui-ok-bg:            #ECFDF3;
+    --nui-ok-line:          #BBF7D0;
+
+    --nui-warn:             #B45309;
+    --nui-warn-bg:          #FFFBEB;
+    --nui-warn-line:        #FDE68A;
+
+    --nui-risk:             #B42318;
+    --nui-risk-bg:          #FEF3F2;
+    --nui-risk-line:        #FECDCA;
+    --nui-risk-hover:       #932014;   /* danger button hover — darker than --nui-risk */
+
+    --nui-info:             #175CD3;
+    --nui-info-bg:          #EFF6FF;
+    --nui-info-line:        #BFDBFE;
+
+    --nui-idle:             #5B6675;
+    --nui-idle-bg:          #F1F5F9;
+    --nui-idle-line:        #E2E8F0;
+
+    /* ── Radius ────────────────────────────────────────────────────────── */
+    --nui-r-xs:             6px;
+    --nui-r-sm:             10px;
+    --nui-r:                14px;
+    --nui-r-lg:             20px;
+    --nui-r-pill:           999px;
+
+    /* ── Elevation (low-contrast, cool-tinted — no heavy drop shadows) ──── */
+    --nui-shadow-0:         none;
+    --nui-shadow-1:         0 1px 2px rgba(15, 42, 56, 0.05);
+    --nui-shadow-2:         0 1px 2px rgba(15, 42, 56, 0.05),
+                            0 10px 28px -18px rgba(15, 42, 56, 0.28);
+    --nui-shadow-3:         0 2px 4px rgba(15, 42, 56, 0.06),
+                            0 20px 44px -22px rgba(15, 42, 56, 0.34);
+
+    /* ── Motion ────────────────────────────────────────────────────────── */
+    --nui-ease:             cubic-bezier(0.22, 0.61, 0.36, 1);
+    --nui-dur-fast:         140ms;
+    --nui-dur:              220ms;
+    --nui-dur-slow:         520ms;
+
+    color: var(--nui-text);
+}
+
+/* ══ Ambient page canvas ══════════════════════════════════════════════════ */
+
+.nui-bg {
+    background-color: var(--nui-canvas);
+    background-image:
+        radial-gradient(880px 460px at 10% -10%, rgba(52, 128, 138, 0.13), transparent 62%),
+        radial-gradient(720px 420px at 94% 2%,   rgba(21, 88, 123, 0.10), transparent 60%),
+        linear-gradient(180deg, #F6F8FA 0%, #F1F4F7 100%);
+}
+
+/* Fine blueprint grid — a quiet nod to the product name, faded out early so
+   it never competes with content. */
+.nui-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right,  rgba(15, 42, 56, 0.045) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 42, 56, 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), transparent 52%);
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), transparent 52%);
+}
+
+/* Same grid, tuned for the dark hero panel. */
+.nui-hero-grid {
+    background-image:
+        linear-gradient(to right,  rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(120% 110% at 88% 10%, rgba(0, 0, 0, 0.95), transparent 72%);
+            mask-image: radial-gradient(120% 110% at 88% 10%, rgba(0, 0, 0, 0.95), transparent 72%);
+}
+
+/* ══ Typography helpers ═══════════════════════════════════════════════════ */
+
+.nui-num        { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.nui-display    { letter-spacing: -0.025em; }
+.nui-eyebrow    { letter-spacing: 0.14em; text-transform: uppercase; }
+
+/* ══ Focus — one visible, consistent ring for every interactive element ═══ */
+
+.nui :where(a, button, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--nui-accent);
+    outline-offset: 2px;
+    border-radius: var(--nui-r-xs);
+}
+
+/* ══ Tables ═══════════════════════════════════════════════════════════════ */
+
+.nui-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    text-align: left;
+}
+.nui-table thead th {
+    padding: 10px 16px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nui-text-3);
+    background: var(--nui-surface-sunk);
+    border-bottom: 1px solid var(--nui-line);
+    white-space: nowrap;
+}
+.nui-table tbody :is(td, th) {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--nui-line-soft);
+    vertical-align: middle;
+}
+/* Zero-specificity defaults (:where) so a cell's own utility classes — the
+   brand-coloured provider name, a semibold row header — always win, while a
+   <th scope="row"> still loses its UA-default bold + centring. */
+:where(.nui-table tbody td, .nui-table tbody th) {
+    color: var(--nui-text-2);
+    font-weight: 400;
+    text-align: left;
+}
+.nui-table tbody tr:last-child :is(td, th) { border-bottom: 0; }
+.nui-table tbody tr { transition: background-color var(--nui-dur-fast) var(--nui-ease); }
+.nui-table tbody tr:hover { background: var(--nui-surface-sunk); }
+.nui-table th:first-child, .nui-table td:first-child { padding-left: 20px; }
+.nui-table th:last-child,  .nui-table td:last-child  { padding-right: 20px; }
+
+/* Horizontal-scroll affordance: a fade on the right edge of a scrollable
+   table region, so a clipped column is visibly a clipped column. */
+.nui-scroll-x {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+}
+.nui-scroll-x::-webkit-scrollbar        { height: 8px; }
+.nui-scroll-x::-webkit-scrollbar-thumb  { background: var(--nui-line-strong); border-radius: 999px; }
+.nui-scroll-x::-webkit-scrollbar-track  { background: transparent; }
+
+/* ══ Motion ═══════════════════════════════════════════════════════════════ */
+
+@keyframes nui-rise {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to   { opacity: 1; transform: none; }
+}
+@keyframes nui-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(var(--nui-fill, 1)); }
+}
+
+/* Scroll-reveal: hidden until <NuiReveal> marks it in-view. The page is a
+   client component that renders nothing before its data resolves, so there is
+   no no-JS state in which this could hide real content; NuiReveal also
+   reveals immediately when IntersectionObserver is unavailable. */
+.nui-reveal            { opacity: 0; will-change: opacity, transform; }
+.nui-reveal[data-in="1"] {
+    animation: nui-rise var(--nui-dur-slow) var(--nui-ease) both;
+    animation-delay: var(--nui-delay, 0ms);
+}
+
+.nui-meter-fill {
+    transform-origin: left center;
+    animation: nui-fill 720ms var(--nui-ease) both;
+    animation-delay: 120ms;
+}
+
+/* Print (and any context that renders without scrolling): never let the
+   scroll-reveal hide real content. */
+@media print {
+    .nui-reveal { opacity: 1 !important; animation: none !important; }
+    .nui-bg     { display: none; }
+}
+
+/* ══ Reduced motion — no exceptions ═══════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .nui, .nui *, .nui *::before, .nui *::after {
+        animation-duration: 1ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+        scroll-behavior: auto !important;
+    }
+    .nui-reveal          { opacity: 1; }
+    .nui-meter-fill      { transform: scaleX(var(--nui-fill, 1)); }
+}
+}

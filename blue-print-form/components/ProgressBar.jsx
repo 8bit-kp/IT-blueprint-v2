@@ -13,6 +13,10 @@ import React from "react";
  *                            visual-only (backward-compatible).
  *
  * Clicking the currently active segment is a no-op.
+ *
+ * Styled with the shared design-system tokens (styles/new-ui/tokens.css) —
+ * requires a `.nui`-scoped ancestor, same as every other restyled component
+ * in this migration. See docs/ui-redesign.md.
  */
 const ProgressBar = ({ step, totalSteps, onStepClick }) => {
   // Calculate specific percentage for text label
@@ -22,10 +26,10 @@ const ProgressBar = ({ step, totalSteps, onStepClick }) => {
     <div className="w-full mb-8">
       {/* Header Info */}
       <div className="flex justify-between items-end mb-2.5 px-0.5">
-        <span className="text-xs font-bold text-[#15587B] uppercase tracking-wider">
-          Step {step} <span className="text-gray-400 font-medium">/ {totalSteps}</span>
+        <span className="nui-eyebrow text-[11px] font-bold text-[var(--nui-brand)]">
+          Step {step} <span className="text-[var(--nui-text-3)] font-medium normal-case tracking-normal">/ {totalSteps}</span>
         </span>
-        <span className="text-[10px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+        <span className="nui-num text-[10px] font-semibold text-[var(--nui-text-3)] bg-[var(--nui-surface-sunk)] px-2 py-0.5 rounded-[var(--nui-r-xs)] border border-[var(--nui-line)]">
           {percentage}% Complete
         </span>
       </div>
@@ -40,12 +44,12 @@ const ProgressBar = ({ step, totalSteps, onStepClick }) => {
           const isActive    = stepNum === step;
 
           // Base classes
-          let barColor = "bg-gray-200"; // Future steps
+          let barColor = "bg-[var(--nui-line)]"; // Future steps
 
           if (isCompleted) {
-            barColor = "bg-[#34808A]"; // Completed steps
+            barColor = "bg-[var(--nui-accent)]"; // Completed steps
           } else if (isActive) {
-            barColor = "bg-[#34808A] shadow-[0_0_8px_rgba(52,128,138,0.5)]"; // Current step (with glow)
+            barColor = "bg-[var(--nui-accent)] shadow-[0_0_6px_rgba(52,128,138,0.45)]"; // Current step (subtle glow)
           }
 
           // When a click handler is provided, make each non-active segment
@@ -68,10 +72,11 @@ const ProgressBar = ({ step, totalSteps, onStepClick }) => {
                 }
               }}
               className={[
-                "flex-1 rounded-full transition-all duration-500 ease-out",
+                "flex-1 rounded-[var(--nui-r-pill)] transition-all duration-500 ease-out",
                 barColor,
                 isActive ? "scale-y-110" : "",
                 isClickable ? "cursor-pointer hover:opacity-80" : "cursor-default",
+                isClickable ? "focus-visible:outline-2 focus-visible:outline-[var(--nui-accent)] focus-visible:outline-offset-2" : "",
               ].join(" ")}
             />
           );

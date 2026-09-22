@@ -124,22 +124,22 @@ const ApplicationSecurityScoreCard = ({ report }) => {
 
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {["low", "medium", "high", "critical"].map((level) => (
-                    <div key={level} className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                    <div key={level} className="bg-[var(--nui-surface-sunk)] border border-[var(--nui-line)] rounded-[var(--nui-r-sm)] px-3 py-2 flex items-center justify-between">
+                        <span className="nui-eyebrow text-[10px] font-bold text-[var(--nui-text-3)]">
                             {level === "low" ? "Low" : level === "medium" ? "Medium" : level === "high" ? "High" : "Critical"}
                         </span>
-                        <span className="text-sm font-extrabold" style={{ color: RISK_DISTRIBUTION_COLOR[level] }}>
+                        <span className="nui-num text-sm font-extrabold" style={{ color: RISK_DISTRIBUTION_COLOR[level] }}>
                             {riskDistribution[level]}
                         </span>
                     </div>
                 ))}
             </div>
 
-            <div className="mt-6 bg-[#15587B]/5 border border-[#15587B]/15 rounded-xl px-5 py-4">
-                <p className="text-xs text-gray-600 leading-relaxed">
+            <div className="mt-6 bg-[var(--nui-accent-tint)] border border-[color:var(--nui-accent-tint-2)] rounded-[var(--nui-r)] px-5 py-4">
+                <p className="text-xs text-[var(--nui-text-2)] leading-relaxed">
                     This is an independent snapshot of the applications recorded in your Application Portfolio (Step 7),
                     calculated from a fixed published methodology. It is separate from the main Security Score above and
-                    is not equivalent to the <strong className="text-gray-800">Assessment with Remediation Plan</strong>.
+                    is not equivalent to the <strong className="text-[var(--nui-text)]">Assessment with Remediation Plan</strong>.
                 </p>
             </div>
         </div>

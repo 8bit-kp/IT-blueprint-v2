@@ -74,7 +74,7 @@ const AppShell = ({
     };
 
     return (
-        <div className="min-h-screen bg-[#F3F4F6] font-sans">
+        <div className="nui min-h-screen bg-[var(--nui-canvas)] font-sans">
             <AppSidebar
                 expanded={expanded}
                 onToggleExpanded={toggleExpanded}
@@ -94,7 +94,18 @@ const AppShell = ({
                 on TopBar itself was not reliably producing. */}
             <div className={[expanded ? "md:ml-[304px]" : "md:ml-32", "flex flex-col gap-8", "transition-[margin] duration-300"].join(" ")}>
                 {title && <TopBar title={title} subtitle={subtitle} actions={actions} />}
-                <div className={contentClassName}>{children}</div>
+                {/* `w-full` is required here, not cosmetic: this div is a flex item
+                    (parent is `flex flex-col`), and a flex item with `mx-auto` but no
+                    explicit width shrink-to-fits its own content instead of stretching
+                    to fill the column — so `max-w-6xl mx-auto` alone silently renders at
+                    whatever width that page's content happens to need, which visibly
+                    changed the page's width per step on /blueprint-form (each step's
+                    content has a different natural width). `w-full` gives it an
+                    explicit 100% width first, which `max-w-*` then correctly caps and
+                    `mx-auto` correctly centers only once the column is wider than that
+                    cap. Affects every page using this default/overridden
+                    contentClassName — not just the one that happened to make it visible. */}
+                <div className={`w-full ${contentClassName}`}>{children}</div>
             </div>
 
             {bottomBar && (
@@ -107,7 +118,7 @@ const AppShell = ({
                     {/* px-6 matches TopBar's own inset so the bottom bar's left/right edges
                         line up exactly with the top bar and the page content between them. */}
                     <div className="max-w-6xl mx-auto px-6">
-                        <div className="bg-white border border-gray-200 shadow-sm overflow-hidden">
+                        <div className="bg-[var(--nui-surface)] border border-[var(--nui-line)] shadow-[var(--nui-shadow-2)] rounded-[var(--nui-r)] overflow-hidden">
                             {bottomBar}
                         </div>
                     </div>

@@ -4,6 +4,12 @@
 // Used on the All Reports page to show report availability and future
 // engagement states (advisor review, consultation scheduled, etc.).
 //
+// Restyled to the shared design system (styles/new-ui/tokens.css) — requires
+// a `.nui`-scoped ancestor. Same props/behavior as before; fixed-meaning
+// semantic colours (ready=ok, pending/in_progress=warn/info, complete=accent)
+// map to the equivalent nui tokens, same rule as every other status marker
+// in the app.
+//
 // Props:
 //   status:      "ready" | "pending" | "in_progress" | "complete"
 //   label:       string — short label text
@@ -12,28 +18,28 @@ import React from "react";
 
 const STATUS_CONFIG = {
     ready: {
-        dot:    "bg-green-400",
-        text:   "text-green-700",
-        bg:     "bg-green-50",
-        border: "border-green-100",
+        dot:    "bg-[var(--nui-ok)]",
+        text:   "text-[var(--nui-ok)]",
+        bg:     "bg-[var(--nui-ok-bg)]",
+        border: "border-[var(--nui-ok-line)]",
     },
     pending: {
-        dot:    "bg-amber-400 animate-pulse",
-        text:   "text-amber-700",
-        bg:     "bg-amber-50",
-        border: "border-amber-100",
+        dot:    "bg-[var(--nui-warn)] animate-pulse",
+        text:   "text-[var(--nui-warn)]",
+        bg:     "bg-[var(--nui-warn-bg)]",
+        border: "border-[var(--nui-warn-line)]",
     },
     in_progress: {
-        dot:    "bg-blue-400 animate-pulse",
-        text:   "text-blue-700",
-        bg:     "bg-blue-50",
-        border: "border-blue-100",
+        dot:    "bg-[var(--nui-info)] animate-pulse",
+        text:   "text-[var(--nui-info)]",
+        bg:     "bg-[var(--nui-info-bg)]",
+        border: "border-[var(--nui-info-line)]",
     },
     complete: {
-        dot:    "bg-teal-500",
-        text:   "text-teal-700",
-        bg:     "bg-teal-50",
-        border: "border-teal-100",
+        dot:    "bg-[var(--nui-accent)]",
+        text:   "text-[var(--nui-brand)]",
+        bg:     "bg-[var(--nui-accent-tint)]",
+        border: "border-[color:var(--nui-accent-tint-2)]",
     },
 };
 
